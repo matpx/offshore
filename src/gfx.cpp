@@ -8,14 +8,6 @@
 
 namespace gfx {
 
-  void* sokol_alloc(size_t size, [[maybe_unused]] void* user_data) {
-      return omalloc(size);
-  }
-
-  void sokol_free(void* ptr, [[maybe_unused]] void* user_data) {
-      ofree(ptr);
-  }
-
   SDL_Window* window    = nullptr;
   SDL_GLContext context = nullptr;
 
@@ -29,8 +21,8 @@ namespace gfx {
 
     sg_desc desc = {
       .allocator = {
-          .alloc = sokol_alloc,
-          .free = sokol_free,
+          .alloc = [] (size_t size, [[maybe_unused]] void* user_data) { return omalloc(size); },
+          .free =  [] (void* ptr, [[maybe_unused]] void* user_data) { ofree(ptr); },
       }
     };
     
