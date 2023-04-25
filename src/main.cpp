@@ -23,6 +23,10 @@ int main() {
       }
     }
 
+    gfx::begin_frame();
+    gfx::draw_sphere();
+    gfx::end_frame();
+
     gfx::swap();
   }
 

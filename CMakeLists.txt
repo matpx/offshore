@@ -11,7 +11,10 @@ file(GLOB OffshoreSources CONFIGURE_DEPENDS src/*.cpp src/*.hpp)
 add_executable(offshore ${OffshoreSources})
 
 target_include_directories(offshore SYSTEM PRIVATE thirdparty)
+target_include_directories(offshore SYSTEM PRIVATE assets/shader/include)
 target_link_options(offshore PRIVATE -lSDL2 -lGL)
+
+target_compile_options(offshore PRIVATE -O0 -g)
 
 if(MSVC)
   target_compile_options(offshore PRIVATE /W4 /WX)
