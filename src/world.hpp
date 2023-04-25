@@ -4,10 +4,13 @@
 
 namespace world {
 
-  using EntityId = i32;
+  using EntityId = u32;
 
   struct Entity {
-    HMM_Vec3 translation;
+    bool valid = true;
+    
+    vec3 translation;
+    quat rotation;
   };
 
   void init();

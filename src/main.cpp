@@ -1,10 +1,13 @@
 #include "gfx.hpp"
 #include "world.hpp"
+#include "log.hpp"
+#include "alloc.hpp"
 #include <SDL2/SDL.h>
 
 int main() {
-  SDL_Window* window = gfx::init();
+  DEBUG("Debug Mode!");
 
+  gfx::init();
   world::init();
 
   bool running = true;
@@ -25,6 +28,8 @@ int main() {
 
   world::finish();
   gfx::finish();
+
+  debug_leak_check();
 
   return 0;
 }

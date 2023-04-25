@@ -1,7 +1,8 @@
 #pragma once
 
-#include <malloc.h>
+#include <stddef.h>
 
-#define OMALLOC(N) malloc(N);
-#define OFREE(P) free(P);
+void *omalloc(size_t);
+void ofree(void*);
+void debug_leak_check();
 

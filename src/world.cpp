@@ -1,16 +1,20 @@
 #include "world.hpp"
 #include "alloc.hpp"
 #include <cassert>
+#include <string.h>
 
 namespace world {
 
-  constexpr size_t ENTITY_COUNT = 512;
+  constexpr u32 ENTITY_COUNT = 64;
 
-  Entity *entities;
-  size_t count = 0;
+  Entity *entities = nullptr;
+  u32 count        = 0;
 
   void init() {
-    entities = (Entity*) OMALLOC(ENTITY_COUNT * sizeof(Entity));
+    constexpr size_t entites_size = ENTITY_COUNT * sizeof(Entity);
+  
+    entities = (Entity*) omalloc(entites_size);
+    memset((void*)entities, 0, entites_size);
   }
 
   EntityId create(const Entity& entity) {
@@ -23,12 +27,13 @@ namespace world {
 
   Entity* get(EntityId id) {
     assert(id < ENTITY_COUNT);
+    assert(entities[id].valid);
   
-    return entities;
+    return &entities[id];
   }
 
   void finish() {
-    OFREE(entities);
+    ofree(entities);
   }
 
 }

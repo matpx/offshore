@@ -16,3 +16,13 @@ using u64 = uint64_t;
 using f32 = float;
 using f64 = double;
 
+using vec2 = HMM_Vec2;
+using vec3 = HMM_Vec3;
+using vec4 = HMM_Vec4;
+
+using mat2 = HMM_Mat2;
+using mat3 = HMM_Mat3;
+using mat4 = HMM_Mat4;
+
+using quat = HMM_Quat;
+

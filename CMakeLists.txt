@@ -10,6 +10,12 @@ file(GLOB OffshoreSources CONFIGURE_DEPENDS src/*.cpp src/*.hpp)
 
 add_executable(offshore ${OffshoreSources})
 
-target_include_directories(offshore PRIVATE thirdparty)
+target_include_directories(offshore SYSTEM PRIVATE thirdparty)
 target_link_options(offshore PRIVATE -lSDL2 -lGL)
+
+if(MSVC)
+  target_compile_options(offshore PRIVATE /W4 /WX)
+else()
+  target_compile_options(offshore PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
 
