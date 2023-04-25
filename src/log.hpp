@@ -5,8 +5,8 @@
 #define INFO(MSG) { printf("INFO: "); printf(MSG); printf("\n"); }
 
 #ifndef NDEBUG
-#define DEBUG(MSG) { printf("DEBUG: "); printf(MSG); printf("\n"); }
+  #define DEBUG(MSG) { printf("DEBUG: "); printf(MSG); printf("\n"); }
 #elif
-#define DEBUG(MSG)
+  #define DEBUG(MSG)
 #endif
 

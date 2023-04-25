@@ -29,7 +29,9 @@ int main() {
   world::finish();
   gfx::finish();
 
-  debug_leak_check();
+  #ifndef NDEBUG
+    stb_leakcheck_dumpmem();
+  #endif
 
   return 0;
 }

@@ -1,8 +1,11 @@
 #pragma once
 
-#include <stddef.h>
-
-void *omalloc(size_t);
-void ofree(void*);
-void debug_leak_check();
+#ifndef NDEBUG
+  #include <stb/stb_leakcheck.h>
+  #define omalloc(N) stb_leakcheck_malloc(N, __FILE__, __LINE__);
+  #define ofree(P) stb_leakcheck_free(P);
+#elif
+  #define omalloc(N) malloc(N);
+  #define ofree(P) malloc(P);
+#endif
 

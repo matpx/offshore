@@ -1,4 +1,5 @@
 #include "gfx.hpp"
+#include "alloc.hpp"
 #include <SDL2/SDL.h>
 
 #define SOKOL_GFX_IMPL
@@ -6,6 +7,14 @@
 #include "sokol/sokol_gfx.h"
 
 namespace gfx {
+
+  void* sokol_alloc(size_t size, [[maybe_unused]] void* user_data) {
+      return omalloc(size);
+  }
+
+  void sokol_free(void* ptr, [[maybe_unused]] void* user_data) {
+      ofree(ptr);
+  }
 
   SDL_Window* window    = nullptr;
   SDL_GLContext context = nullptr;
@@ -18,7 +27,13 @@ namespace gfx {
     window = SDL_CreateWindow("game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800, SDL_WINDOW_OPENGL);
     context = SDL_GL_CreateContext(window);
 
-    sg_desc desc = {};
+    sg_desc desc = {
+      .allocator = {
+          .alloc = sokol_alloc,
+          .free = sokol_free,
+      }
+    };
+    
     sg_setup(desc);
 
     return window;
