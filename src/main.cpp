@@ -1,9 +1,11 @@
+#include "gfx.hpp"
+#include "world.hpp"
 #include <SDL2/SDL.h>
 
 int main() {
-  SDL_Init(SDL_INIT_VIDEO);
-  SDL_Window* window = SDL_CreateWindow("game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800, SDL_WINDOW_OPENGL);
-  SDL_GLContext context = SDL_GL_CreateContext(window);
+  SDL_Window* window = gfx::init();
+
+  world::init();
 
   bool running = true;
   SDL_Event sdl_event;
@@ -13,14 +15,16 @@ int main() {
       if(sdl_event.type == SDL_QUIT) {
         running = false;
       }
+      if(sdl_event.type == SDL_KEYDOWN && sdl_event.key.keysym.sym == SDLK_ESCAPE) {
+        running = false;
+      }
     }
 
-    SDL_GL_SwapWindow(window);
+    gfx::swap();
   }
 
-  SDL_GL_DeleteContext(context);
-  SDL_DestroyWindow(window);
-  SDL_Quit();
+  world::finish();
+  gfx::finish();
 
   return 0;
 }
