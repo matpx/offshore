@@ -10,3 +10,5 @@ file(GLOB OffshoreSources src/*.cpp src/*.hpp)
 
 add_executable(offshore ${OffshoreSources})
 
+target_link_options(offshore PRIVATE -lSDL2)
+
