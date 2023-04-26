@@ -38,7 +38,7 @@ namespace gfx::shapes {
         .radius = 0.5f,
         .slices = 12,
         .stacks = 8,
-        .color = sshape_color_4f(1.0f, 0.0f, 0.0f, 1.0f),
+        .color = sshape_color_4f(1.0f, 1.0f, 1.0f, 1.0f),
         .merge = true,
         .transform = {
             .m = {
