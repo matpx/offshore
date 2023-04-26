@@ -2,6 +2,7 @@
 #include "container.hpp"
 #include "log.hpp"
 #include <sokol/sokol_gfx.h>
+#include <sokol/util/sokol_color.h>
 #include <SDL2/SDL.h>
 
 namespace gfx {
@@ -36,7 +37,13 @@ namespace gfx {
   }
 
   void begin_frame() {
-    const sg_pass_action pass_action = {};
+    const sg_pass_action pass_action = {
+      .colors = {{
+          .action = SG_ACTION_CLEAR,
+          .value = SG_BLACK,
+        }},
+    };
+
     sg_begin_default_pass(&pass_action, 1200, 800);
   }
 

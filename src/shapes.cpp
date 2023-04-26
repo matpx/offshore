@@ -76,7 +76,7 @@ namespace gfx::shapes {
     unlit_desc.layout.attrs[1] = sshape_normal_attr_desc();
     unlit_desc.layout.attrs[2] = sshape_texcoord_attr_desc();
     unlit_desc.layout.attrs[3] = sshape_color_attr_desc();
-    unlit_desc.primitive_type = SG_PRIMITIVETYPE_TRIANGLES;
+    unlit_desc.primitive_type = SG_PRIMITIVETYPE_LINES;
     unlit_desc.index_type = SG_INDEXTYPE_UINT16;
 
     unlit_pipeline = sg_make_pipeline(unlit_desc);
