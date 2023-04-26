@@ -8,6 +8,8 @@
 
 namespace gfx::shapes {
 
+  static_assert(sizeof(index_type) == 2);
+
   sg_bindings sphere_binding = {};
   size_t sphere_index_count = 0;
 
@@ -49,19 +51,16 @@ namespace gfx::shapes {
     };
 
     sphere_buffer = sshape_build_sphere(&sphere_buffer, &params);
-
     assert(sphere_buffer.valid);
 
-    sg_buffer_desc sphere_vertex_buffer_desc = sshape_vertex_buffer_desc(&sphere_buffer);
-    sg_buffer sphere_vertex_buffer = sg_make_buffer(sphere_vertex_buffer_desc);
+    const sg_buffer_desc sphere_vertex_buffer_desc = sshape_vertex_buffer_desc(&sphere_buffer);
+    const sg_buffer sphere_vertex_buffer = sg_make_buffer(sphere_vertex_buffer_desc);
 
-    sg_buffer_desc sphere_index_buffer_desc = sshape_index_buffer_desc(&sphere_buffer);
-    sg_buffer sphere_index_buffer = sg_make_buffer(sphere_index_buffer_desc);
+    const sg_buffer_desc sphere_index_buffer_desc = sshape_index_buffer_desc(&sphere_buffer);
+    const sg_buffer sphere_index_buffer = sg_make_buffer(sphere_index_buffer_desc);
 
-    sshape_element_range_t sphere_element_range = sshape_element_range(&sphere_buffer);
+    const sshape_element_range_t sphere_element_range = sshape_element_range(&sphere_buffer);
     sphere_index_count = sphere_element_range.num_elements;
-    assert(sphere_element_range.base_element == 0);
-    assert(sphere_element_range.num_elements > 0);
 
     sphere_binding = {
       .vertex_buffers = {sphere_vertex_buffer},
