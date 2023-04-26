@@ -16,12 +16,14 @@ namespace gfx {
     window = SDL_CreateWindow("game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800, SDL_WINDOW_OPENGL);
     context = SDL_GL_CreateContext(window);
 
-    sg_desc desc = {
-      .allocator = {
-          .alloc = [] (size_t size, [[maybe_unused]] void* user_data) { return malloc(size); },
-          .free =  [] (void* ptr, [[maybe_unused]] void* user_data)   { free(ptr); },
-      }
+    sg_desc desc = {};
+
+#ifndef NDEBUG
+    desc.allocator = {
+      .alloc = [] (size_t size, [[maybe_unused]] void* user_data) { return stb_leakcheck_malloc(size, __FILE__, __LINE__); },
+      .free =  [] (void* ptr, [[maybe_unused]] void* user_data)   { stb_leakcheck_free(ptr); },
     };
+#endif
     
     sg_setup(desc);
 
