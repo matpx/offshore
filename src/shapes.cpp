@@ -17,8 +17,8 @@ namespace gfx::shapes {
   sg_pipeline unlit_pipeline = {};
 
   void init() {
-    sshape_vertex_t vertices[512];
-    u16 indices[4096];
+    static sshape_vertex_t vertices[128];
+    static u16 indices[512];
 
     sshape_buffer_t sphere_buffer = {
         .vertices = {
@@ -31,7 +31,7 @@ namespace gfx::shapes {
 
     const sshape_sphere_t params = {
         .radius = 0.5f,
-        .slices = 16,
+        .slices = 12,
         .stacks = 8,
         .color = sshape_color_4f(1.0f, 0.0f, 0.0f, 1.0f),
         .merge = true,
