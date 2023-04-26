@@ -36,7 +36,7 @@ namespace gfx {
   }
 
   void begin_frame() {
-    sg_pass_action pass_action = {};
+    const sg_pass_action pass_action = {};
     sg_begin_default_pass(&pass_action, 1200, 800);
   }
 
