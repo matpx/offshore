@@ -1,10 +1,7 @@
 #include "shapes.hpp"
 #include "defines.hpp"
-#include "sokol/sokol_gfx.h"
-
-#define SOKOL_SHAPE_IMPL
-#define SOKOL_GLCORE33
-#include "sokol/util/sokol_shape.h"
+#include <sokol/sokol_gfx.h>
+#include <sokol/util/sokol_shape.h>
 
 #include "unlit.h"
 
@@ -16,16 +13,19 @@ namespace gfx::shapes {
   sg_shader unlit_shader = {};
   sg_pipeline unlit_pipeline = {};
 
+  sshape_vertex_t *vertices = nullptr;
+  index_type *indices = nullptr;
+  
   void init() {
-    static sshape_vertex_t vertices[128];
-    static u16 indices[512];
+    arrsetlen(vertices, 128);
+    arrsetlen(indices, 512);
 
     sshape_buffer_t sphere_buffer = {
         .vertices = {
-            .buffer = SSHAPE_RANGE(vertices),
+            .buffer = { .ptr = vertices, .size = arrlenu(vertices) * sizeof(sshape_vertex_t) },
         },
         .indices = {
-            .buffer = SSHAPE_RANGE(indices),
+            .buffer = { .ptr = indices, .size = arrlenu(indices) * sizeof(index_type) },
         }
     };
 
@@ -91,6 +91,9 @@ namespace gfx::shapes {
     sg_destroy_buffer(sphere_binding.index_buffer);
     sg_destroy_pipeline(unlit_pipeline);
     sg_destroy_shader(unlit_shader);
+
+    arrfree(vertices);
+    arrfree(indices);
   }
 
 }

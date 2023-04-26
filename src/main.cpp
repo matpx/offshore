@@ -1,14 +1,12 @@
 #include "gfx.hpp"
 #include "world.hpp"
 #include "log.hpp"
-#include "alloc.hpp"
 #include <SDL2/SDL.h>
 
 int main() {
-  DEBUG("Debug Mode!");
+  DEBUG("debug mode!");
 
   gfx::init();
-  world::init();
 
   bool running = true;
   SDL_Event sdl_event;
@@ -33,9 +31,9 @@ int main() {
   world::finish();
   gfx::finish();
 
-  #ifndef NDEBUG
-    stb_leakcheck_dumpmem();
-  #endif
+#ifndef NDEBUG
+  stb_leakcheck_dumpmem();
+#endif
 
   return 0;
 }

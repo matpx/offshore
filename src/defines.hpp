@@ -1,7 +1,13 @@
 #pragma once
 
+#ifndef NDEBUG
+  #include <stb/stb_leakcheck.h>
+#endif
+
 #include <cstdint>
 #include <hmm/HandmadeMath.h>
+#include <stb/stb_ds.h>
+#include <cassert>
 
 using i8 = int8_t;
 using i16 = int16_t;
@@ -25,4 +31,6 @@ using mat3 = HMM_Mat3;
 using mat4 = HMM_Mat4;
 
 using quat = HMM_Quat;
+
+using index_type = u16;
 

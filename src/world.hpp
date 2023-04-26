@@ -13,8 +13,6 @@ namespace world {
     quat rotation;
   };
 
-  void init();
-
   EntityId create(const Entity&);
 
   Entity* get(EntityId);

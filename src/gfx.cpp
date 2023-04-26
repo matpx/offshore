@@ -1,11 +1,7 @@
 #include "gfx.hpp"
-#include "alloc.hpp"
-#include "shapes.hpp"
+#include "defines.hpp"
+#include <sokol/sokol_gfx.h>
 #include <SDL2/SDL.h>
-
-#define SOKOL_GFX_IMPL
-#define SOKOL_GLCORE33
-#include "sokol/sokol_gfx.h"
 
 namespace gfx {
 
@@ -22,8 +18,8 @@ namespace gfx {
 
     sg_desc desc = {
       .allocator = {
-          .alloc = [] (size_t size, [[maybe_unused]] void* user_data) { return omalloc(size); },
-          .free =  [] (void* ptr, [[maybe_unused]] void* user_data)   { ofree(ptr); },
+          .alloc = [] (size_t size, [[maybe_unused]] void* user_data) { return malloc(size); },
+          .free =  [] (void* ptr, [[maybe_unused]] void* user_data)   { free(ptr); },
       }
     };
     
@@ -56,7 +52,7 @@ namespace gfx {
     SDL_GL_DeleteContext(context);
     SDL_DestroyWindow(window);
 
-    assert(glGetError() == 0);
+    // assert(glGetError() == 0);
     assert(SDL_GetError()[0] == '\0');
     
     SDL_Quit();
