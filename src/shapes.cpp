@@ -1,5 +1,6 @@
 #include "shapes.hpp"
-#include "defines.hpp"
+#include "container.hpp"
+#include "log.hpp"
 #include <sokol/sokol_gfx.h>
 #include <sokol/util/sokol_shape.h>
 
@@ -17,6 +18,8 @@ namespace gfx::shapes {
   index_type *indices = nullptr;
   
   void init() {
+    DEBUG("init shapes");
+  
     arrsetlen(vertices, 128);
     arrsetlen(indices, 512);
 
@@ -87,6 +90,8 @@ namespace gfx::shapes {
   }
 
   void finish() {
+    DEBUG("finish shapes");
+  
     sg_destroy_buffer(sphere_binding.vertex_buffers[0]);
     sg_destroy_buffer(sphere_binding.index_buffer);
     sg_destroy_pipeline(unlit_pipeline);

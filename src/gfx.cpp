@@ -1,5 +1,6 @@
 #include "gfx.hpp"
-#include "defines.hpp"
+#include "container.hpp"
+#include "log.hpp"
 #include <sokol/sokol_gfx.h>
 #include <SDL2/SDL.h>
 
@@ -9,6 +10,8 @@ namespace gfx {
   SDL_GLContext context = nullptr;
 
   SDL_Window* init() {
+    DEBUG("init gfx");
+    
     assert(window == nullptr && context == nullptr);
 
     SDL_Init(SDL_INIT_VIDEO);
@@ -47,6 +50,8 @@ namespace gfx {
   }
 
   void finish() {
+    DEBUG("finish gfx");
+  
     shapes::finish();
   
     sg_shutdown();

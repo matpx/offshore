@@ -1,4 +1,6 @@
 #include "world.hpp"
+#include "container.hpp"
+#include "log.hpp"
 
 namespace world {
 
@@ -17,6 +19,8 @@ namespace world {
   }
 
   void finish() {
+    DEBUG("finish world");
+    
     arrfree(entities);
   }
 

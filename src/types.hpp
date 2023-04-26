@@ -1,13 +1,7 @@
 #pragma once
 
-#ifndef NDEBUG
-  #include <stb/stb_leakcheck.h>
-#endif
-
 #include <cstdint>
 #include <hmm/HandmadeMath.h>
-#include <stb/stb_ds.h>
-#include <cassert>
 
 using i8 = int8_t;
 using i16 = int16_t;
