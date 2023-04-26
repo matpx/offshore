@@ -10,7 +10,7 @@ namespace gfx {
   SDL_GLContext context = nullptr;
 
   SDL_Window* init() {
-    DEBUG("init gfx");
+    INFO("init gfx");
     
     assert(window == nullptr && context == nullptr);
 
@@ -50,8 +50,6 @@ namespace gfx {
   }
 
   void finish() {
-    DEBUG("finish gfx");
-  
     shapes::finish();
   
     sg_shutdown();
@@ -63,6 +61,8 @@ namespace gfx {
     assert(SDL_GetError()[0] == '\0');
     
     SDL_Quit();
+
+    INFO("finished gfx");
   }
 
 }

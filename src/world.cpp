@@ -19,9 +19,9 @@ namespace world {
   }
 
   void finish() {
-    DEBUG("finish world");
-    
     arrfree(entities);
+
+    INFO("finished world");
   }
 
 }
