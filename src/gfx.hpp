@@ -5,7 +5,7 @@
 
 namespace gfx {
 
-  SDL_Window* init();
+  void init();
 
   void begin_frame();
 

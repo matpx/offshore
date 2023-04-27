@@ -10,7 +10,7 @@ namespace gfx {
   SDL_Window* window    = nullptr;
   SDL_GLContext context = nullptr;
 
-  SDL_Window* init() {
+  void init() {
     INFO("init gfx");
     
     assert(window == nullptr && context == nullptr);
@@ -22,18 +22,16 @@ namespace gfx {
 
     sg_desc desc = {};
 
-#ifndef NDEBUG
-    desc.allocator = {
-      .alloc = [] (size_t size, [[maybe_unused]] void* user_data) { return stb_leakcheck_malloc(size, __FILE__, __LINE__); },
-      .free =  [] (void* ptr, [[maybe_unused]] void* user_data)   { stb_leakcheck_free(ptr); },
-    };
-#endif
+    #ifndef NDEBUG
+      desc.allocator = {
+        .alloc = [] (size_t size, [[maybe_unused]] void* user_data) { return stb_leakcheck_malloc(size, __FILE__, __LINE__); },
+        .free =  [] (void* ptr, [[maybe_unused]] void* user_data)   { stb_leakcheck_free(ptr); },
+      };
+    #endif
     
     sg_setup(desc);
 
     shapes::init();
-
-    return window;
   }
 
   void begin_frame() {
