@@ -1,7 +1,6 @@
 #pragma once
 
 #include "types.hpp"
-#include <typeindex>
 
 namespace world {
 
@@ -20,16 +19,21 @@ namespace world {
   };
 
   struct Entity {
-    bool valid = true;
+    enum class Variant : u8 {
+      INVALID = 0,
+      Camera,
+    };
+    
+    Variant variant = Variant::INVALID;
+    bool valid      = true;
+    
     Transform transform;
-
-    std::type_index variant;
 
     union {
       Camera camera;
     };
 
-    Entity(auto component) : variant(typeid(component)), camera(component) {}
+    Entity(Camera component) : variant(Variant::Camera), camera(component) {}
   };
 
   EntityId create(const Entity&);

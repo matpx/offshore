@@ -12,7 +12,7 @@ namespace gfx {
 
   void init() {
     INFO("init gfx");
-    
+
     assert(window == nullptr && context == nullptr);
 
     SDL_Init(SDL_INIT_VIDEO);
