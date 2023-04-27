@@ -24,16 +24,16 @@ namespace world {
       Camera,
     };
     
-    Variant variant = Variant::INVALID;
-    bool valid      = true;
-    
     Transform transform;
 
     union {
       Camera camera;
     };
 
-    Entity(Camera component) : variant(Variant::Camera), camera(component) {}
+    Variant variant;
+    bool valid = true;
+
+    Entity(Camera component) : camera(component), variant(Variant::Camera) {}
   };
 
   EntityId create(const Entity&);
