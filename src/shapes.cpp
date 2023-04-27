@@ -10,14 +10,14 @@ namespace gfx::shapes {
 
   static_assert(sizeof(index_type) == 2);
 
-  sg_bindings sphere_binding = {};
-  size_t sphere_index_count = 0;
+  sshape_element_range_t sphere_elements = {};
+  sg_bindings sphere_binding             = {};
 
-  sg_shader unlit_shader = {};
+  sg_shader unlit_shader     = {};
   sg_pipeline unlit_pipeline = {};
 
   sshape_vertex_t *vertices = nullptr;
-  index_type *indices = nullptr;
+  index_type *indices       = nullptr;
   
   void init() {
     INFO("init shapes");
@@ -59,8 +59,7 @@ namespace gfx::shapes {
     const sg_buffer_desc sphere_index_buffer_desc = sshape_index_buffer_desc(&sphere_buffer);
     const sg_buffer sphere_index_buffer = sg_make_buffer(sphere_index_buffer_desc);
 
-    const sshape_element_range_t sphere_element_range = sshape_element_range(&sphere_buffer);
-    sphere_index_count = sphere_element_range.num_elements;
+    sphere_elements = sshape_element_range(&sphere_buffer);
 
     sphere_binding = {
       .vertex_buffers = {sphere_vertex_buffer},
@@ -85,7 +84,7 @@ namespace gfx::shapes {
   void draw_sphere() {
     sg_apply_pipeline(unlit_pipeline);
     sg_apply_bindings(sphere_binding);
-    sg_draw(0, sphere_index_count, 1);
+    sg_draw(0, sphere_elements.num_elements, 1);
   }
 
   void finish() {
