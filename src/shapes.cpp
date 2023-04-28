@@ -54,16 +54,16 @@ namespace gfx::shapes {
     assert(sphere_buffer.valid);
 
     const sg_buffer_desc sphere_vertex_buffer_desc = sshape_vertex_buffer_desc(&sphere_buffer);
-    const sg_buffer sphere_vertex_buffer = sg_make_buffer(sphere_vertex_buffer_desc);
+    const sg_buffer sphere_vertex_buffer           = sg_make_buffer(sphere_vertex_buffer_desc);
 
     const sg_buffer_desc sphere_index_buffer_desc = sshape_index_buffer_desc(&sphere_buffer);
-    const sg_buffer sphere_index_buffer = sg_make_buffer(sphere_index_buffer_desc);
+    const sg_buffer sphere_index_buffer           = sg_make_buffer(sphere_index_buffer_desc);
 
     sphere_elements = sshape_element_range(&sphere_buffer);
 
     sphere_binding = {
       .vertex_buffers = {sphere_vertex_buffer},
-      .index_buffer = sphere_index_buffer,
+      .index_buffer   = sphere_index_buffer,
     };
 
     unlit_shader = sg_make_shader(unlit_shader_desc(sg_query_backend()));
@@ -71,12 +71,12 @@ namespace gfx::shapes {
     sg_pipeline_desc unlit_desc = {};
     unlit_desc.shader = unlit_shader;
     unlit_desc.layout.buffers[0] = sshape_buffer_layout_desc();
-    unlit_desc.layout.attrs[0] = sshape_position_attr_desc();
-    unlit_desc.layout.attrs[1] = sshape_normal_attr_desc();
-    unlit_desc.layout.attrs[2] = sshape_texcoord_attr_desc();
-    unlit_desc.layout.attrs[3] = sshape_color_attr_desc();
-    unlit_desc.primitive_type = SG_PRIMITIVETYPE_LINES;
-    unlit_desc.index_type = SG_INDEXTYPE_UINT16;
+    unlit_desc.layout.attrs[0]   = sshape_position_attr_desc();
+    unlit_desc.layout.attrs[1]   = sshape_normal_attr_desc();
+    unlit_desc.layout.attrs[2]   = sshape_texcoord_attr_desc();
+    unlit_desc.layout.attrs[3]   = sshape_color_attr_desc();
+    unlit_desc.primitive_type    = SG_PRIMITIVETYPE_LINES;
+    unlit_desc.index_type        = SG_INDEXTYPE_UINT16;
 
     unlit_pipeline = sg_make_pipeline(unlit_desc);
   }

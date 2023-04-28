@@ -10,8 +10,8 @@
 #define INFO(MSG)  { printf("INFO(%s:%s:%d): ", __FILENAME__, __func__, __LINE__); printf(MSG); printf("\n"); }
 
 #ifndef NDEBUG
-  #define DEBUG(MSG) { printf("\033[0;36m"); printf("DEBUG(%s:%s:%d): ", __FILENAME__, __func__, __LINE__); printf(MSG); printf("\033[0m\n"); }
+#define DEBUG(MSG) { printf("\033[0;36m"); printf("DEBUG(%s:%s:%d): ", __FILENAME__, __func__, __LINE__); printf(MSG); printf("\033[0m\n"); }
 #elif
-  #define DEBUG(MSG)
+#define DEBUG(MSG)
 #endif
 

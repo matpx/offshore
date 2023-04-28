@@ -1,7 +1,7 @@
 #pragma once
 
 #ifndef NDEBUG
-  #include <stb/stb_leakcheck.h>
+#include <stb/stb_leakcheck.h>
 #endif
 
 #include "types.hpp"

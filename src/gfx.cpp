@@ -17,7 +17,7 @@ namespace gfx {
 
     SDL_Init(SDL_INIT_VIDEO);
 
-    window = SDL_CreateWindow("game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800, SDL_WINDOW_OPENGL);
+    window  = SDL_CreateWindow("game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800, SDL_WINDOW_OPENGL);
     context = SDL_GL_CreateContext(window);
 
     sg_desc desc = {};
@@ -38,7 +38,7 @@ namespace gfx {
     const sg_pass_action pass_action = {
       .colors = {{
           .action = SG_ACTION_CLEAR,
-          .value = SG_BLACK,
+          .value  = SG_BLACK,
         }},
     };
 
