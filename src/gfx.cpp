@@ -11,7 +11,7 @@ namespace gfx {
   SDL_GLContext context = nullptr;
 
   void init() {
-    INFO("init gfx");
+    INFO("gfx::init()");
 
     assert(window == nullptr && context == nullptr);
 
@@ -78,7 +78,7 @@ namespace gfx {
     
     SDL_Quit();
 
-    INFO("finished gfx");
+    INFO("gfx::finish()");
   }
 
 }

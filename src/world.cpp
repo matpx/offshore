@@ -21,7 +21,7 @@ namespace world {
   void finish() {
     arrfree(entities);
 
-    INFO("finished world");
+    INFO("world::finish()");
   }
 
 }

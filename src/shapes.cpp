@@ -20,7 +20,9 @@ namespace gfx::shapes {
   index_type *indices       = nullptr;
   
   void init() {
-    INFO("init shapes");
+    INFO("shapes::init()");
+
+    assert(vertices == nullptr && indices == nullptr);
   
     arrsetlen(vertices, 128);
     arrsetlen(indices, 512);
@@ -96,7 +98,7 @@ namespace gfx::shapes {
     arrfree(vertices);
     arrfree(indices);
 
-    INFO("finished shapes");
+    INFO("shapes::finish()");
   }
 
 }
