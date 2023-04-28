@@ -70,8 +70,9 @@ namespace gfx::shapes {
 
     unlit_shader = sg_make_shader(unlit_shader_desc(sg_query_backend()));
 
-    sg_pipeline_desc unlit_desc = {};
-    unlit_desc.shader = unlit_shader;
+    sg_pipeline_desc unlit_desc  = {};
+
+    unlit_desc.shader            = unlit_shader;
     unlit_desc.layout.buffers[0] = sshape_buffer_layout_desc();
     unlit_desc.layout.attrs[0]   = sshape_position_attr_desc();
     unlit_desc.layout.attrs[1]   = sshape_normal_attr_desc();
