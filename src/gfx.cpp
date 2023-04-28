@@ -15,10 +15,21 @@ namespace gfx {
 
     assert(window == nullptr && context == nullptr);
 
-    SDL_Init(SDL_INIT_VIDEO);
+    if(SDL_Init(SDL_INIT_VIDEO) != 0) {
+      FATAL("SDL_Init() failed");
+    }
 
-    window  = SDL_CreateWindow("game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800, SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800, SDL_WINDOW_OPENGL);
+  
+    if(window == nullptr) {
+      FATAL("SDL_CreateWindow() failed");
+    }
+  
     context = SDL_GL_CreateContext(window);
+  
+    if(context == nullptr) {
+      FATAL("SDL_GL_CreateContext() failed");
+    }
 
     sg_desc desc = {};
 
