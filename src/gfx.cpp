@@ -75,7 +75,6 @@ namespace gfx {
     unlit_shader = sg_make_shader(unlit_shader_desc(sg_query_backend()));
 
     sg_pipeline_desc unlit_desc  = {};
-
     unlit_desc.shader            = unlit_shader;
     unlit_desc.layout.buffers[0] = sshape_buffer_layout_desc();
     unlit_desc.layout.attrs[0]   = sshape_position_attr_desc();
@@ -115,6 +114,9 @@ namespace gfx {
   SDL_Window* window    = nullptr;
   SDL_GLContext context = nullptr;
 
+  u32 window_width  = 1200;
+  u32 window_height = 800;
+
   void init() {
     INFO("gfx::init()");
 
@@ -124,7 +126,7 @@ namespace gfx {
       FATAL("SDL_Init() failed");
     }
 
-    window = SDL_CreateWindow("game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1200, 800, SDL_WINDOW_OPENGL);
+    window = SDL_CreateWindow("game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, SDL_WINDOW_OPENGL);
   
     if(window == nullptr) {
       FATAL("SDL_CreateWindow() failed");
@@ -158,11 +160,20 @@ namespace gfx {
         }},
     };
 
-    sg_begin_default_pass(&pass_action, 1200, 800);
+    sg_begin_default_pass(&pass_action, window_width, window_height);
 
-    assert(camera.variant == world::Entity::Variant::Camera);
     camera.transform.update();
-    current_vp = camera.camera.projection * HMM_InvGeneralM4(camera.transform.world);
+
+    world::Camera& camera_component = camera.get_camera();
+
+    if(camera_component.width != window_width || camera_component.height != window_height) {
+      DEBUG("camera_component.update()");
+      camera_component.width = window_width;
+      camera_component.height = window_height;
+      camera_component.update();
+    }
+
+    current_vp = camera_component.projection * HMM_InvGeneralM4(camera.transform.world);
   }
 
   void end_frame() {
