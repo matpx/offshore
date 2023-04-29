@@ -1,9 +1,15 @@
+@ctype mat4 float4x4
+
 @vs vs
+
+layout(binding = 0) uniform VP {
+  mat4 vp;
+};
 
 in vec3 position;
 
 void main() {
-  gl_Position = vec4(position, 1);
+  gl_Position = vp * vec4(position, 1);
 }
 
 @end

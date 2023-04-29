@@ -4,6 +4,8 @@
 
 namespace world {
 
+  EntityId main_camera = INVALID_ENTITY;
+
   Entity *entities = nullptr;
 
   EntityId create(const Entity& entity) {
@@ -12,10 +14,10 @@ namespace world {
     return arrlen(entities) - 1;
   }
 
-  Entity* get(EntityId id) {
+  Entity& get(EntityId id) {
     assert(entities[id].valid);
   
-    return &entities[id];
+    return entities[id];
   }
 
   void finish() {

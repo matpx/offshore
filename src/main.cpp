@@ -9,6 +9,11 @@ int main() {
 
   gfx::init();
 
+  world::main_camera = world::create(
+    world::Entity(
+      world::Transform { .translation = {0,0,5}}, 
+      world::Camera(1.2, 1.0, 0.1, 100.0)));
+
   bool running = true;
   SDL_Event sdl_event;
 
@@ -22,8 +27,8 @@ int main() {
       }
     }
 
-    gfx::begin_frame();
-    gfx::shapes::draw_sphere();
+    gfx::begin_frame(world::get(world::main_camera));
+    gfx::draw_sphere();
     gfx::end_frame();
 
     gfx::swap();

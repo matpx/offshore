@@ -4,18 +4,26 @@
 
 namespace world {
 
-  using EntityId = u32;
+  using EntityId = i32;
 
+  constexpr EntityId INVALID_ENTITY = -1;
+  
   struct Transform {
-    vec3 translation;
-    quat rotation;
+    float3 translation = {0, 0, 0};
+    float4 rotation    = {0, 0, 0, 1};
+
+    float4x4 world = linalg::identity;
+
+    void update() {
+      world = mul(linalg::translation_matrix(translation), linalg::rotation_matrix(rotation));
+    }
   };
 
   struct Camera {
-    mat4 projection;
+    float4x4 projection;
     
     Camera(float fov, float aspect, float near, float far)
-      : projection(HMM_Perspective_RH_NO(fov, aspect, near, far)) {}
+      : projection(linalg::perspective_matrix(fov, aspect, near, far) ) {}
   };
 
   struct Entity {
@@ -23,7 +31,7 @@ namespace world {
       INVALID = 0,
       Camera,
     };
-    
+
     Transform transform;
 
     union {
@@ -33,14 +41,17 @@ namespace world {
     Variant variant;
     bool valid = true;
 
-    Entity(Camera component) : camera(component), variant(Variant::Camera) {}
+    Entity(Transform transform, Camera component)
+      : transform(transform), camera(component), variant(Variant::Camera) {}
   };
 
   EntityId create(const Entity&);
 
-  Entity* get(EntityId);
+  Entity& get(EntityId);
 
   void finish();
+
+  extern EntityId main_camera;
 
 }
 
