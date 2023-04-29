@@ -10,13 +10,13 @@ namespace world {
   constexpr EntityId INVALID_ENTITY = -1;
   
   struct Transform {
-    vec3 translation = vec3(0, 0, 0);
+    vec3 translation = vec3();
     quat rotation    = quat();
 
     mat4 world = mat4();
 
     void update() {
-      world = HMM_Translate(translation);
+      world = HMM_Translate(translation) * HMM_QToM4(rotation);
     }
   };
 
