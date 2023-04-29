@@ -1,4 +1,4 @@
-@ctype mat4 float4x4
+@ctype mat4 mat4
 
 @vs vs
 

@@ -59,7 +59,7 @@
 #define SLOT_VP (0)
 #pragma pack(push,1)
 SOKOL_SHDC_ALIGN(16) typedef struct VP_t {
-    float4x4 vp;
+    mat4 vp;
 } VP_t;
 #pragma pack(pop)
 /*

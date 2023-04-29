@@ -15,7 +15,8 @@ namespace world {
   }
 
   Entity& get(EntityId id) {
-    assert(entities[id].valid);
+    assert(id < arrlen(entities));
+    assert(entities[id].variant != Entity::Variant::INVALID);
   
     return entities[id];
   }

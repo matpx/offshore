@@ -9,10 +9,11 @@ int main() {
 
   gfx::init();
 
-  world::main_camera = world::create(
-    world::Entity(
-      world::Transform { .translation = {0,0,5}}, 
-      world::Camera(1.2, 1.0, 0.1, 100.0)));
+  auto cam = world::Entity(
+      world::Transform { .translation = HMM_V3(0,0,5) }, 
+      world::Camera(1.2, 1.0, 0.1, 100.0));
+
+  world::main_camera = world::create(cam);
 
   bool running = true;
   SDL_Event sdl_event;

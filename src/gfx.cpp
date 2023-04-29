@@ -21,7 +21,7 @@ namespace gfx {
   sshape_vertex_t *vertices = nullptr;
   index_type *indices       = nullptr;
 
-  float4x4 current_vp;
+  mat4 current_vp;
   
   void init_shapes() {
     INFO("shapes::init()");
@@ -162,7 +162,7 @@ namespace gfx {
 
     assert(camera.variant == world::Entity::Variant::Camera);
     camera.transform.update();
-    current_vp = mul(camera.camera.projection, inverse(camera.transform.world));
+    current_vp = camera.camera.projection * HMM_InvGeneralM4(camera.transform.world);
   }
 
   void end_frame() {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.hpp"
+#include <hmm/HandmadeMath.h>
 
 namespace world {
 
@@ -9,21 +10,21 @@ namespace world {
   constexpr EntityId INVALID_ENTITY = -1;
   
   struct Transform {
-    float3 translation = {0, 0, 0};
-    float4 rotation    = {0, 0, 0, 1};
+    vec3 translation = HMM_V3(0, 0, 0);
+    quat rotation    = HMM_Q (0, 0, 0, 1);
 
-    float4x4 world = linalg::identity;
+    mat4 world = HMM_M4();
 
     void update() {
-      world = mul(linalg::translation_matrix(translation), linalg::rotation_matrix(rotation));
+      world = HMM_Translate(translation);
     }
   };
 
   struct Camera {
-    float4x4 projection;
+    mat4 projection;
     
-    Camera(float fov, float aspect, float near, float far)
-      : projection(linalg::perspective_matrix(fov, aspect, near, far) ) {}
+    Camera(float fov, float aspect, float near, float far) 
+      : projection(HMM_Perspective_RH_ZO(fov, aspect, near, far)) {}
   };
 
   struct Entity {
@@ -33,13 +34,9 @@ namespace world {
     };
 
     Transform transform;
+    Camera camera;
 
-    union {
-      Camera camera;
-    };
-
-    Variant variant;
-    bool valid = true;
+    Variant variant = Variant::INVALID;
 
     Entity(Transform transform, Camera component)
       : transform(transform), camera(component), variant(Variant::Camera) {}
