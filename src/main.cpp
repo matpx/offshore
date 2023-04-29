@@ -10,7 +10,7 @@ int main() {
   gfx::init();
 
   auto cam = world::Entity(
-      world::Transform { .translation = HMM_V3(0,0,5) }, 
+      world::Transform { .translation = v3(0,0,5) }, 
       world::Camera(1.2, 1.0, 0.1, 100.0));
 
   world::main_camera = world::create(cam);

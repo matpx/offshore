@@ -10,10 +10,10 @@ namespace world {
   constexpr EntityId INVALID_ENTITY = -1;
   
   struct Transform {
-    vec3 translation = HMM_V3(0, 0, 0);
-    quat rotation    = HMM_Q (0, 0, 0, 1);
+    vec3 translation = v3(0, 0, 0);
+    quat rotation    = q (0, 0, 0, 1);
 
-    mat4 world = HMM_M4();
+    mat4 world = m4();
 
     void update() {
       world = HMM_Translate(translation);
@@ -34,7 +34,10 @@ namespace world {
     };
 
     Transform transform;
-    Camera camera;
+
+    union {
+      Camera camera;
+    };
 
     Variant variant = Variant::INVALID;
 
