@@ -244,6 +244,9 @@ typedef union HMM_Vec2
     float Elements[2];
 
 #ifdef __cplusplus
+    HMM_Vec2() = default;
+    HMM_Vec2(float X, float Y) : X(X), Y(Y) {}
+
     inline float &operator[](const int &Index)
     {
         return Elements[Index];
@@ -295,6 +298,9 @@ typedef union HMM_Vec3
     float Elements[3];
 
 #ifdef __cplusplus
+    HMM_Vec3() = default;
+    HMM_Vec3(float X, float Y, float Z) : X(X), Y(Y), Z(Z) {}
+
     inline float &operator[](const int &Index)
     {
         return Elements[Index];
@@ -359,6 +365,9 @@ typedef union HMM_Vec4
 #endif
 
 #ifdef __cplusplus
+    HMM_Vec4() = default;
+    HMM_Vec4(float X, float Y, float Z, float W) : X(X), Y(Y), Z(Z), W(W) {}
+
     inline float &operator[](const int &Index)
     {
         return Elements[Index];
@@ -425,6 +434,11 @@ typedef union HMM_Quat
 
 #ifdef HANDMADE_MATH__USE_SSE
     __m128 SSE;
+#endif
+
+#ifdef __cplusplus
+    HMM_Quat() : X(0), Y(0), Z(0), W(1) {}
+    HMM_Quat(float X, float Y, float Z, float W) : X(X), Y(Y), Z(Z), W(W) {};
 #endif
 } HMM_Quat;
 

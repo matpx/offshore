@@ -30,26 +30,6 @@ using mat4 = HMM_Mat4;
 
 using quat = HMM_Quat;
 
-constexpr vec2 v2(float x, float y) {
-    return HMM_V2(x, y);
-}
-
-constexpr vec3 v3(float x, float y, float z) {
-    return HMM_V3(x, y, z);
-}
-
-constexpr vec4 v4(float x, float y, float z, float w) {
-    return HMM_V4(x, y, z, w);
-}
-
-constexpr quat q(float x, float y, float z, float w) {
-    return HMM_Q(x, y, z, w);
-}
-
-inline mat4 m4() {
-    return HMM_M4();
-}
-
 // GFX
 
 using index_type = u16;
