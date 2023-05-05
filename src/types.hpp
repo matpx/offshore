@@ -29,5 +29,5 @@ using quat = HMM_Quat;
 
 // GFX
 
-using index_type = u16;
+using index_t = u16;
 

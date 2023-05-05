@@ -1,11 +1,10 @@
 #include "gfx.hpp"
 #include "world.hpp"
-#include "log.hpp"
-#include "container.hpp"
+#include "utils.hpp"
 #include <SDL2/SDL.h>
 
 int main() {
-  DEBUG("debug mode!");
+  LOG_DEBUG("debug mode!");
 
   gfx::init();
 

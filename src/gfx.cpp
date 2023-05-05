@@ -1,6 +1,5 @@
 #include "gfx.hpp"
-#include "container.hpp"
-#include "log.hpp"
+#include "utils.hpp"
 #include <sokol/sokol_gfx.h>
 #include <sokol/util/sokol_shape.h>
 #include <sokol/util/sokol_color.h>
@@ -10,7 +9,7 @@
 
 namespace gfx {
 
-  static_assert(sizeof(index_type) == 2);
+  static_assert(sizeof(index_t) == 2);
 
   sshape_element_range_t sphere_elements = {};
   sg_bindings sphere_binding             = {};
@@ -18,25 +17,25 @@ namespace gfx {
   sg_shader unlit_shader     = {};
   sg_pipeline unlit_pipeline = {};
 
-  sshape_vertex_t *vertices = nullptr;
-  index_type *indices       = nullptr;
+  utils::Vector<sshape_vertex_t> vertices;
+  utils::Vector<index_t> indices;
 
   mat4 current_vp;
   
   void init_shapes() {
-    INFO("shapes::init()");
+    LOG_INFO("shapes::init()");
 
-    assert(vertices == nullptr && indices == nullptr);
+    assert(vertices.size() == 0 && indices.size() == 0);
   
-    arrsetlen(vertices, 128);
-    arrsetlen(indices, 512);
+    vertices.set_size(128);
+    indices.set_size(512);
 
     sshape_buffer_t sphere_buffer = {
         .vertices = {
-            .buffer = { .ptr = vertices, .size = arrlenu(vertices) * sizeof(sshape_vertex_t) },
+            .buffer = { .ptr = vertices._data, .size = vertices.size() * sizeof(sshape_vertex_t) },
         },
         .indices = {
-            .buffer = { .ptr = indices, .size = arrlenu(indices) * sizeof(index_type) },
+            .buffer = { .ptr = indices._data, .size = indices.size() * sizeof(index_t) },
         }
     };
 
@@ -105,10 +104,10 @@ namespace gfx {
     sg_destroy_pipeline(unlit_pipeline);
     sg_destroy_shader(unlit_shader);
 
-    arrfree(vertices);
-    arrfree(indices);
+    vertices.clear();
+    indices.clear();
 
-    INFO("shapes::finish()");
+    LOG_INFO("shapes::finish()");
   }
 
   SDL_Window* window    = nullptr;
@@ -118,7 +117,7 @@ namespace gfx {
   u32 window_height = 800;
 
   void init() {
-    INFO("gfx::init()");
+    LOG_INFO("gfx::init()");
 
     assert(window == nullptr && context == nullptr);
 
@@ -167,7 +166,7 @@ namespace gfx {
     world::Camera& camera_component = camera.get_camera();
 
     if(camera_component.width != window_width || camera_component.height != window_height) {
-      DEBUG("camera_component.update()");
+      LOG_DEBUG("camera_component.update()");
       camera_component.width = window_width;
       camera_component.height = window_height;
       camera_component.update();
@@ -198,7 +197,7 @@ namespace gfx {
     
     SDL_Quit();
 
-    INFO("gfx::finish()");
+    LOG_INFO("gfx::finish()");
   }
 
 }

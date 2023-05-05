@@ -1,30 +1,29 @@
 #include "world.hpp"
-#include "container.hpp"
-#include "log.hpp"
+#include "utils.hpp"
 
 namespace world {
 
   EntityId main_camera = INVALID_ENTITY;
 
-  Entity *entities = nullptr;
+  utils::Vector<Entity> entities;
 
   EntityId create(const Entity& entity) {
-    arrpush(entities, entity);
+    entities.push(entity);
 
-    return arrlen(entities) - 1;
+    return entities.size() - 1;
   }
 
   Entity& get(EntityId id) {
-    assert(id < arrlen(entities));
+    assert(id < (int)entities.size());
     assert(entities[id].variant != Entity::Variant::INVALID);
   
     return entities[id];
   }
 
   void finish() {
-    arrfree(entities);
+    entities.clear();
 
-    INFO("world::finish()");
+    LOG_INFO("world::finish()");
   }
 
 }
