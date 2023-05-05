@@ -1,5 +1,6 @@
 #include "gfx.hpp"
 #include "world.hpp"
+#include "input.hpp"
 #include "utils.hpp"
 #include <SDL2/SDL.h>
 
@@ -25,6 +26,8 @@ int main() {
       if(sdl_event.type == SDL_KEYDOWN && sdl_event.key.keysym.sym == SDLK_ESCAPE) {
         running = false;
       }
+
+      input::handle_sdl_event(sdl_event);
     }
 
     gfx::begin_frame(world::get(world::main_camera));
