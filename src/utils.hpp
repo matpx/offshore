@@ -17,9 +17,9 @@ namespace utils {
         constexpr size_t size() const        { return arrlenu(_data); }
         constexpr void set_size(size_t size) { arrsetlen(_data, size); }
 
-        constexpr T pop()             { return arrpop(_data); }
+        constexpr T pop() { return arrpop(_data); }
 
-        constexpr void push(T& value) { arrpush(_data, value); }
+        constexpr void push(T& value)       { arrpush(_data, value); }
         constexpr void push(const T& value) { arrpush(_data, value); }
 
         constexpr void clear() { arrfree(_data); }
