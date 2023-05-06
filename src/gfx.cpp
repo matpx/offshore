@@ -23,7 +23,7 @@ namespace gfx {
   mat4 current_vp;
   
   void init_shapes() {
-    LOG_INFO("shapes::init()");
+    LOG_INFO("gfx::init_shapes()");
 
     assert(vertices.size() == 0 && indices.size() == 0);
   
@@ -107,7 +107,7 @@ namespace gfx {
     vertices.clear();
     indices.clear();
 
-    LOG_INFO("shapes::finish()");
+    LOG_INFO("gfx::finish_shapes()");
   }
 
   SDL_Window* window    = nullptr;
