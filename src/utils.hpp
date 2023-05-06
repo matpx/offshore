@@ -28,6 +28,23 @@ namespace utils {
 
         constexpr const T& operator[](size_t pos) const { assert(pos < size()); return _data[pos]; }
         constexpr       T& operator[](size_t pos)       { assert(pos < size()); return _data[pos]; }
+
+        Vector() = default;
+        Vector(const Vector&) = delete;
+        Vector(Vector&&) = delete;
+    };
+
+    template<typename T>
+    struct Span {
+        const T* const _data;
+        size_t _data_size;
+
+        Span(const Vector<T>& vector)
+            : _data(vector._data), _data_size(stbds_arrlen(vector._data)) {}
+
+        constexpr size_t size() const { return _data_size; }
+
+        constexpr const T& operator[](size_t pos) const { assert(pos < _data_size); return _data[pos]; }
     };
 
     template<typename KEY, typename VALUE>
@@ -57,6 +74,10 @@ namespace utils {
             assert(i != nullptr);
             return i->value;
         }
+
+        Hashmap() = default;
+        Hashmap(const Hashmap&) = delete;
+        Hashmap(Hashmap&&) = delete;
     };
 
 }

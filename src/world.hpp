@@ -52,7 +52,7 @@ namespace world {
       Camera camera;
     };
 
-    Variant variant = Variant::INVALID;
+    Variant variant;
 
     Entity(Transform transform, Camera component)
       : transform(transform), camera(component), variant(Variant::Camera) {}
