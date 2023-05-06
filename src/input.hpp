@@ -7,11 +7,11 @@
 namespace input {
 
 enum class Actions {
-    LEFT,
-    RIGHT,
-    UP,
-    DOWN,
-    _LEN,
+  LEFT,
+  RIGHT,
+  UP,
+  DOWN,
+  _LEN,
 };
 
 void handle_sdl_event(const SDL_Event& window_event);

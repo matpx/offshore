@@ -9,22 +9,22 @@ EntityId main_camera = INVALID_ENTITY;
 utils::Vector<Entity> entities;
 
 EntityId create(const Entity& entity) {
-    entities.push(entity);
+  entities.push(entity);
 
-    return entities.size() - 1;
+  return entities.size() - 1;
 }
 
 Entity& get(EntityId id) {
-    assert(id < (int)entities.size());
-    assert(entities[id].variant != Entity::Variant::INVALID);
+  assert(id < (int)entities.size());
+  assert(entities[id].variant != Entity::Variant::INVALID);
 
-    return entities[id];
+  return entities[id];
 }
 
 void finish() {
-    entities.clear();
+  entities.clear();
 
-    LOG_INFO("world::finish()");
+  LOG_INFO("world::finish()");
 }
 
 }  // namespace world
