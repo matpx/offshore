@@ -38,7 +38,7 @@ namespace utils {
     template<typename T>
     struct Span {
         const T* const _data;
-        size_t _data_size;
+        const size_t   _data_size;
 
         Span(const Vector<T>& vector)
             : _data(vector._data), _data_size(stbds_arrlen(vector._data)) {}
