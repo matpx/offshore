@@ -1,21 +1,21 @@
 #pragma once
 
 #include <SDL2/SDL_video.h>
+
 #include "world.hpp"
 
 namespace gfx {
 
-  void init();
+void init();
 
-  void begin_frame(world::Entity& camera);
+void begin_frame(world::Entity& camera);
 
-  void draw_sphere();
+void draw_sphere();
 
-  void end_frame();
-  
-  void swap();
-  
-  void finish();
-  
-}
+void end_frame();
 
+void swap();
+
+void finish();
+
+}  // namespace gfx
