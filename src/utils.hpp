@@ -16,13 +16,13 @@ namespace utils {
     struct Vector {
         T* _data = nullptr;
 
-        constexpr size_t size() const        { return stbds_arrlenu(_data); }
-        constexpr void set_size(size_t size) { stbds_arrsetlen(_data, size); }
+        constexpr size_t size() const          { return stbds_arrlenu(_data); }
+        constexpr size_t set_size(size_t size) { return stbds_arrsetlen(_data, size); }
 
         constexpr T pop() { return stbds_arrpop(_data); }
 
-        constexpr void push(T& value)       { stbds_arrpush(_data, value); }
-        constexpr void push(const T& value) { stbds_arrpush(_data, value); }
+        constexpr T push(T& value)       { return stbds_arrpush(_data, value); }
+        constexpr T push(const T& value) { return stbds_arrpush(_data, value); }
 
         constexpr void clear() { stbds_arrfree(_data); }
 
@@ -30,7 +30,7 @@ namespace utils {
         constexpr       T& operator[](size_t pos)       { assert(pos < size()); return _data[pos]; }
 
         Vector() = default;
-        Vector(size_t size) { stbds_arrsetlen(_data, size); };
+        Vector(size_t size) { set_size(size); };
         Vector(const Vector&) = delete;
         Vector(Vector&&) = delete;
     };
@@ -66,9 +66,9 @@ namespace utils {
             return i != nullptr ? &(i->value) : nullptr;
         }
 
-        constexpr void put(KEY key, VALUE value) { stbds_hmput(_data, key, value); }
-        constexpr bool remove(KEY key)           { return stbds_hmdel(_data, key); }
-        constexpr void clear()                   { stbds_hmfree(_data); }
+        constexpr VALUE put(KEY key, VALUE value) { return stbds_hmput(_data, key, value); }
+        constexpr bool remove(KEY key)            { return stbds_hmdel(_data, key); }
+        constexpr void clear()                    { stbds_hmfree(_data); }
 
         constexpr VALUE& operator[](KEY key) {
             Internal *i = stbds_hmgetp_null(_data, key);
