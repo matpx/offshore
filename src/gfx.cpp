@@ -121,7 +121,7 @@ namespace gfx {
 
     assert(window == nullptr && context == nullptr);
 
-    if(SDL_Init(SDL_INIT_VIDEO) != 0) {
+    if(SDL_Init(SDL_INIT_EVERYTHING) != 0) {
       FATAL("SDL_Init() failed");
     }
 
