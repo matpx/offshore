@@ -30,6 +30,7 @@ namespace utils {
         constexpr       T& operator[](size_t pos)       { assert(pos < size()); return _data[pos]; }
 
         Vector() = default;
+        Vector(size_t size) { stbds_arrsetlen(_data, size); };
         Vector(const Vector&) = delete;
         Vector(Vector&&) = delete;
     };

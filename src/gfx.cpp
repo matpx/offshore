@@ -17,18 +17,13 @@ namespace gfx {
   sg_shader unlit_shader     = {};
   sg_pipeline unlit_pipeline = {};
 
-  utils::Vector<sshape_vertex_t> vertices;
-  utils::Vector<index_t> indices;
-
   mat4 current_vp;
   
   void init_shapes() {
     LOG_INFO("gfx::init_shapes()");
 
-    assert(vertices.size() == 0 && indices.size() == 0);
-  
-    vertices.set_size(128);
-    indices.set_size(512);
+    utils::Vector<sshape_vertex_t> vertices(128);
+    utils::Vector<index_t> indices(512);
 
     sshape_buffer_t sphere_buffer = {
         .vertices = {
@@ -63,6 +58,9 @@ namespace gfx {
 
     const sg_buffer_desc sphere_index_buffer_desc = sshape_index_buffer_desc(&sphere_buffer);
     const sg_buffer sphere_index_buffer           = sg_make_buffer(sphere_index_buffer_desc);
+
+    vertices.clear();
+    indices.clear();
 
     sphere_elements = sshape_element_range(&sphere_buffer);
 
@@ -103,9 +101,6 @@ namespace gfx {
     sg_destroy_buffer(sphere_binding.index_buffer);
     sg_destroy_pipeline(unlit_pipeline);
     sg_destroy_shader(unlit_shader);
-
-    vertices.clear();
-    indices.clear();
 
     LOG_INFO("gfx::finish_shapes()");
   }
