@@ -48,7 +48,10 @@ struct Span {
   const T *const _data;
   const size_t _data_size;
 
-  Span(const Vector<T> &vector)
+  explicit Span(const T* const data, size_t data_size)
+      : _data(data), _data_size(data_size) {}
+
+  explicit Span(const Vector<T> &vector)
       : _data(vector._data), _data_size(stbds_arrlen(vector._data)) {}
 
   constexpr size_t size() const { return _data_size; }
