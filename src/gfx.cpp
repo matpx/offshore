@@ -5,6 +5,7 @@
 #include <sokol/util/sokol_color.h>
 #include <sokol/util/sokol_shape.h>
 
+#include "allocator.hpp"
 #include "unlit.h"
 #include "utils.hpp"
 
@@ -28,7 +29,9 @@ void init_shapes() {
 
   sshape_buffer_t sphere_buffer = {
       .vertices = {
-          .buffer = {.ptr = vertices._data, .size = vertices.size() * sizeof(sshape_vertex_t)},
+          .buffer = {
+              .ptr = vertices._data,
+              .size = vertices.size() * sizeof(sshape_vertex_t)},
       },
       .indices = {
           .buffer = {.ptr = indices._data, .size = indices.size() * sizeof(index_t)},
@@ -134,8 +137,8 @@ void init() {
 
 #ifndef NDEBUG
   desc.allocator = {
-      .alloc = [](size_t size, [[maybe_unused]] void* user_data) { return stb_leakcheck_malloc(size, __FILE__, __LINE__); },
-      .free = [](void* ptr, [[maybe_unused]] void* user_data) { stb_leakcheck_free(ptr); },
+      .alloc = [](size_t size, [[maybe_unused]] void* user_data) { return allocator::_malloc(size); },
+      .free = [](void* ptr, [[maybe_unused]] void* user_data) { allocator::_free(ptr); },
   };
 #endif
 

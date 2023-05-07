@@ -41,9 +41,7 @@ int main() {
   world::finish();
   gfx::finish();
 
-#ifndef NDEBUG
-  stb_leakcheck_dumpmem();
-#endif
+  allocator::debug_leak_check();
 
   return 0;
 }
