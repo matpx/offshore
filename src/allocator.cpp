@@ -22,6 +22,6 @@ void debug_leak_check() {
 #endif
 }
 
-static_assert(std::alignment_of<std::max_align_t>() >= 16);
+static_assert(std::alignment_of<std::max_align_t>() >= alignment);
 
 }  // namespace allocator
