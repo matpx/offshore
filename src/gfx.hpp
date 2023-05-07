@@ -14,7 +14,7 @@ void draw_sphere();
 
 void end_frame();
 
-void swap();
+void present();
 
 void finish();
 

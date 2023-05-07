@@ -173,7 +173,7 @@ void end_frame() {
   sg_commit();
 }
 
-void swap() {
+void present() {
   SDL_GL_SwapWindow(window);
 }
 

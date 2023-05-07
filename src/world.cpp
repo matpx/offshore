@@ -15,7 +15,7 @@ EntityId create(const Entity& entity) {
 }
 
 Entity& get(EntityId id) {
-  assert(id < (int)entities.size());
+  assert(id < entities.size());
   assert(entities[id].variant != Entity::Variant::INVALID);
 
   return entities[id];

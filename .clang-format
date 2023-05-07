@@ -1,2 +1,2 @@
 BasedOnStyle: Google
-ColumnLimit: 0
+ColumnLimit: 100

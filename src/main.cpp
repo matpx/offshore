@@ -4,22 +4,20 @@
 #include "input.hpp"
 #include "utils.hpp"
 #include "world.hpp"
+#include "player.hpp"
 
 int main() {
   LOG_DEBUG("debug mode!");
 
   gfx::init();
-
-  world::Entity cam = world::Entity(
-      world::Transform{HMM_V3(0, 0, 5)},
-      world::Camera(1000, 1000, 1.2, 0.1, 100.0));
-
-  world::main_camera = world::create(cam);
+  player::setup();
 
   bool running = true;
   SDL_Event sdl_event;
 
   while (running) {
+    input::clear();
+
     while (SDL_PollEvent(&sdl_event)) {
       if (sdl_event.type == SDL_QUIT) {
         running = false;
@@ -31,11 +29,13 @@ int main() {
       input::handle_sdl_event(sdl_event);
     }
 
+    player::update();
+
     gfx::begin_frame(world::get(world::main_camera));
     gfx::draw_sphere();
     gfx::end_frame();
 
-    gfx::swap();
+    gfx::present();
   }
 
   world::finish();
