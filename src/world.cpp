@@ -1,5 +1,7 @@
 #include "world.hpp"
 
+#include <cstddef>
+
 #include "utils.hpp"
 
 namespace world {
@@ -28,3 +30,5 @@ void finish() {
 }
 
 }  // namespace world
+
+static_assert(std::alignment_of<std::max_align_t>() >= std::alignment_of<world::Entity>());

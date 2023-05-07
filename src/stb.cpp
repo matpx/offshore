@@ -7,6 +7,5 @@
 
 #include <cstddef>
 #include <type_traits>
-static_assert(std::alignment_of<stb_leakcheck_malloc_info>() == 16);
-static_assert(std::alignment_of<stbds_array_header>() == 16);
-static_assert(std::alignment_of<std::max_align_t>() >= 16);
+static_assert(std::alignment_of<std::max_align_t>() >= std::alignment_of<stb_leakcheck_malloc_info>());
+static_assert(std::alignment_of<std::max_align_t>() >= std::alignment_of<stbds_array_header>());
