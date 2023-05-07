@@ -44,7 +44,8 @@ void update() {
     velocity.X += 0.03f;
   }
 
-  player.transform.translation += velocity;
+  player.transform.translation +=
+      (HMM_QToM4(player.transform.rotation) * HMM_V4(velocity.X, velocity.Y, velocity.Z, 1)).XYZ;
 
   // camera parent
 
