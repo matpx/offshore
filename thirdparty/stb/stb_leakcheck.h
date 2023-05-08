@@ -24,7 +24,7 @@
 #include <stddef.h>
 typedef struct malloc_info stb_leakcheck_malloc_info;
 
-struct alignas(allocator::alignment) malloc_info
+struct alignas(allocator::base_alignment) malloc_info
 {
    const char *file;
    int line;

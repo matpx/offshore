@@ -27,4 +27,6 @@ void finish() {
   LOG_INFO("world::finish()");
 }
 
+static_assert(allocator::base_alignment >= std::alignment_of<world::Entity>());
+
 }  // namespace world

@@ -12,6 +12,8 @@ namespace allocator {
 
 void* _malloc(size_t size) { return malloc(size); }
 
+void* _aligned_alloc(size_t alignment, size_t size) { return aligned_alloc(alignment, size); }
+
 void* _realloc(void* ptr, size_t size) { return realloc(ptr, size); }
 
 void _free(void* ptr) { free(ptr); }
@@ -22,6 +24,6 @@ void debug_leak_check() {
 #endif
 }
 
-static_assert(std::alignment_of<std::max_align_t>() >= alignment);
+static_assert(std::alignment_of<std::max_align_t>() >= base_alignment);
 
 }  // namespace allocator
