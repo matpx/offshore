@@ -1,9 +1,6 @@
 #pragma once
 
 #include <cassert>
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/gtx/quaternion.hpp>
 
 #include "types.hpp"
 
@@ -18,6 +15,7 @@ struct Transform {
   quat rotation = glm::identity<quat>();
 
   mat4 world = glm::identity<mat4>();
+  glm::dmat4 x;
 
   void update() {
     world = glm::translate(glm::identity<mat4>(), translation) * glm::toMat4(rotation);

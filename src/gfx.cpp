@@ -4,7 +4,6 @@
 #include <sokol/sokol_gfx.h>
 #include <sokol/util/sokol_color.h>
 #include <sokol/util/sokol_shape.h>
-#include <glm/ext/quaternion_common.hpp>
 
 #include "allocator.hpp"
 #include "unlit.h"

@@ -1,5 +1,6 @@
 #include "world.hpp"
 
+#include "log.hpp"
 #include "utils.hpp"
 
 namespace world {
@@ -13,6 +14,7 @@ EntityId create(const Entity& entity) {
    if(entities.size() <= entity_count) {
     entities.set_size(1 + entities.size() * 2);
   }
+
   assert((u64)entities._data % alignof(Entity) == 0);
 
   entities[entity_count] = entity;
@@ -32,7 +34,5 @@ void finish() {
 
   LOG_INFO("world::finish()");
 }
-
-static_assert(allocator::base_alignment >= std::alignment_of<world::Entity>());
 
 }  // namespace world

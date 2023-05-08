@@ -1,5 +1,4 @@
 #include "player.hpp"
-#include <glm/ext/quaternion_trigonometric.hpp>
 
 #include "input.hpp"
 #include "log.hpp"

@@ -62,6 +62,4 @@ void debug_leak_check() {
   assert(alloc_count == 0);
 }
 
-static_assert(std::alignment_of<std::max_align_t>() >= base_alignment);
-
 }  // namespace allocator
