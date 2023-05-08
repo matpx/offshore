@@ -4,6 +4,7 @@
 #include <sokol/sokol_gfx.h>
 #include <sokol/util/sokol_color.h>
 #include <sokol/util/sokol_shape.h>
+#include <glm/ext/quaternion_common.hpp>
 
 #include "allocator.hpp"
 #include "unlit.h"
@@ -168,7 +169,7 @@ void begin_frame(world::Entity& camera) {
     camera_component.update();
   }
 
-  current_vp = camera_component.projection * HMM_InvGeneralM4(camera.transform.world);
+  current_vp = camera_component.projection * glm::inverse(camera.transform.world);
 }
 
 void end_frame() {

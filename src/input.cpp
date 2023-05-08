@@ -32,8 +32,8 @@ void handle_sdl_event(const SDL_Event& window_event) {
   } else if (window_event.type == SDL_KEYUP) {
     set_key_state(window_event.key.keysym.sym, false);
   } else if (window_event.type == SDL_MOUSEMOTION) {
-    mouse_motion.X += window_event.motion.xrel;
-    mouse_motion.Y += window_event.motion.yrel;
+    mouse_motion.x += window_event.motion.xrel;
+    mouse_motion.y += window_event.motion.yrel;
   }
 }
 

@@ -1,6 +1,9 @@
 #pragma once
 
 #include <cassert>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/gtx/quaternion.hpp>
 
 #include "types.hpp"
 
@@ -11,13 +14,13 @@ using EntityId = u32;
 constexpr EntityId INVALID_ENTITY = std::numeric_limits<u32>::max();
 
 struct Transform {
-  vec3 translation = HMM_V3(0, 0, 0);
-  quat rotation = HMM_Q(0, 0, 0, 1);
+  vec3 translation = {0, 0, 0};
+  quat rotation = glm::identity<quat>();
 
-  mat4 world = HMM_M4D(1);
+  mat4 world = glm::identity<mat4>();
 
   void update() {
-    world = HMM_Translate(translation) * HMM_QToM4(rotation);
+    world = glm::translate(glm::identity<mat4>(), translation) * glm::toMat4(rotation);
   }
 };
 
@@ -36,7 +39,7 @@ struct Camera {
   }
 
   void update() {
-    projection = HMM_Perspective_RH_ZO(fov, (float)width / (float)height, near, far);
+    projection = glm::perspective(fov, (float)width / (float)height, near, far);
   }
 };
 
