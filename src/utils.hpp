@@ -4,26 +4,38 @@
 #include "log.hpp"
 #include "types.hpp"
 
-#define STBDS_NO_SHORT_NAMES
-#define STBDS_REALLOC(context, ptr, size) allocator::_realloc(ptr, size)
-#define STBDS_FREE(context, ptr) allocator::_free(ptr)
-#include <stb/stb_ds.h>
+// #define STBDS_NO_SHORT_NAMES
+// #define STBDS_REALLOC(context, ptr, size) allocator::_realloc(ptr, size)
+// #define STBDS_FREE(allocator::_free, ptr) allocator::_free(allocator::_free)
+// #include <stb/stb_ds.h>
 
 namespace utils {
 
-template <typename T>
+template <typename T, bool aligned = false>
 struct Vector {
   T *_data = nullptr;
+  size_t _size = 0;
 
-  constexpr size_t size() const { return stbds_arrlenu(_data); }
-  constexpr size_t set_size(size_t size) { return stbds_arrsetlen(_data, size); }
+  constexpr bool empty() const { return _data == nullptr; }
 
-  constexpr T pop() { return stbds_arrpop(_data); }
+  constexpr size_t size() const { return _size; }
+  constexpr void set_size(size_t size) {
+    if constexpr (aligned) {
+      _data = (T *)allocator::_aligned_realloc(alignof(T), _data, size * sizeof(T));
+    } else {
+      _data = (T *)allocator::_realloc(_data, size * sizeof(T));
+    }
+    _size = size;
+  }
 
-  constexpr T push(T &value) { return stbds_arrpush(_data, value); }
-  constexpr T push(const T &value) { return stbds_arrpush(_data, value); }
-
-  constexpr void clear() { stbds_arrfree(_data); }
+  constexpr void clear() {
+    if (_data == nullptr) {
+      return;
+    }
+    allocator::_free(_data);
+    _data = nullptr;
+    _size = 0;
+  }
 
   constexpr const T &operator[](size_t pos) const {
     assert(pos < size());
@@ -40,6 +52,7 @@ struct Vector {
   Vector(Vector &&) = delete;
 };
 
+/*
 template <typename T>
 struct Span {
   const T *const _data;
@@ -89,5 +102,6 @@ struct Hashmap {
   Hashmap(const Hashmap &) = delete;
   Hashmap(Hashmap &&) = delete;
 };
+*/
 
 }  // namespace utils

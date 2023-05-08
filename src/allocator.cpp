@@ -2,25 +2,40 @@
 
 #include <malloc.h>
 
-#include "types.hpp"
+#include <cstring>
+#include <cassert>
 
-#ifndef NDEBUG
-#define STB_LEAKCHECK_IMPLEMENTATION
-// #define STB_LEAKCHECK_SHOWALL
-#include <stb/stb_leakcheck.h>
-#endif
+#include "types.hpp"
 
 namespace allocator {
 
-void* _malloc(size_t size) { return malloc(size); }
+static i64 alloc_count = 0;
 
-void* _aligned_alloc(size_t alignment, size_t size) { return aligned_alloc(alignment, size); }
+void* _malloc(size_t size) {
+  alloc_count++;
+  return malloc(size);
+}
 
-void* _realloc(void* ptr, size_t size) { return realloc(ptr, size); }
+void* _aligned_alloc(size_t alignment, size_t size) {
+  alloc_count++;
+  return aligned_alloc(alignment, size);
+}
+
+void* _realloc(void* ptr, size_t size) {
+  if (size == 0 && ptr != nullptr) {
+    alloc_count--;
+  } else if (ptr == nullptr) {
+    alloc_count++;
+  }
+
+  return realloc(ptr, size);
+}
 
 void* _aligned_realloc(size_t alignment, void* ptr, size_t size) {
   if (size == 0 && ptr != nullptr) {
+    alloc_count--;
     free(ptr);
+    return nullptr;
   }
 
   void* aligned_ptr = _aligned_alloc(alignment, size);
@@ -33,17 +48,18 @@ void* _aligned_realloc(size_t alignment, void* ptr, size_t size) {
 
   memcpy(aligned_ptr, ptr, copy_size);
 
-  free(ptr);
+  _free(ptr);
 
   return aligned_ptr;
 }
 
-void _free(void* ptr) { free(ptr); }
+void _free(void* ptr) {
+  alloc_count--;
+  free(ptr);
+}
 
 void debug_leak_check() {
-#ifndef NDEBUG
-  stb_leakcheck_dumpmem();
-#endif
+  assert(alloc_count == 0);
 }
 
 static_assert(std::alignment_of<std::max_align_t>() >= base_alignment);

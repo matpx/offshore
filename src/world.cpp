@@ -6,12 +6,18 @@ namespace world {
 
 EntityId main_camera = INVALID_ENTITY;
 
-utils::Vector<Entity> entities;
+utils::Vector<Entity, true> entities;
+size_t entity_count = 0;
 
 EntityId create(const Entity& entity) {
-  entities.push(entity);
+   if(entities.size() <= entity_count) {
+    entities.set_size(1 + entities.size() * 2);
+  }
+  assert((u64)entities._data % alignof(Entity) == 0);
 
-  return entities.size() - 1;
+  entities[entity_count] = entity;
+
+  return entity_count++;
 }
 
 Entity& get(EntityId id) {
