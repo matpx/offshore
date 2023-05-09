@@ -38,7 +38,7 @@ int main() {
     gfx::present();
   }
 
-  world::finish();
+  world::clear();
   gfx::finish();
 
   allocator::debug_leak_check();

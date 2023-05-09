@@ -24,7 +24,7 @@ Entity& get(EntityId id) {
   return entities[id];
 }
 
-void finish() {
+void clear() {
   entities.clear();
 
   LOG_INFO("world::finish()");

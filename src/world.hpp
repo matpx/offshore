@@ -84,7 +84,7 @@ EntityId create(const Entity&);
 
 Entity& get(EntityId);
 
-void finish();
+void clear();
 
 extern EntityId main_camera;
 
