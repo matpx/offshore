@@ -30,11 +30,11 @@ void init_shapes() {
   sshape_buffer_t sphere_buffer = {
       .vertices = {
           .buffer = {
-              .ptr = vertices._data,
+              .ptr = vertices.data(),
               .size = vertices.size() * sizeof(sshape_vertex_t)},
       },
       .indices = {
-          .buffer = {.ptr = indices._data, .size = indices.size() * sizeof(index_t)},
+          .buffer = {.ptr = indices.data(), .size = indices.size() * sizeof(index_t)},
       }};
 
   const sshape_sphere_t params = {

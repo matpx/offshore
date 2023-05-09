@@ -9,23 +9,30 @@
 
 namespace allocator {
 
+#ifndef NDEBUG
 static i64 alloc_count = 0;
+inline void increase_alloc_count() {alloc_count++;}
+inline void decrease_alloc_count() {alloc_count--;}
+#elif
+inline void increase_alloc_count() {}
+inline void decrease_alloc_count() {}
+#endif
 
 void* _malloc(size_t size) {
-  alloc_count++;
+  increase_alloc_count();
   return malloc(size);
 }
 
 void* _aligned_alloc(size_t alignment, size_t size) {
-  alloc_count++;
+  increase_alloc_count();
   return aligned_alloc(alignment, size);
 }
 
 void* _realloc(void* ptr, size_t size) {
   if (size == 0 && ptr != nullptr) {
-    alloc_count--;
+    decrease_alloc_count();
   } else if (ptr == nullptr) {
-    alloc_count++;
+    increase_alloc_count();
   }
 
   return realloc(ptr, size);
@@ -33,7 +40,7 @@ void* _realloc(void* ptr, size_t size) {
 
 void* _aligned_realloc(size_t alignment, void* ptr, size_t size) {
   if (size == 0 && ptr != nullptr) {
-    alloc_count--;
+    decrease_alloc_count();
     free(ptr);
     return nullptr;
   }
@@ -54,7 +61,7 @@ void* _aligned_realloc(size_t alignment, void* ptr, size_t size) {
 }
 
 void _free(void* ptr) {
-  alloc_count--;
+  decrease_alloc_count();
   free(ptr);
 }
 

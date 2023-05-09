@@ -11,22 +11,27 @@
 
 namespace utils {
 
-template <typename T, bool aligned = false>
+template <typename T>
 struct Vector {
+ private:
   T *_data = nullptr;
   size_t _size = 0;
 
+ public:
   constexpr bool empty() const { return _data == nullptr; }
 
   constexpr size_t size() const { return _size; }
   constexpr void set_size(size_t size) {
-    if constexpr (aligned) {
+    if constexpr (std::alignment_of<T>() > std::alignment_of<max_align_t>()) {
       _data = (T *)allocator::_aligned_realloc(alignof(T), _data, size * sizeof(T));
     } else {
       _data = (T *)allocator::_realloc(_data, size * sizeof(T));
     }
     _size = size;
   }
+
+  constexpr T *data() { return _data; }
+  constexpr const T *data() const { return _data; }
 
   constexpr void clear() {
     if (_data == nullptr) {
