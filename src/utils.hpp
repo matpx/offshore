@@ -30,6 +30,10 @@ struct Vector {
       _data = (T *)allocator::_realloc(_data, required_capacity * sizeof(T));
     }
 
+    if(_data == nullptr) {
+      FATAL("allocation failure!");
+    }
+
     _capacity = required_capacity;
   }
 

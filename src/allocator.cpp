@@ -3,7 +3,6 @@
 #include <malloc.h>
 
 #include <cstring>
-#include <cassert>
 
 #include "types.hpp"
 
@@ -11,8 +10,8 @@ namespace allocator {
 
 #ifndef NDEBUG
 static i64 alloc_count = 0;
-inline void increase_alloc_count() {alloc_count++;}
-inline void decrease_alloc_count() {alloc_count--;}
+inline void increase_alloc_count() { alloc_count++; }
+inline void decrease_alloc_count() { alloc_count--; }
 #elif
 inline void increase_alloc_count() {}
 inline void decrease_alloc_count() {}
@@ -24,21 +23,27 @@ void* _malloc(size_t size) {
 }
 
 void* _aligned_alloc(size_t alignment, size_t size) {
+  assert(alignment > 0 && size > 0);
+
   increase_alloc_count();
   return aligned_alloc(alignment, size);
 }
 
 void* _realloc(void* ptr, size_t size) {
-  if (size == 0 && ptr != nullptr) {
-    decrease_alloc_count();
-  } else if (ptr == nullptr) {
+  assert(ptr != nullptr || size != 0);
+
+  if (ptr == nullptr) {
     increase_alloc_count();
+  } else if (size == 0) {
+    decrease_alloc_count();
   }
 
   return realloc(ptr, size);
 }
 
 void* _aligned_realloc(size_t alignment, void* ptr, size_t size) {
+  assert(ptr != nullptr || size != 0);
+
   if (size == 0 && ptr != nullptr) {
     decrease_alloc_count();
     free(ptr);
@@ -47,7 +52,7 @@ void* _aligned_realloc(size_t alignment, void* ptr, size_t size) {
 
   void* aligned_ptr = _aligned_alloc(alignment, size);
 
-  if (ptr == nullptr) {
+  if (ptr == nullptr || aligned_ptr == nullptr) {
     return aligned_ptr;
   }
 
@@ -61,6 +66,8 @@ void* _aligned_realloc(size_t alignment, void* ptr, size_t size) {
 }
 
 void _free(void* ptr) {
+  assert(ptr != nullptr);
+
   decrease_alloc_count();
   free(ptr);
 }
