@@ -5,7 +5,6 @@
 #include <sokol/util/sokol_color.h>
 #include <sokol/util/sokol_shape.h>
 
-#include "allocator.hpp"
 #include "unlit.h"
 #include "utils.hpp"
 

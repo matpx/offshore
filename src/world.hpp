@@ -1,7 +1,5 @@
 #pragma once
 
-#include <cassert>
-
 #include "types.hpp"
 
 namespace world {

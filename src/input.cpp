@@ -1,8 +1,5 @@
 #include "input.hpp"
 
-#include <SDL2/SDL_events.h>
-#include <SDL2/SDL_keycode.h>
-
 namespace input {
 
 bool pressed[(size_t)Actions::_LEN];

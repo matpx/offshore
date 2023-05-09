@@ -1,8 +1,6 @@
 #include "player.hpp"
 
 #include "input.hpp"
-#include "log.hpp"
-#include "types.hpp"
 #include "world.hpp"
 
 namespace player {
