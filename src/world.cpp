@@ -8,20 +8,14 @@ namespace world {
 EntityId main_camera = INVALID_ENTITY;
 
 utils::Vector<Entity> entities;
-size_t entity_count = 0;
 
 EntityId create(const Entity& entity) {
-   if(entities.size() <= entity_count) {
-    entities.set_size(8 + entities.size() * 3/2);
-    LOG_DEBUG("resize world: %ld", entities.size());
-  }
-
   assert(entity.variant != Entity::Variant::INVALID);
   assert((size_t)entities.data() % alignof(Entity) == 0);
 
-  entities[entity_count] = entity;
+  entities.push(entity);
 
-  return entity_count++;
+  return entities.size() - 1;
 }
 
 Entity& get(EntityId id) {

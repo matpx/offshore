@@ -15,44 +15,74 @@ template <typename T>
 struct Vector {
  private:
   T *_data = nullptr;
+
+  size_t _capacity = 0;
   size_t _size = 0;
 
- public:
-  constexpr bool empty() const { return _data == nullptr; }
-
-  constexpr size_t size() const { return _size; }
-  constexpr void set_size(size_t size) {
-    if constexpr (std::alignment_of<T>() > std::alignment_of<max_align_t>()) {
-      _data = (T *)allocator::_aligned_realloc(alignof(T), _data, size * sizeof(T));
-    } else {
-      _data = (T *)allocator::_realloc(_data, size * sizeof(T));
+  void ensure_capacity(size_t required_capacity) {
+    if (required_capacity <= _capacity) {
+      return;
     }
-    _size = size;
+
+    if constexpr (std::alignment_of<T>() > std::alignment_of<max_align_t>()) {
+      _data = (T *)allocator::_aligned_realloc(alignof(T), _data, required_capacity * sizeof(T));
+    } else {
+      _data = (T *)allocator::_realloc(_data, required_capacity * sizeof(T));
+    }
+
+    _capacity = required_capacity;
   }
 
-  constexpr T *data() { return _data; }
-  constexpr const T *data() const { return _data; }
+ public:
+  constexpr static size_t min_push_reserve = 4;
+
+  constexpr size_t size() const { return _size; }
+  constexpr size_t capacity() const { return _capacity; }
+
+  constexpr void resize(size_t new_size) {
+    ensure_capacity(new_size);
+
+    _size = new_size;
+  }
+
+  constexpr void reserve(size_t new_capacity) {
+    ensure_capacity(new_capacity);
+  }
+
+  constexpr void push(const T &value) {
+    if (_size == _capacity) {
+      ensure_capacity(min_push_reserve + _capacity * 2);
+    }
+
+    _data[_size++] = value;
+  }
 
   constexpr void clear() {
     if (_data == nullptr) {
       return;
     }
+
     allocator::_free(_data);
+
     _data = nullptr;
     _size = 0;
+    _capacity = 0;
   }
 
+  constexpr T *data() { return _data; }
+  constexpr const T *data() const { return _data; }
+
   constexpr const T &operator[](size_t pos) const {
-    assert(pos < size());
+    assert(pos < _size);
     return _data[pos];
   }
   constexpr T &operator[](size_t pos) {
-    assert(pos < size());
+    assert(pos < _size);
     return _data[pos];
   }
 
   Vector() = default;
-  Vector(size_t size) { set_size(size); };
+  Vector(size_t size) { resize(size); };
   Vector(const Vector &) = delete;
   Vector(Vector &&) = delete;
 };
