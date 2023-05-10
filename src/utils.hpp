@@ -30,7 +30,7 @@ struct Vector {
       _data = (T *)allocator::_realloc(_data, required_capacity * sizeof(T));
     }
 
-    if(_data == nullptr) {
+    if (_data == nullptr) {
       FATAL("allocation failure!");
     }
 
@@ -89,6 +89,22 @@ struct Vector {
   Vector(size_t size) { resize(size); };
   Vector(const Vector &) = delete;
   Vector(Vector &&) = delete;
+};
+
+template <typename T, size_t SIZE>
+struct Array {
+  T _data[SIZE];
+
+  constexpr static size_t size = SIZE;
+
+  constexpr const T &operator[](size_t pos) const {
+    assert(pos < SIZE);
+    return _data[pos];
+  }
+  constexpr T &operator[](size_t pos) {
+    assert(pos < SIZE);
+    return _data[pos];
+  }
 };
 
 /*

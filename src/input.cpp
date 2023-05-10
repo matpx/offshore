@@ -1,8 +1,10 @@
 #include "input.hpp"
 
+#include "utils.hpp"
+
 namespace input {
 
-bool pressed[(size_t)Actions::_LEN];
+utils::Array<bool, (size_t)Actions::_LEN> pressed;
 
 vec2 mouse_motion = {};
 
