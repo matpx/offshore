@@ -1,5 +1,6 @@
 #include "player.hpp"
 
+#include "gfx.hpp"
 #include "input.hpp"
 #include "world.hpp"
 
@@ -10,6 +11,21 @@ static world::EntityId player_id = world::INVALID_ENTITY;
 void setup() {
   world::main_camera = world::create(world::Entity({}, world::Camera(1000, 1000, 1.5, 0.1, 100.0)));
   player_id = world::create(world::Entity({.translation = {0, 0, 5}}, world::Player{}));
+
+  utils::Vector<Vertex> vertices = {
+      Vertex{.positions = {0, 0, 0}},
+      Vertex{.positions = {2, 0, 0}},
+      Vertex{.positions = {0, 2, 0}},
+  };
+
+  utils::Vector<index_t> indices = {1, 2, 3};
+
+  gfx::Mesh mesh = gfx::create_mesh(vertices, indices);
+
+  vertices.clear();
+  indices.clear();
+
+  world::create(world::Entity({}, world::Renderable{mesh}));
 }
 
 void update() {
@@ -23,8 +39,8 @@ void update() {
   head_rotation.x += input::last_mouse_motion().x * 0.001f;
   head_rotation.y += input::last_mouse_motion().y * 0.001f;
 
-  player.transform.rotation = glm::angleAxis(head_rotation.x, vec3 {0, -1, 0}) *
-                              glm::angleAxis(head_rotation.y, vec3 {-1, 0, 0});
+  player.transform.rotation = glm::angleAxis(head_rotation.x, vec3{0, -1, 0}) *
+                              glm::angleAxis(head_rotation.y, vec3{-1, 0, 0});
 
   // translation
 

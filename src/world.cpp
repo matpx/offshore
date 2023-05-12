@@ -24,6 +24,10 @@ Entity& get(EntityId id) {
   return entities[id];
 }
 
+const utils::Span<Entity> get_entities() {
+  return entities;
+}
+
 void clear() {
   entities.clear();
 

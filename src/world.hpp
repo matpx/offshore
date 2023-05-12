@@ -1,6 +1,7 @@
 #pragma once
 
-#include "types.hpp"
+#include "mesh.hpp"
+#include "utils.hpp"
 
 namespace world {
 
@@ -39,6 +40,10 @@ struct Camera {
   }
 };
 
+struct Renderable {
+  gfx::Mesh mesh;
+};
+
 struct Player {
 };
 
@@ -47,15 +52,16 @@ struct Entity {
     INVALID = 0,
     Player,
     Camera,
+    Renderable,
   };
 
-  const char* name = "no_name";
-
+  const char* name;
   Transform transform;
 
   union {
     Camera camera;
     Player player;
+    Renderable renderable;
   };
 
   Variant variant;
@@ -64,7 +70,10 @@ struct Entity {
       : name(name), transform(transform), camera(component), variant(Variant::Camera) {}
 
   Entity(Transform transform, Player component, const char* name = "player")
-      : name(name), transform(transform), player(component), variant(Variant::Player){}
+      : name(name), transform(transform), player(component), variant(Variant::Player) {}
+
+  Entity(Transform transform, Renderable component, const char* name = "renderable")
+      : name(name), transform(transform), renderable(component), variant(Variant::Renderable) {}
 
   constexpr Camera& get_camera() {
     assert(variant == Variant::Camera);
@@ -75,12 +84,13 @@ struct Entity {
     assert(variant == Variant::Player);
     return player;
   }
-
 };
 
 EntityId create(const Entity&);
 
 Entity& get(EntityId);
+
+const utils::Span<Entity> get_entities();
 
 void clear();
 

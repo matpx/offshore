@@ -32,6 +32,7 @@ int main() {
     player::update();
 
     gfx::begin_frame(world::get(world::main_camera));
+    gfx::draw_world();
     gfx::draw_sphere();
     gfx::end_frame();
 

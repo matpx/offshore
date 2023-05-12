@@ -2,6 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include <sokol/sokol_gfx.h>
+#include <sokol/sokol_log.h>
 #include <sokol/util/sokol_color.h>
 #include <sokol/util/sokol_shape.h>
 
@@ -17,6 +18,7 @@ sg_bindings sphere_binding = {};
 
 sg_shader unlit_shader = {};
 sg_pipeline unlit_pipeline = {};
+sg_pipeline basic_pipeline = {};
 
 mat4 current_vp;
 
@@ -82,6 +84,13 @@ void init_shapes() {
   unlit_desc.index_type = SG_INDEXTYPE_UINT16;
 
   unlit_pipeline = sg_make_pipeline(unlit_desc);
+
+  sg_pipeline_desc basic_desc = {};
+  basic_desc.shader = unlit_shader;
+  basic_desc.layout.attrs[ATTR_vs_position] = {.format = SG_VERTEXFORMAT_FLOAT3};
+  basic_desc.index_type = SG_INDEXTYPE_UINT16;
+
+  basic_pipeline = sg_make_pipeline(basic_desc);
 }
 
 void draw_sphere() {
@@ -99,6 +108,7 @@ void draw_sphere() {
 void finish_shapes() {
   sg_destroy_buffer(sphere_binding.vertex_buffers[0]);
   sg_destroy_buffer(sphere_binding.index_buffer);
+  sg_destroy_pipeline(basic_pipeline);
   sg_destroy_pipeline(unlit_pipeline);
   sg_destroy_shader(unlit_shader);
 
@@ -132,18 +142,43 @@ void init() {
     FATAL("SDL_GL_CreateContext() failed");
   }
 
-  sg_desc desc = {};
+  sg_desc desc = {.logger = {.func = slog_func}};
 
-#ifndef NDEBUG
   desc.allocator = {
       .alloc = [](size_t size, [[maybe_unused]] void* user_data) { return allocator::_malloc(size); },
       .free = [](void* ptr, [[maybe_unused]] void* user_data) { allocator::_free(ptr); },
   };
-#endif
 
   sg_setup(desc);
 
   init_shapes();
+}
+
+Mesh create_mesh(const utils::Span<Vertex> vertex_data, const utils::Span<index_t> index_data) {
+  const sg_buffer_desc vertex_buffer_desc = {
+      .data = {
+          .ptr = vertex_data.data(),
+          .size = vertex_data.size() * sizeof(Vertex),
+      }};
+
+  sg_buffer vertex_buffer = sg_make_buffer(vertex_buffer_desc);
+
+  const sg_buffer_desc index_buffer_desc = {
+      .type = SG_BUFFERTYPE_INDEXBUFFER,
+      .data = {
+          .ptr = index_data.data(),
+          .size = index_data.size() * sizeof(index_t),
+      },
+  };
+
+  sg_buffer index_buffer = sg_make_buffer(index_buffer_desc);
+
+  return {
+      .bindings = {
+          .vertex_buffers = {vertex_buffer},
+          .index_buffer = index_buffer},
+      .num_elements = static_cast<u32>(index_data.size()),
+  };
 }
 
 void begin_frame(world::Entity& camera) {
@@ -168,6 +203,30 @@ void begin_frame(world::Entity& camera) {
   }
 
   current_vp = camera_component.projection * glm::inverse(camera.transform.world);
+}
+
+void draw_world() {
+  const utils::Span<world::Entity> entities = world::get_entities();
+
+  VP_t VP = {
+      .vp = current_vp,
+  };
+
+  sg_apply_pipeline(basic_pipeline);
+  sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_VP, SG_RANGE(VP));
+
+  for (size_t i = 0; i < entities.size(); i++) {
+    const world::Entity& entity = entities[i];
+
+    if (entity.variant != world::Entity::Variant::Renderable) {
+      continue;
+    }
+
+    const Mesh& mesh = entity.renderable.mesh;
+
+    sg_apply_bindings(mesh.bindings);
+    sg_draw(0, mesh.num_elements, 1);
+  }
 }
 
 void end_frame() {

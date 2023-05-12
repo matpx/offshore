@@ -37,3 +37,7 @@ using quat = glm::quat;
 // GFX
 
 using index_t = u16;
+
+struct Vertex {
+    float positions[3];
+};
