@@ -12,18 +12,15 @@ void setup() {
   world::main_camera = world::create(world::Entity({}, world::Camera(1000, 1000, 1.5, 0.1, 100.0)));
   player_id = world::create(world::Entity({.translation = {0, 0, 5}}, world::Player{}));
 
-  utils::Vector<Vertex> vertices = {
+  utils::Array<Vertex, 3> vertices = {
       Vertex{.positions = {0, 0, 0}},
       Vertex{.positions = {2, 0, 0}},
       Vertex{.positions = {0, 2, 0}},
   };
 
-  utils::Vector<index_t> indices = {1, 2, 3};
+  utils::Array<index_t, 3> indices = {1, 2, 3};
 
   gfx::Mesh mesh = gfx::create_mesh(vertices, indices);
-
-  vertices.clear();
-  indices.clear();
 
   world::create(world::Entity({}, world::Renderable{mesh}));
 }
