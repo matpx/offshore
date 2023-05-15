@@ -2,6 +2,7 @@
 
 #include "gfx.hpp"
 #include "input.hpp"
+#include "shapes.hpp"
 #include "utils.hpp"
 #include "world.hpp"
 #include "player.hpp"
@@ -33,7 +34,7 @@ int main() {
 
     gfx::begin_frame(world::get(world::main_camera));
     gfx::draw_world();
-    gfx::draw_sphere();
+    gfx::shapes::draw_sphere();
     gfx::end_frame();
 
     gfx::present();

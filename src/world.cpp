@@ -31,7 +31,7 @@ const utils::Span<Entity> get_entities() {
 void clear() {
   entities.clear();
 
-  LOG_INFO("world::finish()");
+  LOG_INFO("world::clear()");
 }
 
 }  // namespace world

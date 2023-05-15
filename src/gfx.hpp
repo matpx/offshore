@@ -22,4 +22,6 @@ void present();
 
 void finish();
 
+extern mat4 current_vp;
+
 }  // namespace gfx

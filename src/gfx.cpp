@@ -4,8 +4,8 @@
 #include <sokol/sokol_gfx.h>
 #include <sokol/sokol_log.h>
 #include <sokol/util/sokol_color.h>
-#include <sokol/util/sokol_shape.h>
 
+#include "shapes.hpp"
 #include "unlit.h"
 #include "utils.hpp"
 
@@ -13,77 +13,24 @@ namespace gfx {
 
 static_assert(sizeof(index_t) == 2);
 
-sshape_element_range_t sphere_elements = {};
-sg_bindings sphere_binding = {};
+// Context
+SDL_Window* window = nullptr;
+SDL_GLContext context = nullptr;
 
+u32 window_width = 1200;
+u32 window_height = 800;
+
+// Pipelines
 sg_shader unlit_shader = {};
-sg_pipeline unlit_pipeline = {};
 sg_pipeline basic_pipeline = {};
 
+// State
 mat4 current_vp;
 
-void init_shapes() {
-  LOG_INFO("gfx::init_shapes()");
-
-  utils::Vector<sshape_vertex_t> vertices(128);
-  utils::Vector<index_t> indices(512);
-
-  sshape_buffer_t sphere_buffer = {
-      .vertices = {
-          .buffer = {
-              .ptr = vertices.data(),
-              .size = vertices.size() * sizeof(sshape_vertex_t)},
-      },
-      .indices = {
-          .buffer = {.ptr = indices.data(), .size = indices.size() * sizeof(index_t)},
-      }};
-
-  const sshape_sphere_t params = {
-      .radius = 0.5f,
-      .slices = 12,
-      .stacks = 8,
-      .color = sshape_color_4f(1.0f, 1.0f, 1.0f, 1.0f),
-      .merge = true,
-      .transform = {
-          .m = {
-              {1.0f, 0.0f, 0.0f, 0.0f},
-              {0.0f, 1.0f, 0.0f, 0.0f},
-              {0.0f, 0.0f, 1.0f, 0.0f},
-              {0.0f, 0.0f, 0.0f, 1.0f},
-          }}};
-
-  sphere_buffer = sshape_build_sphere(&sphere_buffer, &params);
-  assert(sphere_buffer.valid);
-
-  const sg_buffer_desc sphere_vertex_buffer_desc = sshape_vertex_buffer_desc(&sphere_buffer);
-  const sg_buffer sphere_vertex_buffer = sg_make_buffer(sphere_vertex_buffer_desc);
-
-  const sg_buffer_desc sphere_index_buffer_desc = sshape_index_buffer_desc(&sphere_buffer);
-  const sg_buffer sphere_index_buffer = sg_make_buffer(sphere_index_buffer_desc);
-
-  vertices.clear();
-  indices.clear();
-
-  sphere_elements = sshape_element_range(&sphere_buffer);
-
-  sphere_binding = {
-      .vertex_buffers = {sphere_vertex_buffer},
-      .index_buffer = sphere_index_buffer,
-  };
+void init_pipelines() {
+  LOG_INFO("gfx::init_pipelines()");
 
   unlit_shader = sg_make_shader(unlit_shader_desc(sg_query_backend()));
-
-  sg_pipeline_desc unlit_desc = {};
-  unlit_desc.shader = unlit_shader;
-  unlit_desc.layout.buffers[0] = sshape_buffer_layout_desc();
-  unlit_desc.layout.attrs[0] = sshape_position_attr_desc();
-  unlit_desc.layout.attrs[1] = sshape_normal_attr_desc();
-  unlit_desc.layout.attrs[2] = sshape_texcoord_attr_desc();
-  unlit_desc.layout.attrs[3] = sshape_color_attr_desc();
-  unlit_desc.primitive_type = SG_PRIMITIVETYPE_LINES;
-  unlit_desc.index_type = SG_INDEXTYPE_UINT16;
-
-  unlit_pipeline = sg_make_pipeline(unlit_desc);
 
   sg_pipeline_desc basic_desc = {};
   basic_desc.shader = unlit_shader;
@@ -93,33 +40,12 @@ void init_shapes() {
   basic_pipeline = sg_make_pipeline(basic_desc);
 }
 
-void draw_sphere() {
-  sg_apply_pipeline(unlit_pipeline);
-  sg_apply_bindings(sphere_binding);
-
-  VP_t VP = {
-      .vp = current_vp,
-  };
-  sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_VP, SG_RANGE(VP));
-
-  sg_draw(0, sphere_elements.num_elements, 1);
-}
-
-void finish_shapes() {
-  sg_destroy_buffer(sphere_binding.vertex_buffers[0]);
-  sg_destroy_buffer(sphere_binding.index_buffer);
+void finish_pipelines() {
   sg_destroy_pipeline(basic_pipeline);
-  sg_destroy_pipeline(unlit_pipeline);
   sg_destroy_shader(unlit_shader);
 
-  LOG_INFO("gfx::finish_shapes()");
+  LOG_INFO("gfx::finish_pipelines()");
 }
-
-SDL_Window* window = nullptr;
-SDL_GLContext context = nullptr;
-
-u32 window_width = 1200;
-u32 window_height = 800;
 
 void init() {
   LOG_INFO("gfx::init()");
@@ -151,7 +77,8 @@ void init() {
 
   sg_setup(desc);
 
-  init_shapes();
+  init_pipelines();
+  shapes::init();
 }
 
 Mesh create_mesh(const utils::Span<Vertex> vertex_data, const utils::Span<index_t> index_data) {
@@ -239,7 +166,8 @@ void present() {
 }
 
 void finish() {
-  finish_shapes();
+  shapes::finish();
+  finish_pipelines();
 
   sg_shutdown();
 
