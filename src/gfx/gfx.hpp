@@ -2,13 +2,13 @@
 
 #include <SDL2/SDL_video.h>
 
-#include "world.hpp"
+#include "../world/world.hpp"
 
 namespace gfx {
 
 void init();
 
-Mesh create_mesh(const utils::Span<Vertex> vertex_data, const utils::Span<index_t> index_data);
+Mesh create_mesh(const container::Span<Vertex> vertex_data, const container::Span<index_t> index_data);
 
 void begin_frame(world::Entity& camera);
 

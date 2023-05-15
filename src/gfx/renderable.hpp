@@ -2,7 +2,7 @@
 
 #include <sokol/sokol_gfx.h>
 
-#include "types.hpp"
+#include "../core/types.hpp"
 
 namespace gfx {
 

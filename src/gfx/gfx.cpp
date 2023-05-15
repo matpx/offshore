@@ -7,7 +7,7 @@
 
 #include "material.hpp"
 #include "shapes.hpp"
-#include "utils.hpp"
+#include "../core/container.hpp"
 
 namespace gfx {
 
@@ -55,7 +55,7 @@ void init() {
   shapes::init();
 }
 
-Mesh create_mesh(const utils::Span<Vertex> vertex_data, const utils::Span<index_t> index_data) {
+Mesh create_mesh(const container::Span<Vertex> vertex_data, const container::Span<index_t> index_data) {
   const sg_buffer_desc vertex_buffer_desc = {
       .data = {
           .ptr = vertex_data.data(),
@@ -107,7 +107,7 @@ void begin_frame(world::Entity& camera) {
 }
 
 void draw_world() {
-  const utils::Span<world::Entity> entities = world::get_entities();
+  const container::Span<world::Entity> entities = world::get_entities();
 
   for (size_t i = 0; i < entities.size(); i++) {
     const world::Entity& entity = entities[i];

@@ -1,9 +1,9 @@
 #include "player.hpp"
 
-#include "gfx.hpp"
-#include "input.hpp"
-#include "material.hpp"
-#include "world.hpp"
+#include "../gfx/gfx.hpp"
+#include "../core/input.hpp"
+#include "../gfx/material.hpp"
+#include "../world/world.hpp"
 
 namespace player {
 
@@ -13,13 +13,13 @@ void setup() {
   world::main_camera = world::create(world::Entity({}, components::Camera(1000, 1000, 1.5, 0.1, 100.0)));
   player_id = world::create(world::Entity({.translation = {0, 0, 5}}, components::Player{}));
 
-  utils::Array<Vertex, 3> vertices = {
+  container::Array<Vertex, 3> vertices = {
       Vertex{.positions = {0, 0, 0}},
       Vertex{.positions = {2, 0, 0}},
       Vertex{.positions = {0, 2, 0}},
   };
 
-  utils::Array<index_t, 3> indices = {1, 2, 3};
+  container::Array<index_t, 3> indices = {1, 2, 3};
 
   gfx::Mesh mesh = gfx::create_mesh(vertices, indices);
 

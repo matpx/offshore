@@ -11,7 +11,7 @@
 // #define STBDS_FREE(allocator::_free, ptr) allocator::_free(allocator::_free)
 // #include <stb/stb_ds.h>
 
-namespace utils {
+namespace container {
 
 template <typename T>
 struct Vector {

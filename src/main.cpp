@@ -1,11 +1,11 @@
 #include <SDL2/SDL.h>
 
-#include "gfx.hpp"
-#include "input.hpp"
-#include "shapes.hpp"
-#include "utils.hpp"
-#include "world.hpp"
-#include "player.hpp"
+#include "./gfx/gfx.hpp"
+#include "./core/input.hpp"
+#include "./gfx/shapes.hpp"
+#include "./core/container.hpp"
+#include "./world/world.hpp"
+#include "./systems/player.hpp"
 
 int main() {
   LOG_DEBUG("debug mode!");

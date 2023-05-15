@@ -1,7 +1,7 @@
 #include "material.hpp"
 #include <sokol/sokol_gfx.h>
 
-#include "log.hpp"
+#include "../core/log.hpp"
 #include "renderable.hpp"
 #include "unlit.h"
 

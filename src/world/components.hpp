@@ -1,6 +1,6 @@
 #pragma once
 
-#include "renderable.hpp"
+#include "../gfx/renderable.hpp"
 
 namespace components {
 

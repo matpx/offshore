@@ -5,7 +5,7 @@
 
 #include "gfx.hpp"
 #include "unlit.h"
-#include "utils.hpp"
+#include "../core/container.hpp"
 
 namespace gfx::shapes {
 
@@ -31,8 +31,8 @@ void init() {
 
   unlit_pipeline = sg_make_pipeline(unlit_desc);
 
-  utils::Vector<sshape_vertex_t> vertices(128);
-  utils::Vector<index_t> indices(512);
+  container::Vector<sshape_vertex_t> vertices(128);
+  container::Vector<index_t> indices(512);
 
   sshape_buffer_t sphere_buffer = {
       .vertices = {

@@ -1,13 +1,13 @@
 #include "world.hpp"
 
-#include "log.hpp"
-#include "utils.hpp"
+#include "../core/log.hpp"
+#include "../core/container.hpp"
 
 namespace world {
 
 EntityId main_camera = INVALID_ENTITY;
 
-utils::Vector<Entity> entities;
+container::Vector<Entity> entities;
 
 EntityId create(const Entity& entity) {
   assert(entity.variant != Entity::Variant::INVALID);
@@ -24,7 +24,7 @@ Entity& get(EntityId id) {
   return entities[id];
 }
 
-const utils::Span<Entity> get_entities() {
+const container::Span<Entity> get_entities() {
   return entities;
 }
 

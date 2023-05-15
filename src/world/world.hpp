@@ -1,7 +1,7 @@
 #pragma once
 
 #include "components.hpp"
-#include "utils.hpp"
+#include "../core/container.hpp"
 
 namespace world {
 
@@ -52,7 +52,7 @@ EntityId create(const Entity&);
 
 Entity& get(EntityId);
 
-const utils::Span<Entity> get_entities();
+const container::Span<Entity> get_entities();
 
 void clear();
 

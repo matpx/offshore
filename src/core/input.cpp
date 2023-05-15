@@ -1,10 +1,10 @@
 #include "input.hpp"
 
-#include "utils.hpp"
+#include "container.hpp"
 
 namespace input {
 
-utils::Array<bool, (size_t)Actions::_LEN> pressed;
+container::Array<bool, (size_t)Actions::_LEN> pressed;
 
 vec2 mouse_motion = {};
 
