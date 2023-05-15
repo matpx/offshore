@@ -33,11 +33,3 @@ using mat3 = glm::mat4;
 using mat4 = glm::mat4;
 
 using quat = glm::quat;
-
-// GFX
-
-using index_t = u16;
-
-struct Vertex {
-    float positions[3];
-};

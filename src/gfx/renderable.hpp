@@ -6,6 +6,12 @@
 
 namespace gfx {
 
+using index_t = u16;
+
+struct Vertex {
+    float positions[3];
+};
+
 struct Mesh {
   sg_bindings bindings;
   u32 num_elements;
