@@ -4,9 +4,9 @@
 
 namespace input {
 
-container::Array<bool, (size_t)Actions::_LEN> pressed;
+static container::Array<bool, (size_t)Actions::_LEN> pressed;
 
-vec2 mouse_motion = {};
+static vec2 mouse_motion = {};
 
 void set_key_state(SDL_Keycode key, bool state) {
   switch (key) {

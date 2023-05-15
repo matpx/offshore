@@ -7,8 +7,8 @@
 
 namespace gfx::material {
 
-sg_shader unlit_shader = {};
-sg_pipeline basic_pipeline = {};
+static sg_shader unlit_shader = {};
+static sg_pipeline basic_pipeline = {};
 
 void init() {
   LOG_INFO("material::init()");

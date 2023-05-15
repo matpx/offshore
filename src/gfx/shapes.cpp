@@ -9,10 +9,10 @@
 
 namespace gfx::shapes {
 
-Mesh sphere_mesh = {};
+static Mesh sphere_mesh = {};
 
-sg_shader unlit_shader = {};
-sg_pipeline unlit_pipeline = {};
+static sg_shader unlit_shader = {};
+static sg_pipeline unlit_pipeline = {};
 
 void init() {
   LOG_INFO("gfx::shapes::init()");

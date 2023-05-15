@@ -7,7 +7,7 @@ namespace world {
 
 EntityId main_camera = INVALID_ENTITY;
 
-container::Vector<Entity> entities;
+static container::Vector<Entity> entities;
 
 EntityId create(const Entity& entity) {
   assert(entity.variant != Entity::Variant::INVALID);

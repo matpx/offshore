@@ -13,11 +13,11 @@ namespace gfx {
 
 static_assert(sizeof(index_t) == 2);
 
-SDL_Window* window = nullptr;
-SDL_GLContext context = nullptr;
+static SDL_Window* window = nullptr;
+static SDL_GLContext context = nullptr;
 
-u32 window_width = 1200;
-u32 window_height = 800;
+static u32 window_width = 1200;
+static u32 window_height = 800;
 
 mat4 current_vp;
 
