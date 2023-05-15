@@ -11,4 +11,8 @@ struct Mesh {
   u32 num_elements;
 };
 
+struct Material {
+
+};
+
 }  // namespace gfx

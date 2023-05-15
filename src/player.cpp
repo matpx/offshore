@@ -9,8 +9,8 @@ namespace player {
 static world::EntityId player_id = world::INVALID_ENTITY;
 
 void setup() {
-  world::main_camera = world::create(world::Entity({}, world::Camera(1000, 1000, 1.5, 0.1, 100.0)));
-  player_id = world::create(world::Entity({.translation = {0, 0, 5}}, world::Player{}));
+  world::main_camera = world::create(world::Entity({}, components::Camera(1000, 1000, 1.5, 0.1, 100.0)));
+  player_id = world::create(world::Entity({.translation = {0, 0, 5}}, components::Player{}));
 
   utils::Array<Vertex, 3> vertices = {
       Vertex{.positions = {0, 0, 0}},
@@ -22,7 +22,7 @@ void setup() {
 
   gfx::Mesh mesh = gfx::create_mesh(vertices, indices);
 
-  world::create(world::Entity({}, world::Renderable{mesh}));
+  world::create(world::Entity({}, components::Renderable{mesh}));
 }
 
 void update() {

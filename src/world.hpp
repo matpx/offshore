@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mesh.hpp"
+#include "components.hpp"
 #include "utils.hpp"
 
 namespace world {
@@ -8,44 +8,6 @@ namespace world {
 using EntityId = u32;
 
 constexpr EntityId INVALID_ENTITY = std::numeric_limits<u32>::max();
-
-struct Transform {
-  vec3 translation = {0, 0, 0};
-  quat rotation = glm::identity<quat>();
-
-  mat4 world = glm::identity<mat4>();
-  glm::dmat4 x;
-
-  void update() {
-    world = glm::translate(glm::identity<mat4>(), translation) * glm::toMat4(rotation);
-  }
-};
-
-struct Camera {
-  u32 width;
-  u32 height;
-  float fov;
-  float near;
-  float far;
-
-  mat4 projection;
-
-  Camera(u32 width, u32 height, float fov, float near, float far)
-      : width(width), height(height), fov(fov), near(near), far(far) {
-    update();
-  }
-
-  void update() {
-    projection = glm::perspective(fov, (float)width / (float)height, near, far);
-  }
-};
-
-struct Renderable {
-  gfx::Mesh mesh;
-};
-
-struct Player {
-};
 
 struct Entity {
   enum class Variant : u8 {
@@ -56,31 +18,31 @@ struct Entity {
   };
 
   const char* name;
-  Transform transform;
+  components::Transform transform;
 
   union {
-    Camera camera;
-    Player player;
-    Renderable renderable;
+    components::Camera camera;
+    components::Player player;
+    components::Renderable renderable;
   };
 
   Variant variant;
 
-  Entity(Transform transform, Camera component, const char* name = "camera")
+  Entity(components::Transform transform, components::Camera component, const char* name = "camera")
       : name(name), transform(transform), camera(component), variant(Variant::Camera) {}
 
-  Entity(Transform transform, Player component, const char* name = "player")
+  Entity(components::Transform transform, components::Player component, const char* name = "player")
       : name(name), transform(transform), player(component), variant(Variant::Player) {}
 
-  Entity(Transform transform, Renderable component, const char* name = "renderable")
+  Entity(components::Transform transform, components::Renderable component, const char* name = "renderable")
       : name(name), transform(transform), renderable(component), variant(Variant::Renderable) {}
 
-  constexpr Camera& get_camera() {
+  constexpr components::Camera& get_camera() {
     assert(variant == Variant::Camera);
     return camera;
   }
 
-  constexpr Player& get_player() {
+  constexpr components::Player& get_player() {
     assert(variant == Variant::Player);
     return player;
   }

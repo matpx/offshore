@@ -120,7 +120,7 @@ void begin_frame(world::Entity& camera) {
 
   camera.transform.update();
 
-  world::Camera& camera_component = camera.get_camera();
+  components::Camera& camera_component = camera.get_camera();
 
   if (camera_component.width != window_width || camera_component.height != window_height) {
     LOG_DEBUG("camera_component.update()");
