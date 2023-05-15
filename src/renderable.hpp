@@ -12,7 +12,7 @@ struct Mesh {
 };
 
 struct Material {
-
+  sg_pipeline pipeline;
 };
 
 }  // namespace gfx

@@ -40,6 +40,7 @@ struct Player {
 
 struct Renderable {
   gfx::Mesh mesh;
+  gfx::Material material;
 };
 
 }  // namespace components

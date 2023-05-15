@@ -5,47 +5,21 @@
 #include <sokol/sokol_log.h>
 #include <sokol/util/sokol_color.h>
 
+#include "material.hpp"
 #include "shapes.hpp"
-#include "unlit.h"
 #include "utils.hpp"
 
 namespace gfx {
 
 static_assert(sizeof(index_t) == 2);
 
-// Context
 SDL_Window* window = nullptr;
 SDL_GLContext context = nullptr;
 
 u32 window_width = 1200;
 u32 window_height = 800;
 
-// Pipelines
-sg_shader unlit_shader = {};
-sg_pipeline basic_pipeline = {};
-
-// State
 mat4 current_vp;
-
-void init_pipelines() {
-  LOG_INFO("gfx::init_pipelines()");
-
-  unlit_shader = sg_make_shader(unlit_shader_desc(sg_query_backend()));
-
-  sg_pipeline_desc basic_desc = {};
-  basic_desc.shader = unlit_shader;
-  basic_desc.layout.attrs[ATTR_vs_position] = {.format = SG_VERTEXFORMAT_FLOAT3};
-  basic_desc.index_type = SG_INDEXTYPE_UINT16;
-
-  basic_pipeline = sg_make_pipeline(basic_desc);
-}
-
-void finish_pipelines() {
-  sg_destroy_pipeline(basic_pipeline);
-  sg_destroy_shader(unlit_shader);
-
-  LOG_INFO("gfx::finish_pipelines()");
-}
 
 void init() {
   LOG_INFO("gfx::init()");
@@ -77,7 +51,7 @@ void init() {
 
   sg_setup(desc);
 
-  init_pipelines();
+  material::init();
   shapes::init();
 }
 
@@ -135,13 +109,6 @@ void begin_frame(world::Entity& camera) {
 void draw_world() {
   const utils::Span<world::Entity> entities = world::get_entities();
 
-  VP_t VP = {
-      .vp = current_vp,
-  };
-
-  sg_apply_pipeline(basic_pipeline);
-  sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_VP, SG_RANGE(VP));
-
   for (size_t i = 0; i < entities.size(); i++) {
     const world::Entity& entity = entities[i];
 
@@ -149,10 +116,13 @@ void draw_world() {
       continue;
     }
 
-    const Mesh& mesh = entity.renderable.mesh;
+    const components::Renderable& renderable = entity.renderable;
 
-    sg_apply_bindings(mesh.bindings);
-    sg_draw(0, mesh.num_elements, 1);
+    sg_apply_pipeline(renderable.material.pipeline);
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, SG_RANGE(current_vp));
+
+    sg_apply_bindings(renderable.mesh.bindings);
+    sg_draw(0, renderable.mesh.num_elements, 1);
   }
 }
 
@@ -167,7 +137,7 @@ void present() {
 
 void finish() {
   shapes::finish();
-  finish_pipelines();
+  material::finish();
 
   sg_shutdown();
 

@@ -2,6 +2,7 @@
 
 #include "gfx.hpp"
 #include "input.hpp"
+#include "material.hpp"
 #include "world.hpp"
 
 namespace player {
@@ -22,7 +23,7 @@ void setup() {
 
   gfx::Mesh mesh = gfx::create_mesh(vertices, indices);
 
-  world::create(world::Entity({}, components::Renderable{mesh}));
+  world::create(world::Entity({}, components::Renderable{mesh, gfx::material::get()}));
 }
 
 void update() {
