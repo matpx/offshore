@@ -1,4 +1,5 @@
 #include "material.hpp"
+
 #include <sokol/sokol_gfx.h>
 
 #include "../core/log.hpp"
@@ -19,14 +20,17 @@ void init() {
   basic_desc.shader = unlit_shader;
   basic_desc.layout.attrs[ATTR_vs_position] = {.format = SG_VERTEXFORMAT_FLOAT3};
   basic_desc.index_type = SG_INDEXTYPE_UINT16;
+  basic_desc.depth = {
+      .compare = SG_COMPAREFUNC_LESS_EQUAL,
+      .write_enabled = true,
+  };
+  basic_desc.cull_mode = SG_CULLMODE_FRONT;
 
   basic_pipeline = sg_make_pipeline(basic_desc);
 }
 
 Material get() {
-    return Material {
-        basic_pipeline
-    };
+  return Material{basic_pipeline};
 }
 
 void finish() {
@@ -36,4 +40,4 @@ void finish() {
   LOG_INFO("material::finish()");
 }
 
-}
+}  // namespace gfx::material

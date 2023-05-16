@@ -5,25 +5,13 @@
 #include "../gfx/material.hpp"
 #include "../world/world.hpp"
 
-namespace player {
+namespace systems::player {
 
 static world::EntityId player_id = world::INVALID_ENTITY;
 
 void setup() {
   world::main_camera = world::create(world::Entity({}, components::Camera(1000, 1000, 1.5, 0.1, 100.0)));
   player_id = world::create(world::Entity({.translation = {0, 0, 5}}, components::Player{}));
-
-  container::Array<gfx::Vertex, 3> vertices = {
-      gfx::Vertex{.positions = {0, 0, 0}},
-      gfx::Vertex{.positions = {2, 0, 0}},
-      gfx::Vertex{.positions = {0, 2, 0}},
-  };
-
-  container::Array<gfx::index_t, 3> indices = {1, 2, 3};
-
-  gfx::Mesh mesh = gfx::create_mesh(vertices, indices);
-
-  world::create(world::Entity({}, components::Renderable{mesh, gfx::material::get()}));
 }
 
 void update() {
@@ -34,8 +22,8 @@ void update() {
 
   static vec2 head_rotation = {};
 
-  head_rotation.x += input::last_mouse_motion().x * 0.001f;
-  head_rotation.y += input::last_mouse_motion().y * 0.001f;
+  head_rotation.x += input::last_mouse_motion().x * 0.005f;
+  head_rotation.y += input::last_mouse_motion().y * 0.005f;
 
   player.transform.rotation = glm::angleAxis(head_rotation.x, vec3{0, -1, 0}) *
                               glm::angleAxis(head_rotation.y, vec3{-1, 0, 0});
@@ -45,15 +33,15 @@ void update() {
   vec3 velocity = {};
 
   if (input::is_pressed(input::Actions::UP)) {
-    velocity.z -= 0.03f;
+    velocity.z -= 0.05f;
   } else if (input::is_pressed(input::Actions::DOWN)) {
-    velocity.z += 0.03f;
+    velocity.z += 0.05f;
   }
 
   if (input::is_pressed(input::Actions::LEFT)) {
-    velocity.x -= 0.03f;
+    velocity.x -= 0.05f;
   } else if (input::is_pressed(input::Actions::RIGHT)) {
-    velocity.x += 0.03f;
+    velocity.x += 0.05f;
   }
 
   player.transform.translation += player.transform.rotation * velocity;

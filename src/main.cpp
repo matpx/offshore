@@ -6,12 +6,14 @@
 #include "./core/container.hpp"
 #include "./world/world.hpp"
 #include "./systems/player.hpp"
+#include "systems/terrain.hpp"
 
 int main() {
   LOG_DEBUG("debug mode!");
 
   gfx::init();
-  player::setup();
+  systems::player::setup();
+  systems::terrain::create();
 
   bool running = true;
   SDL_Event sdl_event;
@@ -30,7 +32,7 @@ int main() {
       input::handle_sdl_event(sdl_event);
     }
 
-    player::update();
+    systems::player::update();
 
     gfx::begin_frame(world::get(world::main_camera));
     gfx::draw_world();

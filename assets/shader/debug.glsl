@@ -8,10 +8,7 @@ layout(binding = 0) uniform VP {
 
 in vec3 position;
 
-out vec3 global_position;
-
 void main() {
-  global_position = position;
   gl_Position = vp * vec4(position, 1);
 }
 
@@ -19,14 +16,12 @@ void main() {
 
 @fs fs
 
-in vec3 global_position;
-
 out vec4 frag_color;
 
 void main() {
-  frag_color = vec4(global_position * 0.4, 1);
+  frag_color = vec4(1,0,0,1);
 }
 
 @end
 
-@program unlit vs fs
+@program debug vs fs

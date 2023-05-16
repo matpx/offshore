@@ -1,6 +1,6 @@
 #pragma once
 
-namespace player {
+namespace systems::player {
 
 void setup();
 

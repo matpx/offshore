@@ -3,9 +3,9 @@
 #include <sokol/sokol_gfx.h>
 #include <sokol/util/sokol_shape.h>
 
-#include "gfx.hpp"
-#include "unlit.h"
 #include "../core/container.hpp"
+#include "debug.h"
+#include "gfx.hpp"
 
 namespace gfx::shapes {
 
@@ -17,7 +17,7 @@ static sg_pipeline unlit_pipeline = {};
 void init() {
   LOG_INFO("gfx::shapes::init()");
 
-  unlit_shader = sg_make_shader(unlit_shader_desc(sg_query_backend()));
+  unlit_shader = sg_make_shader(debug_shader_desc(sg_query_backend()));
 
   sg_pipeline_desc unlit_desc = {};
   unlit_desc.shader = unlit_shader;
@@ -28,6 +28,10 @@ void init() {
   unlit_desc.layout.attrs[3] = sshape_color_attr_desc();
   unlit_desc.primitive_type = SG_PRIMITIVETYPE_LINES;
   unlit_desc.index_type = SG_INDEXTYPE_UINT16;
+  unlit_desc.depth = {
+      .compare = SG_COMPAREFUNC_LESS_EQUAL,
+      .write_enabled = true,
+  };
 
   unlit_pipeline = sg_make_pipeline(unlit_desc);
 
