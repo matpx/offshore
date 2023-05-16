@@ -15,10 +15,19 @@ int main() {
   systems::player::setup();
   systems::terrain::create();
 
+  Uint64 current_time = SDL_GetPerformanceCounter();
+  Uint64 last_time;
+  double delta_time;
+
   bool running = true;
   SDL_Event sdl_event;
 
   while (running) {
+    last_time = current_time;
+    current_time = SDL_GetPerformanceCounter();
+
+    delta_time = (double)((current_time - last_time)*1000 / (double)SDL_GetPerformanceFrequency() );
+
     input::clear();
 
     while (SDL_PollEvent(&sdl_event)) {
@@ -32,7 +41,7 @@ int main() {
       input::handle_sdl_event(sdl_event);
     }
 
-    systems::player::update();
+    systems::player::update(delta_time);
 
     gfx::begin_frame(world::get(world::main_camera));
     gfx::draw_world();

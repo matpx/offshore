@@ -4,6 +4,6 @@ namespace systems::player {
 
 void setup();
 
-void update();
+void update(double delta_time);
 
 }
