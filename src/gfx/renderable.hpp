@@ -15,6 +15,7 @@ struct Vertex {
 
 struct Mesh {
   sg_bindings bindings;
+  u32 base_element;
   u32 num_elements;
 };
 

@@ -9,13 +9,16 @@
 
 namespace gfx::shapes {
 
-static Mesh sphere_mesh = {};
-
 static sg_shader unlit_shader = {};
 static sg_pipeline unlit_pipeline = {};
 
-void init() {
-  LOG_INFO("gfx::shapes::init()");
+static sg_bindings shapes_bindings = {};
+
+static sshape_element_range_t box_element_range = {};
+static sshape_element_range_t sphere_element_range = {};
+
+void init_pipeline() {
+  LOG_DEBUG("init shapes pipeline");
 
   unlit_shader = sg_make_shader(debug_shader_desc(sg_query_backend()));
 
@@ -34,21 +37,17 @@ void init() {
   };
 
   unlit_pipeline = sg_make_pipeline(unlit_desc);
+}
 
-  container::Vector<sshape_vertex_t> vertices(128);
-  container::Vector<index_t> indices(512);
+void init_buffer() {
+  LOG_DEBUG("init shapes buffer");
 
-  sshape_buffer_t sphere_buffer = {
-      .vertices = {
-          .buffer = {
-              .ptr = vertices.data(),
-              .size = vertices.size() * sizeof(sshape_vertex_t)},
-      },
-      .indices = {
-          .buffer = {.ptr = indices.data(), .size = indices.size() * sizeof(index_t)},
-      }};
+  const sshape_box_t box_params = {
+      .tiles = 4,
+      .merge = true,
+  };
 
-  const sshape_sphere_t params = {
+  const sshape_sphere_t sphere_params = {
       .radius = 0.5f,
       .slices = 12,
       .stacks = 8,
@@ -62,41 +61,83 @@ void init() {
               {0.0f, 0.0f, 0.0f, 1.0f},
           }}};
 
-  sphere_buffer = sshape_build_sphere(&sphere_buffer, &params);
-  assert(sphere_buffer.valid);
+  const sshape_sizes_t box_size = sshape_box_sizes(box_params.tiles);
+  const sshape_sizes_t sphere_size = sshape_sphere_sizes(sphere_params.slices, sphere_params.stacks);
 
-  const sg_buffer_desc sphere_vertex_buffer_desc = sshape_vertex_buffer_desc(&sphere_buffer);
-  const sg_buffer sphere_vertex_buffer = sg_make_buffer(sphere_vertex_buffer_desc);
+  container::Vector<sshape_vertex_t> vertices(box_size.vertices.size + sphere_size.vertices.size);
+  container::Vector<index_t> indices(box_size.indices.size + sphere_size.indices.size);
 
-  const sg_buffer_desc sphere_index_buffer_desc = sshape_index_buffer_desc(&sphere_buffer);
-  const sg_buffer sphere_index_buffer = sg_make_buffer(sphere_index_buffer_desc);
+  sshape_buffer_t shapes_merge_buffer = {
+      .vertices = {
+          .buffer = {
+              .ptr = vertices.data(),
+              .size = vertices.size() * sizeof(sshape_vertex_t)},
+      },
+      .indices = {
+          .buffer = {.ptr = indices.data(), .size = indices.size() * sizeof(index_t)},
+      }};
+
+  shapes_merge_buffer = sshape_build_box(&shapes_merge_buffer, &box_params);
+  assert(shapes_merge_buffer.valid);
+
+  box_element_range = sshape_element_range(&shapes_merge_buffer);
+
+  shapes_merge_buffer = sshape_build_sphere(&shapes_merge_buffer, &sphere_params);
+  assert(shapes_merge_buffer.valid);
+
+  sphere_element_range = sshape_element_range(&shapes_merge_buffer);
+  sphere_element_range.base_element = box_element_range.num_elements;
+  sphere_element_range.num_elements -= box_element_range.num_elements;
+
+  const sg_buffer_desc shapes_vertex_buffer_desc = sshape_vertex_buffer_desc(&shapes_merge_buffer);
+  const sg_buffer shapes_vertex_buffer = sg_make_buffer(shapes_vertex_buffer_desc);
+
+  const sg_buffer_desc shapes_index_buffer_desc = sshape_index_buffer_desc(&shapes_merge_buffer);
+  const sg_buffer shapes_index_buffer = sg_make_buffer(shapes_index_buffer_desc);
+
+  shapes_bindings = {
+      .vertex_buffers = {shapes_vertex_buffer},
+      .index_buffer = shapes_index_buffer,
+  };
 
   vertices.clear();
   indices.clear();
-
-  sphere_mesh.num_elements = sshape_element_range(&sphere_buffer).num_elements;
-
-  sphere_mesh.bindings = {
-      .vertex_buffers = {sphere_vertex_buffer},
-      .index_buffer = sphere_index_buffer,
-  };
 }
 
-void draw_sphere() {
+void init() {
+  LOG_INFO("gfx::shapes::init()");
+
+  init_pipeline();
+  init_buffer();
+}
+
+void draw_box() {
   sg_apply_pipeline(unlit_pipeline);
-  sg_apply_bindings(sphere_mesh.bindings);
+  sg_apply_bindings(shapes_bindings);
 
   MVP_t VP = {
       .mvp = current_vp,
   };
   sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_MVP, SG_RANGE(VP));
 
-  sg_draw(0, sphere_mesh.num_elements, 1);
+  sg_draw(box_element_range.base_element, box_element_range.num_elements, 1);
+}
+
+void draw_sphere() {
+  sg_apply_pipeline(unlit_pipeline);
+  sg_apply_bindings(shapes_bindings);
+
+  MVP_t VP = {
+      .mvp = current_vp,
+  };
+  sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_MVP, SG_RANGE(VP));
+
+  sg_draw(sphere_element_range.base_element, sphere_element_range.num_elements, 1);
 }
 
 void finish() {
-  sg_destroy_buffer(sphere_mesh.bindings.vertex_buffers[0]);
-  sg_destroy_buffer(sphere_mesh.bindings.index_buffer);
+  sg_destroy_buffer(shapes_bindings.vertex_buffers[0]);
+  sg_destroy_buffer(shapes_bindings.index_buffer);
 
   sg_destroy_pipeline(unlit_pipeline);
   sg_destroy_shader(unlit_shader);

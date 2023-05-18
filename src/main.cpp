@@ -45,6 +45,7 @@ int main() {
     gfx::begin_frame(world::get(world::main_camera));
     gfx::draw_world();
     gfx::shapes::draw_sphere();
+    gfx::shapes::draw_box();
     gfx::end_frame();
 
     gfx::present();
