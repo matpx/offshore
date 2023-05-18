@@ -122,38 +122,23 @@ struct Array {
 };
 
 template <typename T>
-struct ConstSpan {
- private:
-  const T *const _data;
-  const size_t _data_size;
-
- public:
-  template <size_t SIZE>
-  ConstSpan(const Array<T, SIZE> &array) : _data(array.data()), _data_size(SIZE) {}
-  ConstSpan(const Vector<T> &vector) : _data(vector.data()), _data_size(vector.size()) {}
-  ConstSpan(const T *const data, size_t data_size) : _data(data), _data_size(data_size) {}
-
-  constexpr size_t size() const { return _data_size; }
-
-  constexpr const T *data() const { return _data; }
-
-  constexpr const T &operator[](size_t pos) const {
-    assert(pos < _data_size);
-    return _data[pos];
-  }
-};
-
-template <typename T>
 struct Span {
  private:
-  T *const _data;
+  T * _data;
   const size_t _data_size;
 
  public:
+  using value_type = typename std::remove_const<T>::type;
+
   template <size_t SIZE>
-  Span(Array<T, SIZE> &array) : _data(array.data()), _data_size(SIZE) {}
-  Span(Vector<T> &vector) : _data(vector.data()), _data_size(vector.size()) {}
-  Span(T *const data, size_t data_size) : _data(data), _data_size(data_size) {}
+  Span(const Array<value_type, SIZE> &array) : _data(array.data()), _data_size(SIZE) {}
+  Span(const Vector<value_type> &vector) : _data(vector.data()), _data_size(vector.size()) {}
+  Span(const value_type *const data, size_t data_size) : _data(data), _data_size(data_size) {}
+
+  template <size_t SIZE>
+  Span(Array<value_type, SIZE> &array) : _data(array.data()), _data_size(SIZE) {}
+  Span(Vector<value_type> &vector) : _data(vector.data()), _data_size(vector.size()) {}
+  Span(value_type *const data, size_t data_size) : _data(data), _data_size(data_size) {}
 
   constexpr size_t size() const { return _data_size; }
 
