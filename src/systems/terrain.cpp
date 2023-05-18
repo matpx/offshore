@@ -84,7 +84,7 @@ void create() {
 #define MC_IMPLEMENTATION
 #include <rjm/rjm_mc.h>
 
-float testIsoFn(const float *pos, [[maybe_unused]] float *extra, [[maybe_unused]] void *userparam) {
+static float testIsoFn(const float *pos, [[maybe_unused]] float *extra, [[maybe_unused]] void *userparam) {
   float x = pos[0], y = pos[1], z = pos[2];
   return (x * x + y * y + z * z) - 5;
 }

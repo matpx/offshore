@@ -19,7 +19,7 @@ static sshape_element_range_t sphere_element_range = {};
 
 static bool shapes_pass_active = false;
 
-void init_pipeline() {
+static void init_pipeline() {
   LOG_DEBUG("init shapes pipeline");
 
   unlit_shader = sg_make_shader(debug_shader_desc(sg_query_backend()));
@@ -41,7 +41,7 @@ void init_pipeline() {
   unlit_pipeline = sg_make_pipeline(unlit_desc);
 }
 
-void init_buffer() {
+static void init_buffer() {
   LOG_DEBUG("init shapes buffer");
 
   const sshape_box_t box_params = {
@@ -120,7 +120,7 @@ void begin_pass() {
   shapes_pass_active = true;
 }
 
-void draw_box(const vec3& position, const vec3& scale) {
+static void draw_shape(const sshape_element_range_t& element_range,const vec3& position, const vec3& scale) {
   assert(shapes_pass_active);
 
   const mat4 mvp = current_vp * glm::scale(glm::translate(glm::identity<mat4>(), position), scale);
@@ -130,20 +130,15 @@ void draw_box(const vec3& position, const vec3& scale) {
   };
   sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_MVP, SG_RANGE(MVP));
 
-  sg_draw(box_element_range.base_element, box_element_range.num_elements, 1);
+  sg_draw(element_range.base_element, element_range.num_elements, 1);
+}
+
+void draw_box(const vec3& position, const vec3& scale) {
+  draw_shape(box_element_range, position, scale);
 }
 
 void draw_sphere(const vec3& position, const vec3& scale) {
-  assert(shapes_pass_active);
-
-  const mat4 mvp = current_vp * glm::scale(glm::translate(glm::identity<mat4>(), position), scale);
-
-  MVP_t MVP = {
-      .mvp = mvp,
-  };
-  sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_MVP, SG_RANGE(MVP));
-
-  sg_draw(sphere_element_range.base_element, sphere_element_range.num_elements, 1);
+  draw_shape(sphere_element_range, position, scale);
 }
 
 void finish_pass() {
