@@ -120,24 +120,28 @@ void begin_pass() {
   shapes_pass_active = true;
 }
 
-void draw_box() {
+void draw_box(const vec3& position, const vec3& scale) {
   assert(shapes_pass_active);
 
-  MVP_t VP = {
-      .mvp = current_vp,
+  const mat4 mvp = current_vp * glm::scale(glm::translate(glm::identity<mat4>(), position), scale);
+
+  MVP_t MVP = {
+      .mvp = mvp,
   };
-  sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_MVP, SG_RANGE(VP));
+  sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_MVP, SG_RANGE(MVP));
 
   sg_draw(box_element_range.base_element, box_element_range.num_elements, 1);
 }
 
-void draw_sphere() {
+void draw_sphere(const vec3& position, const vec3& scale) {
   assert(shapes_pass_active);
 
-  MVP_t VP = {
-      .mvp = current_vp,
+  const mat4 mvp = current_vp * glm::scale(glm::translate(glm::identity<mat4>(), position), scale);
+
+  MVP_t MVP = {
+      .mvp = mvp,
   };
-  sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_MVP, SG_RANGE(VP));
+  sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_MVP, SG_RANGE(MVP));
 
   sg_draw(sphere_element_range.base_element, sphere_element_range.num_elements, 1);
 }
