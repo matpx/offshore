@@ -545,11 +545,14 @@ McMesh mcGenerate(const float *bmin, const float *bmax, float cellsize, McIsoFn 
 	int stride = xd+1;
 	McCorner *grid0 = (McCorner *)MC_REALLOC(NULL, sizeof(McCorner) * (xd+1)*(yd+1));
 	McCorner *grid1 = (McCorner *)MC_REALLOC(NULL, sizeof(McCorner) * (xd+1)*(yd+1));
+
+	McCorner *prime = grid0;
+	float epsilon = cellsize * 0.1f;
+
 	if (!grid0 || !grid1)
 		goto end;
 
 	// Prime the first slice.
-	McCorner *prime = grid0;
 	for (int y=0;y<=yd;y++)
 	{
 		for (int x=0;x<=xd;x++,prime++)
@@ -631,7 +634,6 @@ McMesh mcGenerate(const float *bmin, const float *bmax, float cellsize, McIsoFn 
 	}
 
 	// Calculate all normals and extra data.
-	float epsilon = cellsize * 0.1f;
 	for (int n=0;n<help.mesh.nverts;n++)
 	{
 		McVertex *v = &help.mesh.verts[n];

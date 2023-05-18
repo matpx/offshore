@@ -50,6 +50,8 @@ struct Entity {
 
 EntityId create(const Entity&);
 
+void update();
+
 Entity& get(EntityId);
 
 const container::Span<Entity> get_entities();

@@ -116,10 +116,13 @@ void draw_world() {
       continue;
     }
 
+    const components::Transform& transform = entity.transform;
     const components::Renderable& renderable = entity.renderable;
 
+    const mat4 mvp = current_vp * transform.world;
+
     sg_apply_pipeline(renderable.material.pipeline);
-    sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, SG_RANGE(current_vp));
+    sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, SG_RANGE(mvp));
 
     sg_apply_bindings(renderable.mesh.bindings);
     sg_draw(0, renderable.mesh.num_elements, 1);

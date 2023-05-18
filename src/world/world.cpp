@@ -18,6 +18,17 @@ EntityId create(const Entity& entity) {
   return entities.size() - 1;
 }
 
+void update() {
+  container::Span<world::Entity> entities = world::get_entities();
+
+  for (size_t i = 0; i < entities.size(); i++) {
+    world::Entity& entity = entities[i];
+   
+    components::Transform& transform = entity.transform;
+    transform.update();
+  }
+}
+
 Entity& get(EntityId id) {
   assert(entities[id].variant != Entity::Variant::INVALID);
 

@@ -1,10 +1,8 @@
 #include <SDL2/SDL.h>
 
-#include "./gfx/gfx.hpp"
 #include "./core/input.hpp"
+#include "./gfx/gfx.hpp"
 #include "./gfx/shapes.hpp"
-#include "./core/container.hpp"
-#include "./world/world.hpp"
 #include "./systems/player.hpp"
 #include "systems/terrain.hpp"
 
@@ -26,7 +24,7 @@ int main() {
     last_time = current_time;
     current_time = SDL_GetPerformanceCounter();
 
-    delta_time = (double)((current_time - last_time)*1000 / (double)SDL_GetPerformanceFrequency() );
+    delta_time = (double)((current_time - last_time) * 1000 / (double)SDL_GetPerformanceFrequency());
 
     input::clear();
 
@@ -42,6 +40,7 @@ int main() {
     }
 
     systems::player::update(delta_time);
+    world::update();
 
     gfx::begin_frame(world::get(world::main_camera));
     gfx::draw_world();

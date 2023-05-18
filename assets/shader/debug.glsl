@@ -2,14 +2,14 @@
 
 @vs vs
 
-layout(binding = 0) uniform VP {
-  mat4 vp;
+layout(binding = 0) uniform MVP {
+  mat4 mvp;
 };
 
 in vec3 position;
 
 void main() {
-  gl_Position = vp * vec4(position, 1);
+  gl_Position = mvp * vec4(position, 1);
 }
 
 @end

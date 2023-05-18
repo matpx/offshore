@@ -86,10 +86,10 @@ void draw_sphere() {
   sg_apply_pipeline(unlit_pipeline);
   sg_apply_bindings(sphere_mesh.bindings);
 
-  VP_t VP = {
-      .vp = current_vp,
+  MVP_t VP = {
+      .mvp = current_vp,
   };
-  sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_VP, SG_RANGE(VP));
+  sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_MVP, SG_RANGE(VP));
 
   sg_draw(0, sphere_mesh.num_elements, 1);
 }

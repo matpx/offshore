@@ -2,8 +2,8 @@
 
 @vs vs
 
-layout(binding = 0) uniform VP {
-  mat4 vp;
+layout(binding = 0) uniform MVP {
+  mat4 mvp;
 };
 
 in vec3 position;
@@ -12,7 +12,7 @@ out vec3 global_position;
 
 void main() {
   global_position = position;
-  gl_Position = vp * vec4(position, 1);
+  gl_Position = mvp * vec4(position, 1);
 }
 
 @end
@@ -24,7 +24,7 @@ in vec3 global_position;
 out vec4 frag_color;
 
 void main() {
-  frag_color = vec4(global_position * 0.4, 1);
+  frag_color = vec4(global_position, 1);
 }
 
 @end

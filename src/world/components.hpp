@@ -7,9 +7,7 @@ namespace components {
 struct Transform {
   vec3 translation = {0, 0, 0};
   quat rotation = glm::identity<quat>();
-
   mat4 world = glm::identity<mat4>();
-  glm::dmat4 x;
 
   void update() {
     world = glm::translate(glm::identity<mat4>(), translation) * glm::toMat4(rotation);

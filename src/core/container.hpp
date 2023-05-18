@@ -6,11 +6,6 @@
 #include "log.hpp"
 #include "types.hpp"
 
-// #define STBDS_NO_SHORT_NAMES
-// #define STBDS_REALLOC(context, ptr, size) allocator::_realloc(ptr, size)
-// #define STBDS_FREE(allocator::_free, ptr) allocator::_free(allocator::_free)
-// #include <stb/stb_ds.h>
-
 namespace container {
 
 template <typename T>
@@ -127,22 +122,48 @@ struct Array {
 };
 
 template <typename T>
-struct Span {
+struct ConstSpan {
  private:
   const T *const _data;
   const size_t _data_size;
 
  public:
-  Span(const T *const data, size_t data_size) : _data(data), _data_size(data_size) {}
-
   template <size_t SIZE>
-  Span(const Array<T, SIZE> &array) : _data(array.data()), _data_size(SIZE) {}
-
-  Span(const Vector<T> &vector) : _data(vector.data()), _data_size(vector.size()) {}
+  ConstSpan(const Array<T, SIZE> &array) : _data(array.data()), _data_size(SIZE) {}
+  ConstSpan(const Vector<T> &vector) : _data(vector.data()), _data_size(vector.size()) {}
+  ConstSpan(const T *const data, size_t data_size) : _data(data), _data_size(data_size) {}
 
   constexpr size_t size() const { return _data_size; }
 
   constexpr const T *data() const { return _data; }
+
+  constexpr const T &operator[](size_t pos) const {
+    assert(pos < _data_size);
+    return _data[pos];
+  }
+};
+
+template <typename T>
+struct Span {
+ private:
+  T *const _data;
+  const size_t _data_size;
+
+ public:
+  template <size_t SIZE>
+  Span(Array<T, SIZE> &array) : _data(array.data()), _data_size(SIZE) {}
+  Span(Vector<T> &vector) : _data(vector.data()), _data_size(vector.size()) {}
+  Span(T *const data, size_t data_size) : _data(data), _data_size(data_size) {}
+
+  constexpr size_t size() const { return _data_size; }
+
+  constexpr const T *data() const { return _data; }
+  constexpr T *data() { return _data; }
+
+  constexpr T &operator[](size_t pos) {
+    assert(pos < _data_size);
+    return _data[pos];
+  }
 
   constexpr const T &operator[](size_t pos) const {
     assert(pos < _data_size);
@@ -184,4 +205,4 @@ struct Hashmap {
 };
 */
 
-}  // namespace utils
+}  // namespace container
