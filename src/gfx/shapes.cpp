@@ -17,6 +17,8 @@ static sg_bindings shapes_bindings = {};
 static sshape_element_range_t box_element_range = {};
 static sshape_element_range_t sphere_element_range = {};
 
+static bool shapes_pass_active = false;
+
 void init_pipeline() {
   LOG_DEBUG("init shapes pipeline");
 
@@ -111,9 +113,15 @@ void init() {
   init_buffer();
 }
 
-void draw_box() {
+void begin_pass() {
   sg_apply_pipeline(unlit_pipeline);
   sg_apply_bindings(shapes_bindings);
+
+  shapes_pass_active = true;
+}
+
+void draw_box() {
+  assert(shapes_pass_active);
 
   MVP_t VP = {
       .mvp = current_vp,
@@ -124,8 +132,7 @@ void draw_box() {
 }
 
 void draw_sphere() {
-  sg_apply_pipeline(unlit_pipeline);
-  sg_apply_bindings(shapes_bindings);
+  assert(shapes_pass_active);
 
   MVP_t VP = {
       .mvp = current_vp,
@@ -135,7 +142,13 @@ void draw_sphere() {
   sg_draw(sphere_element_range.base_element, sphere_element_range.num_elements, 1);
 }
 
+void finish_pass() {
+  shapes_pass_active = false;
+}
+
 void finish() {
+  assert(!shapes_pass_active);
+
   sg_destroy_buffer(shapes_bindings.vertex_buffers[0]);
   sg_destroy_buffer(shapes_bindings.index_buffer);
 
