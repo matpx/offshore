@@ -18,7 +18,8 @@ void init() {
 
   sg_pipeline_desc basic_desc = {};
   basic_desc.shader = unlit_shader;
-  basic_desc.layout.attrs[ATTR_vs_position] = {.format = SG_VERTEXFORMAT_FLOAT3};
+  basic_desc.layout.attrs[ATTR_vs_a_position] = {.format = SG_VERTEXFORMAT_FLOAT3};
+  basic_desc.layout.attrs[ATTR_vs_a_normal] = {.format = SG_VERTEXFORMAT_FLOAT3};
   basic_desc.index_type = SG_INDEXTYPE_UINT16;
   basic_desc.depth = {
       .compare = SG_COMPAREFUNC_LESS_EQUAL,

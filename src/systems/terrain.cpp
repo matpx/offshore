@@ -105,7 +105,10 @@ void create() {
   container::Vector<gfx::index_t> index_data(iso_mesh.ntris * 3);
 
   for (int n = 0; n < iso_mesh.nverts; n++) {
-    vertex_data[n] = {{iso_mesh.verts[n].x, iso_mesh.verts[n].y, iso_mesh.verts[n].z}};
+    vertex_data[n] = {
+        .positions = {iso_mesh.verts[n].x, iso_mesh.verts[n].y, iso_mesh.verts[n].z},
+        .normal = {iso_mesh.verts[n].nx, iso_mesh.verts[n].ny, iso_mesh.verts[n].nz},
+    };
   }
 
   for (int n = 0; n < iso_mesh.ntris; n++) {

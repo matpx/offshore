@@ -6,25 +6,26 @@ layout(binding = 0) uniform MVP {
   mat4 mvp;
 };
 
-in vec3 position;
+in vec3 a_position;
+in vec3 a_normal;
 
-out vec3 global_position;
+out vec3 v_normal;
 
 void main() {
-  global_position = position;
-  gl_Position = mvp * vec4(position, 1);
+  v_normal = a_normal;
+  gl_Position = mvp * vec4(a_position, 1);
 }
 
 @end
 
 @fs fs
 
-in vec3 global_position;
+in vec3 v_normal;
 
 out vec4 frag_color;
 
 void main() {
-  frag_color = vec4(global_position, 1);
+  frag_color = vec4(v_normal, 1);
 }
 
 @end

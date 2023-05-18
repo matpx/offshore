@@ -86,7 +86,7 @@ void begin_frame(world::Entity& camera) {
   const sg_pass_action pass_action = {
       .colors = {{
           .action = SG_ACTION_CLEAR,
-          .value = SG_BLACK,
+          .value = SG_DARK_GRAY,
       }},
   };
 
