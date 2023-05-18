@@ -128,15 +128,12 @@ struct Span {
   const size_t _data_size;
 
  public:
-  using value_type = typename std::remove_const<T>::type;
-
   template<typename Container>
   Span(const Container& container) : _data(container.data()), _data_size(container.size()) {}
-  Span(const value_type *const data, size_t data_size) : _data(data), _data_size(data_size) {}
 
   template<typename Container>
   Span(Container& container) : _data(container.data()), _data_size(container.size()) {}
-  Span(value_type *const data, size_t data_size) : _data(data), _data_size(data_size) {}
+  Span(T *const data, size_t data_size) : _data(data), _data_size(data_size) {}
 
   constexpr size_t size() const { return _data_size; }
 
