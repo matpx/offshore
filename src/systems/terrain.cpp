@@ -84,17 +84,23 @@ void create() {
 #define MC_IMPLEMENTATION
 #include <rjm/rjm_mc.h>
 
+#define STB_PERLIN_IMPLEMENTATION
+#include <stb/stb_perlin.h>
+
 static float testIsoFn(const float *pos, [[maybe_unused]] float *extra, [[maybe_unused]] void *userparam) {
-  float x = pos[0], y = pos[1], z = pos[2];
-  return (x * x + y * y + z * z) - 5;
+  const vec3 x{pos[0], pos[1], pos[2]};
+
+  const vec3 xn = glm::normalize(x) * 2.0f;
+
+  return glm::length2(x) - 5 - std::max(0.0f, stb_perlin_noise3(xn.x, xn.y, xn.z, 0, 0, 0) * 0.3f);
 }
 
 void create() {
   LOG_DEBUG("terrain create");
 
-  float bmin[3] = {-2, -2, -2};
-  float bmax[3] = {+2, +2, +2};
-  float res = 0.5f;
+  float bmin[3] = {-3, -3, -3};
+  float bmax[3] = {+3, +3, +3};
+  float res = 0.1f;
 
   McMesh iso_mesh = mcGenerate(bmin, bmax, res, testIsoFn, NULL);
 
