@@ -5,10 +5,6 @@
 
 namespace world {
 
-using EntityId = u32;
-
-constexpr EntityId INVALID_ENTITY = std::numeric_limits<u32>::max();
-
 struct Entity {
   enum class Variant : u8 {
     INVALID = 0,

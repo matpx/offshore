@@ -1,7 +1,7 @@
 #include "world.hpp"
 
-#include "../core/log.hpp"
 #include "../core/container.hpp"
+#include "../core/log.hpp"
 
 namespace world {
 
@@ -19,13 +19,23 @@ EntityId create(const Entity& entity) {
 }
 
 void update() {
-  container::Span<world::Entity> entities = world::get_entities();
+  for (size_t i = 0; i < entities.size(); i++) {
+    world::Entity& entity = entities[i];
+    components::Transform& transform = entity.transform;
+
+    if (transform.parent_id == INVALID_ENTITY) {
+      transform.update();
+    }
+  }
 
   for (size_t i = 0; i < entities.size(); i++) {
     world::Entity& entity = entities[i];
-   
     components::Transform& transform = entity.transform;
-    transform.update();
+
+    if (transform.parent_id != INVALID_ENTITY) {
+      const components::Transform& parent_transform = get(transform.parent_id).transform;
+      transform.update_from_parent(parent_transform);
+    }
   }
 }
 

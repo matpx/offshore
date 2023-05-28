@@ -31,3 +31,9 @@ using mat3 = glm::mat4;
 using mat4 = glm::mat4;
 
 using quat = glm::quat;
+
+// Entity
+
+using EntityId = u32;
+
+constexpr EntityId INVALID_ENTITY = std::numeric_limits<u32>::max();

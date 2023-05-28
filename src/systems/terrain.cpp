@@ -92,15 +92,15 @@ static float testIsoFn(const float *pos, [[maybe_unused]] float *extra, [[maybe_
 
   const vec3 xn = glm::normalize(x) * 2.0f;
 
-  return glm::length2(x) - 5 - std::max(0.0f, stb_perlin_noise3(xn.x, xn.y, xn.z, 0, 0, 0) * 0.3f);
+  return glm::length2(x) - 90 - std::max(0.0f, stb_perlin_noise3(xn.x, xn.y, xn.z, 0, 0, 0) * 10.0f);
 }
 
 void create() {
   LOG_DEBUG("terrain create");
 
-  float bmin[3] = {-3, -3, -3};
-  float bmax[3] = {+3, +3, +3};
-  float res = 0.1f;
+  float bmin[3] = {-10, -10, -10};
+  float bmax[3] = {+10, +10, +10};
+  float res = 0.5f;
 
   McMesh iso_mesh = mcGenerate(bmin, bmax, res, testIsoFn, NULL);
 

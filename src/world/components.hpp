@@ -9,8 +9,19 @@ struct Transform {
   quat rotation = glm::identity<quat>();
   mat4 world = glm::identity<mat4>();
 
+  EntityId parent_id = INVALID_ENTITY;
+
   void update() {
+    assert(parent_id == INVALID_ENTITY);
+
     world = glm::translate(glm::identity<mat4>(), translation) * glm::toMat4(rotation);
+  }
+
+  void update_from_parent(const Transform& parent) {
+    assert(parent_id != INVALID_ENTITY);
+
+    world = glm::translate(glm::identity<mat4>(), translation) * glm::toMat4(rotation);
+    world = parent.world * world;
   }
 };
 

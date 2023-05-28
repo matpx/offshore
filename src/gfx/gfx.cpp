@@ -92,7 +92,7 @@ void begin_frame(world::Entity& camera) {
 
   sg_begin_default_pass(&pass_action, window_width, window_height);
 
-  camera.transform.update();
+  // camera.transform.update();
 
   components::Camera& camera_component = camera.get_camera();
 
