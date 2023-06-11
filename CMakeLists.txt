@@ -20,7 +20,7 @@ target_link_options(offshore PRIVATE -lSDL2 -lGL)
 if(MSVC)
   target_compile_options(offshore PRIVATE /W4 /WX)
 else()
-  target_compile_options(offshore PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions -fno-rtti)
+  target_compile_options(offshore PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions -fno-rtti -D_GLIBCXX_DEBUG -D_LIBCPP_DEBUG)
   target_compile_options(offshore PRIVATE -O0 -g)
 endif()
 
