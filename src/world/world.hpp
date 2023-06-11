@@ -1,59 +1,18 @@
 #pragma once
 
-#include "components.hpp"
+#include <entt/fwd.hpp>
+
 #include "../core/container.hpp"
+#include "components.hpp"
 
 namespace world {
 
-struct Entity {
-  enum class Variant : u8 {
-    INVALID = 0,
-    Player,
-    Camera,
-    Renderable,
-  };
-
-  const char* name;
-  components::Transform transform;
-
-  union {
-    components::Camera camera;
-    components::Player player;
-    components::Renderable renderable;
-  };
-
-  Variant variant;
-
-  Entity(components::Transform transform, components::Camera component, const char* name = "camera")
-      : name(name), transform(transform), camera(component), variant(Variant::Camera) {}
-
-  Entity(components::Transform transform, components::Player component, const char* name = "player")
-      : name(name), transform(transform), player(component), variant(Variant::Player) {}
-
-  Entity(components::Transform transform, components::Renderable component, const char* name = "renderable")
-      : name(name), transform(transform), renderable(component), variant(Variant::Renderable) {}
-
-  constexpr components::Camera& get_camera() {
-    assert(variant == Variant::Camera);
-    return camera;
-  }
-
-  constexpr components::Player& get_player() {
-    assert(variant == Variant::Player);
-    return player;
-  }
-};
-
-EntityId create(const Entity&);
+void init();
 
 void update();
 
-Entity& get(EntityId);
+extern std::unique_ptr<entt::registry> registry;
 
-const container::Span<Entity> get_entities();
-
-void clear();
-
-extern EntityId main_camera;
+extern entt::entity main_camera;
 
 }  // namespace world

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL2/SDL_video.h>
+#include <entt/entity/fwd.hpp>
 
 #include "../world/world.hpp"
 
@@ -10,7 +11,7 @@ void init();
 
 Mesh create_mesh(const container::Span<Vertex> vertex_data, const container::Span<index_t> index_data);
 
-void begin_frame(world::Entity& camera);
+void begin_frame(entt::entity camera);
 
 void draw_world();
 

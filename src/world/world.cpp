@@ -1,58 +1,30 @@
 #include "world.hpp"
 
+#include <entt/entity/entity.hpp>
+#include <entt/entity/fwd.hpp>
+#include <entt/entity/registry.hpp>
+
 #include "../core/container.hpp"
 #include "../core/log.hpp"
+#include "components.hpp"
 
 namespace world {
 
-EntityId main_camera = INVALID_ENTITY;
+std::unique_ptr<entt::registry> registry;
 
-static container::Vector<Entity> entities;
+entt::entity main_camera = entt::null;
 
-EntityId create(const Entity& entity) {
-  assert(entity.variant != Entity::Variant::INVALID);
-  assert((size_t)entities.data() % alignof(Entity) == 0);
-
-  entities.push(entity);
-
-  return entities.size() - 1;
-}
+void init() { registry = std::make_unique<entt::registry>(); }
 
 void update() {
-  for (size_t i = 0; i < entities.size(); i++) {
-    world::Entity& entity = entities[i];
-    components::Transform& transform = entity.transform;
-
-    if (transform.parent_id == INVALID_ENTITY) {
+  for (auto [entity, transform] : world::registry->view<components::Transform>().each()) {
+    if (transform.parent_id != entt::null) {
+      const components::Transform& parent_transform = world::registry->get<components::Transform>(transform.parent_id);
+      transform.update_from_parent(parent_transform);
+    } else {
       transform.update();
     }
   }
-
-  for (size_t i = 0; i < entities.size(); i++) {
-    world::Entity& entity = entities[i];
-    components::Transform& transform = entity.transform;
-
-    if (transform.parent_id != INVALID_ENTITY) {
-      const components::Transform& parent_transform = get(transform.parent_id).transform;
-      transform.update_from_parent(parent_transform);
-    }
-  }
-}
-
-Entity& get(EntityId id) {
-  assert(entities[id].variant != Entity::Variant::INVALID);
-
-  return entities[id];
-}
-
-const container::Span<Entity> get_entities() {
-  return entities;
-}
-
-void clear() {
-  entities.clear();
-
-  LOG_INFO("world::clear()");
 }
 
 }  // namespace world

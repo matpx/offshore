@@ -5,11 +5,13 @@
 #include "./gfx/shapes.hpp"
 #include "./systems/player.hpp"
 #include "systems/terrain.hpp"
+#include "world/world.hpp"
 
 int main() {
   LOG_DEBUG("debug mode!");
 
   gfx::init();
+  world::init();
   systems::player::setup();
   systems::terrain::create();
 
@@ -42,7 +44,7 @@ int main() {
     systems::player::update(delta_time);
     world::update();
 
-    gfx::begin_frame(world::get(world::main_camera));
+    gfx::begin_frame(world::main_camera);
     gfx::draw_world();
 
     gfx::shapes::begin_pass();
@@ -55,7 +57,6 @@ int main() {
     gfx::present();
   }
 
-  world::clear();
   gfx::finish();
 
   allocator::debug_leak_check();

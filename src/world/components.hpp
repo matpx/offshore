@@ -1,5 +1,6 @@
 #pragma once
 
+#include <entt/entity/entity.hpp>
 #include "../gfx/renderable.hpp"
 
 namespace components {
@@ -9,16 +10,16 @@ struct Transform {
   quat rotation = glm::identity<quat>();
   mat4 world = glm::identity<mat4>();
 
-  EntityId parent_id = INVALID_ENTITY;
+  entt::entity parent_id = entt::null;
 
   void update() {
-    assert(parent_id == INVALID_ENTITY);
+    assert(parent_id == entt::null);
 
     world = glm::translate(glm::identity<mat4>(), translation) * glm::toMat4(rotation);
   }
 
   void update_from_parent(const Transform& parent) {
-    assert(parent_id != INVALID_ENTITY);
+    assert(parent_id != entt::null);
 
     world = glm::translate(glm::identity<mat4>(), translation) * glm::toMat4(rotation);
     world = parent.world * world;

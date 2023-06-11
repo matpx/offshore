@@ -3,6 +3,7 @@
 #include "../gfx/gfx.hpp"
 #include "../gfx/material.hpp"
 #include "../world/world.hpp"
+#include <entt/entity/registry.hpp>
 
 namespace systems::terrain {
 
@@ -125,7 +126,13 @@ void create() {
 
   const gfx::Mesh mesh = gfx::create_mesh(vertex_data, index_data);
 
-  world::create(world::Entity({}, components::Renderable{mesh, gfx::material::get()}));
+  const entt::entity terrain_chunk = world::registry->create();
+
+  world::registry->emplace<components::Transform>(terrain_chunk, components::Transform {});
+  world::registry->emplace<components::Renderable>(terrain_chunk, components::Renderable {
+    mesh,
+    gfx::material::get()
+  });
 
   vertex_data.clear();
   index_data.clear();

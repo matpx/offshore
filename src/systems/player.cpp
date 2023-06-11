@@ -1,25 +1,33 @@
 #include "player.hpp"
 
+#include <entt/entity/registry.hpp>
+
 #include "../core/input.hpp"
 #include "../gfx/material.hpp"
 #include "../world/world.hpp"
 
 namespace systems::player {
 
-static EntityId player_id = INVALID_ENTITY;
+static entt::entity player_entity = entt::null;
 
 void setup() {
-  player_id = world::create(world::Entity({.translation = {0, 0, 12}}, components::Player{}));
+  player_entity = world::registry->create();
 
-  world::main_camera = world::create(world::Entity({.parent_id = player_id}, components::Camera(1000, 1000, 1.5, 0.1, 100.0)));
+  world::registry->emplace<components::Transform>(player_entity, components::Transform{.translation = {0, 0, 12}});
+  world::registry->emplace<components::Player>(player_entity, components::Player{});
+
+  world::main_camera = world::registry->create();
+
+  world::registry->emplace<components::Transform>(world::main_camera, components::Transform{.parent_id = player_entity});
+  world::registry->emplace<components::Camera>(world::main_camera, components::Camera(1000, 1000, 1.5, 0.1, 100.0));
 }
 
 void update(double delta_time) {
   constexpr float look_multiplier = 0.005f;
   constexpr float velocity_multiplier = 0.005f;
 
-  world::Entity& player = world::get(player_id);
-  world::Entity& camera = world::get(world::main_camera);
+  components::Transform& player_transform = world::registry->get<components::Transform>(player_entity);
+  components::Transform& camera_transform = world::registry->get<components::Transform>(world::main_camera);
 
   // rotation
 
@@ -28,10 +36,13 @@ void update(double delta_time) {
   head_rotation.x += input::last_mouse_motion().x * look_multiplier;
   head_rotation.y += input::last_mouse_motion().y * look_multiplier;
 
-  player.transform.rotation = glm::slerp(player.transform.rotation, glm::rotation(glm::normalize(player.transform.rotation * vec3(0, 1, 0)), glm::normalize(player.transform.translation)) * player.transform.rotation, 0.2f);
+  player_transform.rotation =
+      glm::slerp(player_transform.rotation,
+                 glm::rotation(glm::normalize(player_transform.rotation * vec3(0, 1, 0)), glm::normalize(player_transform.translation)) *
+                     player_transform.rotation,
+                 0.2f);
 
-  camera.transform.rotation = glm::angleAxis(head_rotation.x, vec3{0, -1, 0}) *
-                              glm::angleAxis(head_rotation.y, vec3{-1, 0, 0});
+  camera_transform.rotation = glm::angleAxis(head_rotation.x, vec3{0, -1, 0}) * glm::angleAxis(head_rotation.y, vec3{-1, 0, 0});
 
   // translation
 
@@ -49,7 +60,7 @@ void update(double delta_time) {
     velocity.x += velocity_multiplier * delta_time;
   }
 
-  player.transform.translation += player.transform.rotation * glm::angleAxis(head_rotation.x, vec3{0, -1, 0}) * velocity;
+  player_transform.translation += player_transform.rotation * glm::angleAxis(head_rotation.x, vec3{0, -1, 0}) * velocity;
 }
 
 }  // namespace systems::player

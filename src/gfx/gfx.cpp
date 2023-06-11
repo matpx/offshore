@@ -5,9 +5,10 @@
 #include <sokol/sokol_log.h>
 #include <sokol/util/sokol_color.h>
 
+#include <entt/entity/registry.hpp>
+
 #include "material.hpp"
 #include "shapes.hpp"
-#include "../core/container.hpp"
 
 namespace gfx {
 
@@ -30,7 +31,8 @@ void init() {
     FATAL("SDL_Init() failed");
   }
 
-  window = SDL_CreateWindow("game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height, SDL_WINDOW_OPENGL);
+  window = SDL_CreateWindow("game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height,
+                            SDL_WINDOW_OPENGL);
 
   if (window == nullptr) {
     FATAL("SDL_CreateWindow() failed");
@@ -56,33 +58,31 @@ void init() {
 }
 
 Mesh create_mesh(const container::Span<Vertex> vertex_data, const container::Span<index_t> index_data) {
-  const sg_buffer_desc vertex_buffer_desc = {
-      .data = {
-          .ptr = vertex_data.data(),
-          .size = vertex_data.size() * sizeof(Vertex),
-      }};
+  const sg_buffer_desc vertex_buffer_desc = {.data = {
+                                                 .ptr = vertex_data.data(),
+                                                 .size = vertex_data.size() * sizeof(Vertex),
+                                             }};
 
   sg_buffer vertex_buffer = sg_make_buffer(vertex_buffer_desc);
 
   const sg_buffer_desc index_buffer_desc = {
       .type = SG_BUFFERTYPE_INDEXBUFFER,
-      .data = {
-          .ptr = index_data.data(),
-          .size = index_data.size() * sizeof(index_t),
-      },
+      .data =
+          {
+              .ptr = index_data.data(),
+              .size = index_data.size() * sizeof(index_t),
+          },
   };
 
   sg_buffer index_buffer = sg_make_buffer(index_buffer_desc);
 
   return {
-      .bindings = {
-          .vertex_buffers = {vertex_buffer},
-          .index_buffer = index_buffer},
+      .bindings = {.vertex_buffers = {vertex_buffer}, .index_buffer = index_buffer},
       .num_elements = static_cast<u32>(index_data.size()),
   };
 }
 
-void begin_frame(world::Entity& camera) {
+void begin_frame(entt::entity camera) {
   const sg_pass_action pass_action = {
       .colors = {{
           .action = SG_ACTION_CLEAR,
@@ -94,7 +94,8 @@ void begin_frame(world::Entity& camera) {
 
   // camera.transform.update();
 
-  components::Camera& camera_component = camera.get_camera();
+  const components::Transform& camera_transform = world::registry->get<components::Transform>(camera);
+  components::Camera& camera_component = world::registry->get<components::Camera>(camera);
 
   if (camera_component.width != window_width || camera_component.height != window_height) {
     LOG_DEBUG("camera_component.update()");
@@ -103,22 +104,12 @@ void begin_frame(world::Entity& camera) {
     camera_component.update();
   }
 
-  current_vp = camera_component.projection * glm::inverse(camera.transform.world);
+  current_vp = camera_component.projection * glm::inverse(camera_transform.world);
 }
 
 void draw_world() {
-  const container::Span<world::Entity> entities = world::get_entities();
-
-  for (size_t i = 0; i < entities.size(); i++) {
-    const world::Entity& entity = entities[i];
-
-    if (entity.variant != world::Entity::Variant::Renderable) {
-      continue;
-    }
-
-    const components::Transform& transform = entity.transform;
-    const components::Renderable& renderable = entity.renderable;
-
+  for (const auto [entity, transform, renderable] :
+       world::registry->view<components::Transform, components::Renderable>().each()) {
     const mat4 mvp = current_vp * transform.world;
 
     sg_apply_pipeline(renderable.material.pipeline);
@@ -134,9 +125,7 @@ void end_frame() {
   sg_commit();
 }
 
-void present() {
-  SDL_GL_SwapWindow(window);
-}
+void present() { SDL_GL_SwapWindow(window); }
 
 void finish() {
   shapes::finish();
