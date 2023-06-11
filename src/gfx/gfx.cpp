@@ -9,6 +9,7 @@
 
 #include "material.hpp"
 #include "shapes.hpp"
+#include "../core/log.hpp"
 
 namespace gfx {
 
@@ -46,10 +47,10 @@ void init() {
 
   sg_desc desc = {.logger = {.func = slog_func}};
 
-  desc.allocator = {
-      .alloc = [](size_t size, [[maybe_unused]] void* user_data) { return allocator::_malloc(size); },
-      .free = [](void* ptr, [[maybe_unused]] void* user_data) { allocator::_free(ptr); },
-  };
+  // desc.allocator = {
+  //     .alloc = [](size_t size, [[maybe_unused]] void* user_data) { return allocator::_malloc(size); },
+  //     .free = [](void* ptr, [[maybe_unused]] void* user_data) { allocator::_free(ptr); },
+  // };
 
   sg_setup(desc);
 
@@ -57,7 +58,7 @@ void init() {
   shapes::init();
 }
 
-Mesh create_mesh(const container::Span<Vertex> vertex_data, const container::Span<index_t> index_data) {
+Mesh create_mesh(const std::span<Vertex> vertex_data, const std::span<index_t> index_data) {
   const sg_buffer_desc vertex_buffer_desc = {.data = {
                                                  .ptr = vertex_data.data(),
                                                  .size = vertex_data.size() * sizeof(Vertex),

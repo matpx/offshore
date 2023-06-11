@@ -3,7 +3,9 @@
 #include <sokol/sokol_gfx.h>
 #include <sokol/util/sokol_shape.h>
 
-#include "../core/container.hpp"
+#include <vector>
+
+#include "../core/log.hpp"
 #include "debug.h"
 #include "gfx.hpp"
 
@@ -49,35 +51,31 @@ static void init_buffer() {
       .merge = true,
   };
 
-  const sshape_sphere_t sphere_params = {
-      .radius = 0.5f,
-      .slices = 12,
-      .stacks = 8,
-      .color = sshape_color_4f(1.0f, 1.0f, 1.0f, 1.0f),
-      .merge = true,
-      .transform = {
-          .m = {
-              {1.0f, 0.0f, 0.0f, 0.0f},
-              {0.0f, 1.0f, 0.0f, 0.0f},
-              {0.0f, 0.0f, 1.0f, 0.0f},
-              {0.0f, 0.0f, 0.0f, 1.0f},
-          }}};
+  const sshape_sphere_t sphere_params = {.radius = 0.5f,
+                                         .slices = 12,
+                                         .stacks = 8,
+                                         .color = sshape_color_4f(1.0f, 1.0f, 1.0f, 1.0f),
+                                         .merge = true,
+                                         .transform = {.m = {
+                                                           {1.0f, 0.0f, 0.0f, 0.0f},
+                                                           {0.0f, 1.0f, 0.0f, 0.0f},
+                                                           {0.0f, 0.0f, 1.0f, 0.0f},
+                                                           {0.0f, 0.0f, 0.0f, 1.0f},
+                                                       }}};
 
   const sshape_sizes_t box_size = sshape_box_sizes(box_params.tiles);
   const sshape_sizes_t sphere_size = sshape_sphere_sizes(sphere_params.slices, sphere_params.stacks);
 
-  container::Vector<sshape_vertex_t> vertices(box_size.vertices.size + sphere_size.vertices.size);
-  container::Vector<index_t> indices(box_size.indices.size + sphere_size.indices.size);
+  std::vector<sshape_vertex_t> vertices(box_size.vertices.size + sphere_size.vertices.size);
+  std::vector<index_t> indices(box_size.indices.size + sphere_size.indices.size);
 
-  sshape_buffer_t shapes_merge_buffer = {
-      .vertices = {
-          .buffer = {
-              .ptr = vertices.data(),
-              .size = vertices.size() * sizeof(sshape_vertex_t)},
-      },
-      .indices = {
-          .buffer = {.ptr = indices.data(), .size = indices.size() * sizeof(index_t)},
-      }};
+  sshape_buffer_t shapes_merge_buffer = {.vertices =
+                                             {
+                                                 .buffer = {.ptr = vertices.data(), .size = vertices.size() * sizeof(sshape_vertex_t)},
+                                             },
+                                         .indices = {
+                                             .buffer = {.ptr = indices.data(), .size = indices.size() * sizeof(index_t)},
+                                         }};
 
   shapes_merge_buffer = sshape_build_box(&shapes_merge_buffer, &box_params);
   assert(shapes_merge_buffer.valid);
@@ -101,9 +99,6 @@ static void init_buffer() {
       .vertex_buffers = {shapes_vertex_buffer},
       .index_buffer = shapes_index_buffer,
   };
-
-  vertices.clear();
-  indices.clear();
 }
 
 void init() {
@@ -120,7 +115,7 @@ void begin_pass() {
   shapes_pass_active = true;
 }
 
-static void draw_shape(const sshape_element_range_t& element_range,const vec3& position, const vec3& scale) {
+static void draw_shape(const sshape_element_range_t& element_range, const vec3& position, const vec3& scale) {
   assert(shapes_pass_active);
 
   const mat4 mvp = current_vp * glm::scale(glm::translate(glm::identity<mat4>(), position), scale);
@@ -133,17 +128,11 @@ static void draw_shape(const sshape_element_range_t& element_range,const vec3& p
   sg_draw(element_range.base_element, element_range.num_elements, 1);
 }
 
-void draw_box(const vec3& position, const vec3& scale) {
-  draw_shape(box_element_range, position, scale);
-}
+void draw_box(const vec3& position, const vec3& scale) { draw_shape(box_element_range, position, scale); }
 
-void draw_sphere(const vec3& position, const vec3& scale) {
-  draw_shape(sphere_element_range, position, scale);
-}
+void draw_sphere(const vec3& position, const vec3& scale) { draw_shape(sphere_element_range, position, scale); }
 
-void finish_pass() {
-  shapes_pass_active = false;
-}
+void finish_pass() { shapes_pass_active = false; }
 
 void finish() {
   assert(!shapes_pass_active);

@@ -6,6 +6,7 @@
 #include "./systems/player.hpp"
 #include "systems/terrain.hpp"
 #include "world/world.hpp"
+#include "core/log.hpp"
 
 int main() {
   LOG_DEBUG("debug mode!");
@@ -58,8 +59,6 @@ int main() {
   }
 
   gfx::finish();
-
-  allocator::debug_leak_check();
 
   return 0;
 }

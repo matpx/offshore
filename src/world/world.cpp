@@ -4,7 +4,6 @@
 #include <entt/entity/fwd.hpp>
 #include <entt/entity/registry.hpp>
 
-#include "../core/container.hpp"
 #include "../core/log.hpp"
 #include "components.hpp"
 

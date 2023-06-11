@@ -1,10 +1,9 @@
 #include "input.hpp"
-
-#include "container.hpp"
+#include <array>
 
 namespace input {
 
-static container::Array<bool, (size_t)Actions::_LEN> pressed;
+static std::array<bool, (size_t)Actions::_LEN> pressed;
 
 static vec2 mouse_motion = {};
 
@@ -36,16 +35,10 @@ void handle_sdl_event(const SDL_Event& window_event) {
   }
 }
 
-void clear() {
-  mouse_motion = {};
-}
+void clear() { mouse_motion = {}; }
 
-bool is_pressed(Actions actions) {
-  return pressed[(size_t)actions];
-}
+bool is_pressed(Actions actions) { return pressed[(size_t)actions]; }
 
-vec2 last_mouse_motion() {
-  return mouse_motion;
-}
+vec2 last_mouse_motion() { return mouse_motion; }
 
 }  // namespace input

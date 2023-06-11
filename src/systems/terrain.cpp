@@ -1,9 +1,11 @@
 #include "terrain.hpp"
 
+#include <entt/entity/registry.hpp>
+
+#include "../core/log.hpp"
 #include "../gfx/gfx.hpp"
 #include "../gfx/material.hpp"
 #include "../world/world.hpp"
-#include <entt/entity/registry.hpp>
 
 namespace systems::terrain {
 
@@ -108,8 +110,8 @@ void create() {
   LOG_DEBUG("terrain verts: %d", iso_mesh.nverts);
   LOG_DEBUG("terrain indices: %d", iso_mesh.ntris * 3);
 
-  container::Vector<gfx::Vertex> vertex_data(iso_mesh.nverts);
-  container::Vector<gfx::index_t> index_data(iso_mesh.ntris * 3);
+  std::vector<gfx::Vertex> vertex_data(iso_mesh.nverts);
+  std::vector<gfx::index_t> index_data(iso_mesh.ntris * 3);
 
   for (int n = 0; n < iso_mesh.nverts; n++) {
     vertex_data[n] = {
@@ -128,11 +130,8 @@ void create() {
 
   const entt::entity terrain_chunk = world::registry->create();
 
-  world::registry->emplace<components::Transform>(terrain_chunk, components::Transform {});
-  world::registry->emplace<components::Renderable>(terrain_chunk, components::Renderable {
-    mesh,
-    gfx::material::get()
-  });
+  world::registry->emplace<components::Transform>(terrain_chunk, components::Transform{});
+  world::registry->emplace<components::Renderable>(terrain_chunk, components::Renderable{mesh, gfx::material::get()});
 
   vertex_data.clear();
   index_data.clear();

@@ -2,7 +2,6 @@
 
 #include <entt/fwd.hpp>
 
-#include "../core/container.hpp"
 #include "components.hpp"
 
 namespace world {
