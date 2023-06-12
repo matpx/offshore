@@ -50,11 +50,11 @@ int main() {
     gfx::draw_world();
 
     gfx::shapes::begin_pass();
-    // gfx::shapes::draw_sphere({2,0,0}, {3,1,1});
-    // gfx::shapes::draw_box({0,1,0}, {1,3,1});
+    // ...
     gfx::shapes::finish_pass();
 
     gfx::ui::finish_pass();
+    // ...
     gfx::ui::begin_pass();
 
     gfx::end_frame();
