@@ -16,9 +16,9 @@ entt::entity main_camera = entt::null;
 void init() { registry = std::make_unique<entt::registry>(); }
 
 void update() {
-  for (auto [entity, transform] : world::registry->view<components::Transform>().each()) {
+  for (auto [entity, transform] : world::registry->view<comp::Transform>().each()) {
     if (transform.parent_id != entt::null) {
-      const components::Transform& parent_transform = world::registry->get<components::Transform>(transform.parent_id);
+      const comp::Transform& parent_transform = world::registry->get<comp::Transform>(transform.parent_id);
       transform.update_from_parent(parent_transform);
     } else {
       transform.update();

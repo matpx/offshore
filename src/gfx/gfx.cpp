@@ -95,8 +95,8 @@ void begin_frame(entt::entity camera) {
 
   // camera.transform.update();
 
-  const components::Transform& camera_transform = world::registry->get<components::Transform>(camera);
-  components::Camera& camera_component = world::registry->get<components::Camera>(camera);
+  const comp::Transform& camera_transform = world::registry->get<comp::Transform>(camera);
+  comp::Camera& camera_component = world::registry->get<comp::Camera>(camera);
 
   if (camera_component.width != window_width || camera_component.height != window_height) {
     LOG_DEBUG("camera_component.update()");
@@ -110,7 +110,7 @@ void begin_frame(entt::entity camera) {
 
 void draw_world() {
   for (const auto [entity, transform, renderable] :
-       world::registry->view<components::Transform, components::Renderable>().each()) {
+       world::registry->view<comp::Transform, comp::Renderable>().each()) {
     const mat4 mvp = current_vp * transform.world;
 
     sg_apply_pipeline(renderable.material.pipeline);

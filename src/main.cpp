@@ -4,9 +4,9 @@
 #include "./gfx/gfx.hpp"
 #include "./gfx/shapes.hpp"
 #include "./systems/player.hpp"
+#include "core/log.hpp"
 #include "systems/terrain.hpp"
 #include "world/world.hpp"
-#include "core/log.hpp"
 
 int main() {
   LOG_DEBUG("debug mode!");

@@ -3,7 +3,7 @@
 #include <entt/entity/entity.hpp>
 #include "../gfx/renderable.hpp"
 
-namespace components {
+namespace comp {
 
 struct Transform {
   vec3 translation = {0, 0, 0};
@@ -53,4 +53,4 @@ struct Renderable {
   gfx::Material material;
 };
 
-}  // namespace components
+}  // namespace comp

@@ -65,22 +65,22 @@ void create() {
   gfx::Mesh m;
 
   m = make_plane([](vec3 i) -> vec3 { return glm::normalize(vec3{i.x - hd, i.y - hd, hd}) * radius; }, false);
-  world::create(world::Entity({}, components::Renderable{m, gfx::material::get()}));
+  world::create(world::Entity({}, comp::Renderable{m, gfx::material::get()}));
 
   m = make_plane([](vec3 i) -> vec3 { return glm::normalize(vec3{i.x - hd, i.y - hd, -hd}) * radius; }, true);
-  world::create(world::Entity({}, components::Renderable{m, gfx::material::get()}));
+  world::create(world::Entity({}, comp::Renderable{m, gfx::material::get()}));
 
   m = make_plane([](vec3 i) -> vec3 { return glm::normalize(vec3{i.x - hd, -hd, i.y - hd}) * radius; }, false);
-  world::create(world::Entity({}, components::Renderable{m, gfx::material::get()}));
+  world::create(world::Entity({}, comp::Renderable{m, gfx::material::get()}));
 
   m = make_plane([](vec3 i) -> vec3 { return glm::normalize(vec3{i.x - hd, hd, i.y - hd}) * radius; }, true);
-  world::create(world::Entity({}, components::Renderable{m, gfx::material::get()}));
+  world::create(world::Entity({}, comp::Renderable{m, gfx::material::get()}));
 
   m = make_plane([](vec3 i) -> vec3 { return glm::normalize(vec3{-hd, i.y - hd, i.x - hd}) * radius; }, false);
-  world::create(world::Entity({}, components::Renderable{m, gfx::material::get()}));
+  world::create(world::Entity({}, comp::Renderable{m, gfx::material::get()}));
 
   m = make_plane([](vec3 i) -> vec3 { return glm::normalize(vec3{hd, i.y - hd, i.x - hd}) * radius; }, true);
-  world::create(world::Entity({}, components::Renderable{m, gfx::material::get()}));
+  world::create(world::Entity({}, comp::Renderable{m, gfx::material::get()}));
 }
 */
 
@@ -130,8 +130,8 @@ void create() {
 
   const entt::entity terrain_chunk = world::registry->create();
 
-  world::registry->emplace<components::Transform>(terrain_chunk, components::Transform{});
-  world::registry->emplace<components::Renderable>(terrain_chunk, components::Renderable{mesh, gfx::material::get()});
+  world::registry->emplace<comp::Transform>(terrain_chunk, comp::Transform{});
+  world::registry->emplace<comp::Renderable>(terrain_chunk, comp::Renderable{mesh, gfx::material::get()});
 
   vertex_data.clear();
   index_data.clear();
