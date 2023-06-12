@@ -11,7 +11,7 @@
 
 namespace gfx::ui {
 
-nk_context* ctx = nullptr;
+static nk_context* ctx = nullptr;
 
 void init() {
   LOG_INFO("gfx::ui::init()");
