@@ -7,7 +7,7 @@
 #include "../gfx/material.hpp"
 #include "../world/world.hpp"
 
-namespace systems::terrain {
+namespace systems {
 
 /*
 constexpr u16 dim = 4;
@@ -98,7 +98,7 @@ static float testIsoFn(const float *pos, [[maybe_unused]] float *extra, [[maybe_
   return glm::length2(x) - 90 - std::max(0.0f, stb_perlin_noise3(xn.x, xn.y, xn.z, 0, 0, 0) * 10.0f);
 }
 
-void create() {
+void Terrain::setup() {
   LOG_DEBUG("terrain create");
 
   float bmin[3] = {-10, -10, -10};
@@ -139,4 +139,4 @@ void create() {
   mcFree(&iso_mesh);
 }
 
-}  // namespace systems::terrain
+}  // namespace systems

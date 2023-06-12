@@ -1,7 +1,14 @@
 #pragma once
 
-namespace systems::terrain {
+#include "system.hpp"
+namespace systems {
 
-void create();
+struct Terrain final : System {
+  void setup();
 
-}
+  void update([[maybe_unused]] double delta_time) {}
+
+  void finish() {}
+};
+
+}  // namespace systems

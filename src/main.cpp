@@ -4,9 +4,8 @@
 #include "./gfx/gfx.hpp"
 #include "./gfx/shapes.hpp"
 #include "./gfx/ui.hpp"
-#include "./systems/player.hpp"
 #include "core/log.hpp"
-#include "systems/terrain.hpp"
+#include "systems/router.hpp"
 #include "world/world.hpp"
 
 int main() {
@@ -14,8 +13,7 @@ int main() {
 
   gfx::init();
   world::init();
-  systems::player::setup();
-  systems::terrain::create();
+  systems::router::setup();
 
   Uint64 current_time = SDL_GetPerformanceCounter();
   Uint64 last_time;
@@ -45,7 +43,7 @@ int main() {
 
     input::end();
 
-    systems::player::update(delta_time);
+    systems::router::frame(delta_time);
     world::update();
 
     gfx::begin_frame(world::main_camera);

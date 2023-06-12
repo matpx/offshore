@@ -1,9 +1,15 @@
 #pragma once
 
-namespace systems::player {
+#include "system.hpp"
 
-void setup();
+namespace systems {
 
-void update(double delta_time);
+struct Player : System {
+  void setup();
 
-}
+  void update(double delta_time);
+
+  void finish() {}
+};
+
+}  // namespace systems

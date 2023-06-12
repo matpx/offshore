@@ -6,11 +6,11 @@
 #include "../gfx/material.hpp"
 #include "../world/world.hpp"
 
-namespace systems::player {
+namespace systems {
 
 static entt::entity player_entity = entt::null;
 
-void setup() {
+void Player::setup() {
   player_entity = world::registry->create();
 
   world::registry->emplace<comp::Transform>(player_entity, comp::Transform{.translation = {0, 0, 12}});
@@ -22,7 +22,7 @@ void setup() {
   world::registry->emplace<comp::Camera>(world::main_camera, comp::Camera(1000, 1000, 1.5, 0.1, 100.0));
 }
 
-void update(double delta_time) {
+void Player::update(double delta_time) {
   constexpr float look_multiplier = 0.005f;
   constexpr float velocity_multiplier = 0.005f;
 
