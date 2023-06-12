@@ -4,7 +4,7 @@
 
 namespace systems {
 
-struct Player : System {
+struct Player final : System {
   void setup();
 
   void update(double delta_time);
