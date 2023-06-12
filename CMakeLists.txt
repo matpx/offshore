@@ -17,11 +17,25 @@ target_include_directories(offshore SYSTEM PRIVATE assets/shader/include)
 target_link_options(offshore PRIVATE -lSDL2 -lGL)
 # target_link_options(offshore PRIVATE -fsanitize=address -fno-omit-frame-pointer)
 
+target_compile_definitions(
+  offshore
+  PRIVATE
+  NK_INCLUDE_FIXED_TYPES
+  NK_INCLUDE_STANDARD_IO
+  NK_INCLUDE_DEFAULT_ALLOCATOR
+  NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+  NK_INCLUDE_FONT_BAKING
+  NK_INCLUDE_DEFAULT_FONT
+  NK_INCLUDE_STANDARD_VARARGS
+  SOKOL_NUKLEAR_NO_SOKOL_APP
+)
+
 if(MSVC)
   target_compile_options(offshore PRIVATE /W4 /WX)
 else()
-  target_compile_options(offshore PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions -fno-rtti -D_GLIBCXX_DEBUG -D_LIBCPP_DEBUG)
-  # target_compile_options(offshore PRIVATE -O0 -g)
-  target_compile_options(offshore PRIVATE -O0)
+  target_compile_options(offshore PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions -fno-rtti)
+  target_compile_options(offshore PRIVATE -O0 -g)
+
+  target_compile_definitions(offshore PRIVATE _GLIBCXX_DEBUG _LIBCPP_DEBUG)
 endif()
 

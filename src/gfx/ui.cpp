@@ -1,46 +1,33 @@
 #include "ui.hpp"
 
-#include "gfx.hpp"
-
-#define NK_INCLUDE_FIXED_TYPES
-#define NK_INCLUDE_STANDARD_IO
-#define NK_INCLUDE_DEFAULT_ALLOCATOR
-#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
-#define NK_INCLUDE_FONT_BAKING
-#define NK_INCLUDE_DEFAULT_FONT
-#define NK_INCLUDE_STANDARD_VARARGS
-#include <nuklear/nuklear.h>
-
-#define SOKOL_NUKLEAR_NO_SOKOL_APP
 #include <SDL2/SDL.h>
+#include <nuklear/nuklear.h>
 #include <sokol/sokol_gfx.h>
 #include <sokol/util/sokol_nuklear.h>
+
+#include "gfx.hpp"
 #include "sokol_impl.h"
 
 namespace gfx::ui {
 
 nk_context* ctx = nullptr;
 
-static void
-nk_sdl_clipboard_paste(nk_handle usr, struct nk_text_edit *edit)
-{
-    const char *text = SDL_GetClipboardText();
-    if (text) nk_textedit_paste(edit, text, nk_strlen(text));
-    (void)usr;
+static void nk_sdl_clipboard_paste(nk_handle usr, struct nk_text_edit* edit) {
+  const char* text = SDL_GetClipboardText();
+  if (text) nk_textedit_paste(edit, text, nk_strlen(text));
+  (void)usr;
 }
 
-static void
-nk_sdl_clipboard_copy(nk_handle usr, const char *text, int len)
-{
-    char *str = 0;
-    (void)usr;
-    if (!len) return;
-    str = (char*)malloc((size_t)len+1);
-    if (!str) return;
-    memcpy(str, text, (size_t)len);
-    str[len] = '\0';
-    SDL_SetClipboardText(str);
-    free(str);
+static void nk_sdl_clipboard_copy(nk_handle usr, const char* text, int len) {
+  char* str = 0;
+  (void)usr;
+  if (!len) return;
+  str = (char*)malloc((size_t)len + 1);
+  if (!str) return;
+  memcpy(str, text, (size_t)len);
+  str[len] = '\0';
+  SDL_SetClipboardText(str);
+  free(str);
 }
 
 NK_API int nk_sdl_handle_event(SDL_Event* evt) {
