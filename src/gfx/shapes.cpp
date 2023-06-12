@@ -118,7 +118,7 @@ void begin_pass() {
 static void draw_shape(const sshape_element_range_t& element_range, const vec3& position, const vec3& scale) {
   assert(shapes_pass_active);
 
-  const mat4 mvp = current_vp * glm::scale(glm::translate(glm::identity<mat4>(), position), scale);
+  const mat4 mvp = gfx::get_current_vp() * glm::scale(glm::translate(glm::identity<mat4>(), position), scale);
 
   MVP_t MVP = {
       .mvp = mvp,

@@ -3,6 +3,7 @@
 #include "./core/input.hpp"
 #include "./gfx/gfx.hpp"
 #include "./gfx/shapes.hpp"
+#include "./gfx/ui.hpp"
 #include "./systems/player.hpp"
 #include "core/log.hpp"
 #include "systems/terrain.hpp"
@@ -29,7 +30,7 @@ int main() {
 
     delta_time = (double)((current_time - last_time) * 1000 / (double)SDL_GetPerformanceFrequency());
 
-    input::clear();
+    input::begin();
 
     while (SDL_PollEvent(&sdl_event)) {
       if (sdl_event.type == SDL_QUIT) {
@@ -42,6 +43,8 @@ int main() {
       input::handle_sdl_event(sdl_event);
     }
 
+    input::end();
+
     systems::player::update(delta_time);
     world::update();
 
@@ -52,6 +55,9 @@ int main() {
     // gfx::shapes::draw_sphere({2,0,0}, {3,1,1});
     // gfx::shapes::draw_box({0,1,0}, {1,3,1});
     gfx::shapes::finish_pass();
+
+    gfx::ui::finish_pass();
+    gfx::ui::begin_pass();
 
     gfx::end_frame();
 

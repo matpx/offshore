@@ -14,9 +14,11 @@ enum class Actions {
   _LEN,
 };
 
-void handle_sdl_event(const SDL_Event& window_event);
+void handle_sdl_event(SDL_Event& window_event);
 
-void clear();
+void begin();
+
+void end();
 
 bool is_pressed(Actions actions);
 

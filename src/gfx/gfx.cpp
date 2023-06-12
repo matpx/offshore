@@ -7,9 +7,10 @@
 
 #include <entt/entity/registry.hpp>
 
+#include "../core/log.hpp"
 #include "material.hpp"
 #include "shapes.hpp"
-#include "../core/log.hpp"
+#include "ui.hpp"
 
 namespace gfx {
 
@@ -56,6 +57,7 @@ void init() {
 
   material::init();
   shapes::init();
+  ui::init();
 }
 
 Mesh create_mesh(const std::span<Vertex> vertex_data, const std::span<index_t> index_data) {
@@ -109,8 +111,7 @@ void begin_frame(entt::entity camera) {
 }
 
 void draw_world() {
-  for (const auto [entity, transform, renderable] :
-       world::registry->view<comp::Transform, comp::Renderable>().each()) {
+  for (const auto [entity, transform, renderable] : world::registry->view<comp::Transform, comp::Renderable>().each()) {
     const mat4 mvp = current_vp * transform.world;
 
     sg_apply_pipeline(renderable.material.pipeline);
@@ -129,6 +130,7 @@ void end_frame() {
 void present() { SDL_GL_SwapWindow(window); }
 
 void finish() {
+  ui::finish();
   shapes::finish();
   material::finish();
 
@@ -143,6 +145,14 @@ void finish() {
   SDL_Quit();
 
   LOG_INFO("gfx::finish()");
+}
+
+ivec2 get_width_height() { return {window_width, window_height}; }
+
+SDL_Window* get_sdl_window() { return window; }
+
+const mat4& get_current_vp() {
+  return current_vp;
 }
 
 }  // namespace gfx

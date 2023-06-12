@@ -1,5 +1,8 @@
 #include "input.hpp"
+
 #include <array>
+
+#include "../gfx/ui.hpp"
 
 namespace input {
 
@@ -24,7 +27,7 @@ void set_key_state(SDL_Keycode key, bool state) {
   }
 }
 
-void handle_sdl_event(const SDL_Event& window_event) {
+void handle_sdl_event(SDL_Event& window_event) {
   if (window_event.type == SDL_KEYDOWN) {
     set_key_state(window_event.key.keysym.sym, true);
   } else if (window_event.type == SDL_KEYUP) {
@@ -33,9 +36,16 @@ void handle_sdl_event(const SDL_Event& window_event) {
     mouse_motion.x += window_event.motion.xrel;
     mouse_motion.y += window_event.motion.yrel;
   }
+
+  gfx::ui::handle_input(&window_event);
 }
 
-void clear() { mouse_motion = {}; }
+void begin() {
+  mouse_motion = {};
+  gfx::ui::begin_input();
+}
+
+void end() { gfx::ui::finish_input(); }
 
 bool is_pressed(Actions actions) { return pressed[(size_t)actions]; }
 
