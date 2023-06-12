@@ -22,7 +22,7 @@ static sshape_element_range_t sphere_element_range = {};
 static bool shapes_pass_active = false;
 
 static void init_pipeline() {
-  LOG_DEBUG("init shapes pipeline");
+  LOG_DEBUG("gfx::shapes::init_pipeline()");
 
   unlit_shader = sg_make_shader(debug_shader_desc(sg_query_backend()));
 
@@ -44,7 +44,7 @@ static void init_pipeline() {
 }
 
 static void init_buffer() {
-  LOG_DEBUG("init shapes buffer");
+  LOG_DEBUG("gfx::shapes::init_buffer()");
 
   const sshape_box_t box_params = {
       .tiles = 4,

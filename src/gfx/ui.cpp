@@ -5,6 +5,7 @@
 #include <sokol/sokol_gfx.h>
 #include <sokol/util/sokol_nuklear.h>
 
+#include "../core/log.hpp"
 #include "gfx.hpp"
 #include "sokol_impl.h"
 
@@ -163,6 +164,8 @@ NK_API int nk_sdl_handle_event(SDL_Event* evt) {
 }
 
 void init() {
+  LOG_INFO("gfx::ui::init()");
+
   snk_setup(snk_desc_t{});
 
   ctx = get_nk_context();
@@ -208,6 +211,9 @@ void begin_pass() {
 
 void finish_pass() { snk_render(gfx::get_width_height().x, gfx::get_width_height().y); }
 
-void finish() { snk_shutdown(); }
+void finish() {
+  snk_shutdown();
+  LOG_INFO("gfx::ui::finish()");
+}
 
 }  // namespace gfx::ui
