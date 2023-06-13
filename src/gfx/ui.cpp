@@ -5,6 +5,7 @@
 #include <sokol/sokol_gfx.h>
 #include <sokol/util/sokol_nuklear.h>
 
+#include "window.hpp"
 #include "../core/log.hpp"
 #include "gfx.hpp"
 #include "sokol_impl.h"
@@ -23,7 +24,7 @@ void init() {
 
 void begin_input() { nk_input_begin(ctx); }
 
-void handle_input(SDL_Event* sdl_event) { nk_sdl_handle_event(gfx::get_sdl_window(), sdl_event); }
+void handle_input(SDL_Event* sdl_event) { nk_sdl_handle_event(window::get_sdl_window(), sdl_event); }
 
 void finish_input() { nk_input_end(ctx); }
 
@@ -31,7 +32,7 @@ void begin_pass() {
   nk_clear(ctx);
 }
 
-void finish_pass() { snk_render(gfx::get_width_height().x, gfx::get_width_height().y); }
+void finish_pass() { snk_render(window::get_width_height().x, window::get_width_height().y); }
 
 void finish() {
   snk_shutdown();

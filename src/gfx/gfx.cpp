@@ -11,45 +11,24 @@
 #include "material.hpp"
 #include "shapes.hpp"
 #include "ui.hpp"
+#include "window.hpp"
 
 namespace gfx {
 
 static_assert(sizeof(index_t) == 2);
 
-static SDL_Window* window = nullptr;
 static SDL_GLContext context = nullptr;
-
-static u32 window_width = 1200;
-static u32 window_height = 800;
 
 mat4 current_vp;
 
 void init() {
   LOG_INFO("gfx::init()");
 
-  assert(window == nullptr && context == nullptr);
+  window::init();
 
-  if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-    FATAL("SDL_Init() failed");
-  }
+  assert(context == nullptr);
 
-  SDL_version sdl_version;
-  SDL_GetVersion(&sdl_version);
-
-  LOG_DEBUG("SDL_version: %d.%d.%d", sdl_version.major, sdl_version.minor, sdl_version.patch);
-
-  window = SDL_CreateWindow("game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height,
-                            SDL_WINDOW_OPENGL);
-
-  if (window == nullptr) {
-    FATAL("SDL_CreateWindow() failed");
-  }
-
-  if (SDL_SetRelativeMouseMode(SDL_TRUE) < 0) {
-    LOG_ERROR("SDL_SetRelativeMouseMode() failed");
-  }
-
-  context = SDL_GL_CreateContext(window);
+  context = SDL_GL_CreateContext(window::get_sdl_window());
 
   if (context == nullptr) {
     FATAL("SDL_GL_CreateContext() failed");
@@ -102,17 +81,19 @@ void begin_frame(entt::entity camera) {
       }},
   };
 
-  sg_begin_default_pass(&pass_action, window_width, window_height);
+  const uvec2 window_size = window::get_width_height();
+
+  sg_begin_default_pass(&pass_action, window_size.x, window_size.y);
 
   // camera.transform.update();
 
   const comp::Transform& camera_transform = world::registry->get<comp::Transform>(camera);
   comp::Camera& camera_component = world::registry->get<comp::Camera>(camera);
 
-  if (camera_component.width != window_width || camera_component.height != window_height) {
+  if (camera_component.width != window_size.x || camera_component.height != window_size.y) {
     LOG_DEBUG("camera_component.update()");
-    camera_component.width = window_width;
-    camera_component.height = window_height;
+    camera_component.width = window_size.x;
+    camera_component.height = window_size.y;
     camera_component.update();
   }
 
@@ -136,7 +117,7 @@ void end_frame() {
   sg_commit();
 }
 
-void present() { SDL_GL_SwapWindow(window); }
+void present() { SDL_GL_SwapWindow(window::get_sdl_window()); }
 
 void finish() {
   ui::finish();
@@ -146,16 +127,9 @@ void finish() {
   sg_shutdown();
 
   SDL_GL_DeleteContext(context);
-  SDL_DestroyWindow(window);
 
-  SDL_Quit();
-
-  LOG_INFO("gfx::finish()");
+  window::finish();
 }
-
-ivec2 get_width_height() { return {window_width, window_height}; }
-
-SDL_Window* get_sdl_window() { return window; }
 
 const mat4& get_current_vp() { return current_vp; }
 

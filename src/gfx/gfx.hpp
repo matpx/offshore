@@ -1,7 +1,5 @@
 #pragma once
 
-#include <SDL2/SDL_video.h>
-#include <entt/entity/fwd.hpp>
 #include <span>
 
 #include "../world/world.hpp"
@@ -24,8 +22,6 @@ void present();
 
 void finish();
 
-ivec2 get_width_height();
-SDL_Window* get_sdl_window();
-const mat4& get_current_vp(); 
+const mat4& get_current_vp();
 
 }  // namespace gfx
