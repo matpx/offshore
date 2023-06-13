@@ -11,6 +11,8 @@
 int main() {
   LOG_DEBUG("debug mode!");
 
+  input::init();
+
   gfx::init();
   world::init();
   systems::router::setup();

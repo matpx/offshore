@@ -14,6 +14,8 @@ enum class Actions {
   _LEN,
 };
 
+void init();
+
 void handle_sdl_event(SDL_Event& window_event);
 
 void begin();

@@ -139,9 +139,6 @@ void finish() {
   SDL_GL_DeleteContext(context);
   SDL_DestroyWindow(window);
 
-  // assert(glGetError() == 0);
-  assert(SDL_GetError()[0] == '\0');
-
   SDL_Quit();
 
   LOG_INFO("gfx::finish()");

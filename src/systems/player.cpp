@@ -36,11 +36,11 @@ void Player::update(double delta_time) {
   head_rotation.x += input::last_mouse_motion().x * look_multiplier;
   head_rotation.y += input::last_mouse_motion().y * look_multiplier;
 
-  player_transform.rotation = glm::slerp(player_transform.rotation,
-                                         glm::rotation(glm::normalize(player_transform.rotation * vec3(0, 1, 0)),
-                                                       glm::normalize(player_transform.translation)) *
-                                             player_transform.rotation,
-                                         0.2f);
+  // player_transform.rotation = glm::slerp(player_transform.rotation,
+  //                                        glm::rotation(glm::normalize(player_transform.rotation * vec3(0, 1, 0)),
+  //                                                      glm::normalize(player_transform.translation)) *
+  //                                            player_transform.rotation,
+  //                                        0.2f);
 
   camera_transform.rotation =
       glm::angleAxis(head_rotation.x, vec3{0, -1, 0}) * glm::angleAxis(head_rotation.y, vec3{-1, 0, 0});
@@ -61,8 +61,10 @@ void Player::update(double delta_time) {
     velocity.x += velocity_multiplier * delta_time;
   }
 
-  player_transform.translation +=
-      player_transform.rotation * glm::angleAxis(head_rotation.x, vec3{0, -1, 0}) * velocity;
+  // player_transform.translation +=
+  //    player_transform.rotation * glm::angleAxis(head_rotation.x, vec3{0, -1, 0}) * velocity;
+
+  player_transform.translation += camera_transform.rotation * velocity;
 }
 
-}  // namespace systems::player
+}  // namespace systems
