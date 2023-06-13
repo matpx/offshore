@@ -1,4 +1,4 @@
-#include <SDL2/SDL.h>
+#include <SDL2/SDL_timer.h>
 
 #include "./core/input.hpp"
 #include "./gfx/gfx.hpp"
@@ -10,8 +10,6 @@
 
 int main() {
   LOG_DEBUG("debug mode!");
-
-  input::init();
 
   gfx::init();
   world::init();

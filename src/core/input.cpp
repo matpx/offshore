@@ -1,5 +1,4 @@
 #include "input.hpp"
-#include <SDL2/SDL_mouse.h>
 
 #include <array>
 
@@ -11,12 +10,6 @@ namespace input {
 static std::array<bool, (size_t)Actions::_LEN> pressed;
 
 static vec2 mouse_motion = {};
-
-void init() {
-  if (SDL_SetRelativeMouseMode(SDL_TRUE) < 0) {
-    LOG_ERROR("SDL_SetRelativeMouseMode() failed");
-  }
-}
 
 void set_key_state(SDL_Keycode key, bool state) {
   switch (key) {
