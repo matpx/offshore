@@ -3,6 +3,7 @@
 #include <sokol/sokol_gfx.h>
 #include <sokol/util/sokol_shape.h>
 
+#include <cassert>
 #include <vector>
 
 #include "../core/log.hpp"
@@ -23,6 +24,8 @@ static bool shapes_pass_active = false;
 
 static void init_pipeline() {
   LOG_DEBUG("gfx::shapes::init_pipeline()");
+
+  assert(unlit_pipeline.id == 0);
 
   unlit_shader = sg_make_shader(debug_shader_desc(sg_query_backend()));
 
@@ -69,13 +72,14 @@ static void init_buffer() {
   std::vector<sshape_vertex_t> vertices(box_size.vertices.size + sphere_size.vertices.size);
   std::vector<index_t> indices(box_size.indices.size + sphere_size.indices.size);
 
-  sshape_buffer_t shapes_merge_buffer = {.vertices =
-                                             {
-                                                 .buffer = {.ptr = vertices.data(), .size = vertices.size() * sizeof(sshape_vertex_t)},
-                                             },
-                                         .indices = {
-                                             .buffer = {.ptr = indices.data(), .size = indices.size() * sizeof(index_t)},
-                                         }};
+  sshape_buffer_t shapes_merge_buffer = {
+      .vertices =
+          {
+              .buffer = {.ptr = vertices.data(), .size = vertices.size() * sizeof(sshape_vertex_t)},
+          },
+      .indices = {
+          .buffer = {.ptr = indices.data(), .size = indices.size() * sizeof(index_t)},
+      }};
 
   shapes_merge_buffer = sshape_build_box(&shapes_merge_buffer, &box_params);
   assert(shapes_merge_buffer.valid);
@@ -109,6 +113,8 @@ void init() {
 }
 
 void begin_pass() {
+  assert(!shapes_pass_active);
+
   sg_apply_pipeline(unlit_pipeline);
   sg_apply_bindings(shapes_bindings);
 
@@ -132,7 +138,11 @@ void draw_box(const vec3& position, const vec3& scale) { draw_shape(box_element_
 
 void draw_sphere(const vec3& position, const vec3& scale) { draw_shape(sphere_element_range, position, scale); }
 
-void finish_pass() { shapes_pass_active = false; }
+void finish_pass() {
+  assert(shapes_pass_active);
+
+  shapes_pass_active = false;
+}
 
 void finish() {
   assert(!shapes_pass_active);

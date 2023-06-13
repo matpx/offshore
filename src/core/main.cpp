@@ -1,12 +1,12 @@
 #include <SDL2/SDL_timer.h>
 
-#include "input.hpp"
 #include "../gfx/gfx.hpp"
 #include "../gfx/shapes.hpp"
 #include "../gfx/ui.hpp"
-#include "log.hpp"
 #include "../systems/router.hpp"
 #include "../world/world.hpp"
+#include "input.hpp"
+#include "log.hpp"
 
 int main() {
   LOG_DEBUG("debug mode!");

@@ -40,6 +40,8 @@ void init() {
 }
 
 void finish() {
+  assert(window != nullptr);
+
   SDL_DestroyWindow(window);
 
   SDL_Quit();

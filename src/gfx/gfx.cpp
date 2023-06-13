@@ -5,6 +5,7 @@
 #include <sokol/sokol_log.h>
 #include <sokol/util/sokol_color.h>
 
+#include <cassert>
 #include <entt/entity/registry.hpp>
 
 #include "../core/log.hpp"
@@ -120,6 +121,8 @@ void end_frame() {
 void present() { SDL_GL_SwapWindow(window::get_sdl_window()); }
 
 void finish() {
+  assert(context != nullptr);
+
   ui::finish();
   shapes::finish();
   material::finish();

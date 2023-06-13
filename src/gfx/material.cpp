@@ -14,6 +14,8 @@ static sg_pipeline basic_pipeline = {};
 void init() {
   LOG_INFO("gfx::material::init()");
 
+  assert(basic_pipeline.id == 0);
+
   unlit_shader = sg_make_shader(unlit_shader_desc(sg_query_backend()));
 
   sg_pipeline_desc basic_desc = {};
@@ -30,9 +32,7 @@ void init() {
   basic_pipeline = sg_make_pipeline(basic_desc);
 }
 
-Material get() {
-  return Material{basic_pipeline};
-}
+Material get() { return Material{basic_pipeline}; }
 
 void finish() {
   sg_destroy_pipeline(basic_pipeline);
