@@ -129,6 +129,8 @@ void finish() {
   SDL_GL_DeleteContext(context);
 
   window::finish();
+
+  LOG_INFO("gfx::finish()");
 }
 
 const mat4& get_current_vp() { return current_vp; }

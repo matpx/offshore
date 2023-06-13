@@ -14,6 +14,8 @@ static u32 window_width = 1200;
 static u32 window_height = 800;
 
 void init() {
+  LOG_INFO("gfx::window::init()");
+
   assert(window == nullptr);
 
   if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
@@ -42,7 +44,7 @@ void finish() {
 
   SDL_Quit();
 
-  LOG_INFO("gfx::finish()");
+  LOG_INFO("gfx::window::init()");
 }
 
 SDL_Window* get_sdl_window() { return window; }

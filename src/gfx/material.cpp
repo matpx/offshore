@@ -12,7 +12,7 @@ static sg_shader unlit_shader = {};
 static sg_pipeline basic_pipeline = {};
 
 void init() {
-  LOG_INFO("material::init()");
+  LOG_INFO("gfx::material::init()");
 
   unlit_shader = sg_make_shader(unlit_shader_desc(sg_query_backend()));
 
@@ -38,7 +38,7 @@ void finish() {
   sg_destroy_pipeline(basic_pipeline);
   sg_destroy_shader(unlit_shader);
 
-  LOG_INFO("material::finish()");
+  LOG_INFO("gfx::material::finish()");
 }
 
 }  // namespace gfx::material
