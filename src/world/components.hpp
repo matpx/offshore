@@ -1,7 +1,9 @@
 #pragma once
 
 #include <entt/entity/entity.hpp>
+#include <glm/gtx/quaternion.hpp>
 #include <limits>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "../gfx/renderable.hpp"
 
@@ -28,39 +30,21 @@ struct Transform {
   }
 
   inline AABB transform_aabb(const AABB& aabb) {  // TODO move
+    mat4 rotation_mat = (mat3)world;
 
-    // TODO: https://zeux.io/2010/10/17/aabb-from-obb-with-component-wise-abs/
+    float *rotation_mat_ptr = glm::value_ptr(rotation_mat);
 
-    vec3 corners[8] = {
-        aabb.min,
-        {aabb.min.x, aabb.min.y, aabb.max.z},
-        {aabb.min.x, aabb.max.y, aabb.min.z},
-        {aabb.max.x, aabb.min.y, aabb.min.z},
-        {aabb.min.x, aabb.max.y, aabb.max.z},
-        {aabb.max.x, aabb.min.y, aabb.max.z},
-        {aabb.max.x, aabb.max.y, aabb.min.z},
-        aabb.max,
-    };
-
-    vec3 min = vec3(std::numeric_limits<float>::infinity());
-    vec3 max = vec3(-std::numeric_limits<float>::infinity());
-
-    for (vec3& corner : corners) {
-      corner = world * vec4(corner, 1.0f);
-
-      if (corner.x < min.x) min.x = corner.x;
-      if (corner.y < min.y) min.y = corner.y;
-      if (corner.z < min.z) min.z = corner.z;
-
-      if (corner.x > max.x) max.x = corner.x;
-      if (corner.y > max.y) max.y = corner.y;
-      if (corner.z > max.z) max.z = corner.z;
+    for (i32 i = 0; i < 4*4; i++) {
+      rotation_mat_ptr[i] = std::abs(rotation_mat_ptr[i]);
     }
 
-    return {
-        min,
-        max,
-    };
+    const vec3 center = (aabb.min + aabb.max) / 2.0f;
+    const vec3 extent = (aabb.max - aabb.min) / 2.0f;
+
+    const vec3 new_center = world * vec4(center, 1.0f);
+    const vec3 new_extent = rotation_mat * vec4(extent, 1.0f);
+
+    return {new_center - new_extent, new_center + new_extent};
   }
 };  // namespace comp
 

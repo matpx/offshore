@@ -35,7 +35,7 @@ using uvec2 = glm::uvec2;
 using uvec3 = glm::uvec3;
 using uvec4 = glm::uvec4;
 
-using mat3 = glm::mat4;
+using mat3 = glm::mat3;
 using mat4 = glm::mat4;
 
 using quat = glm::quat;

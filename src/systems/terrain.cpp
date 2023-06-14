@@ -5,6 +5,7 @@
 
 #include <cassert>
 #include <entt/entity/registry.hpp>
+#include <glm/ext/quaternion_trigonometric.hpp>
 #include <limits>
 
 #include "../core/log.hpp"
@@ -73,7 +74,8 @@ void build_chunk(const vec3 chunk_offset, const u32 level) {
     const gfx::Mesh mesh = gfx::create_mesh(vertex_data, index_data);
     const entt::entity terrain_chunk = world::registry->create();
 
-    world::registry->emplace<comp::Transform>(terrain_chunk, comp::Transform{.translation = base_offset});
+    world::registry->emplace<comp::Transform>(
+        terrain_chunk, comp::Transform{.translation = base_offset, .rotation = glm::angleAxis(0.5f, vec3{1, 0, 0})});
     world::registry->emplace<comp::Renderable>(terrain_chunk, comp::Renderable{mesh, gfx::material::get()});
   } else {
     LOG_DEBUG("chunk skipped");
