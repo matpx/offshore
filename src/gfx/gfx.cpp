@@ -35,7 +35,10 @@ void init() {
     FATAL("SDL_GL_CreateContext() failed");
   }
 
-  sg_desc desc = {.logger = {.func = slog_func}};
+  sg_desc desc = {
+      .buffer_pool_size = 256,
+      .logger = {.func = slog_func},
+  };
 
   // desc.allocator = {
   //     .alloc = [](size_t size, [[maybe_unused]] void* user_data) { return allocator::_malloc(size); },
