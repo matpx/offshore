@@ -4,6 +4,7 @@
 #include <sokol/util/sokol_shape.h>
 
 #include <cassert>
+#include <entt/entity/registry.hpp>
 #include <vector>
 
 #include "../core/log.hpp"
@@ -50,7 +51,7 @@ static void init_buffer() {
   LOG_DEBUG("gfx::shapes::init_buffer()");
 
   const sshape_box_t box_params = {
-      .tiles = 4,
+      .tiles = 1,
       .merge = true,
   };
 
@@ -137,6 +138,24 @@ static void draw_shape(const sshape_element_range_t& element_range, const vec3& 
 void draw_box(const vec3& position, const vec3& scale) { draw_shape(box_element_range, position, scale); }
 
 void draw_sphere(const vec3& position, const vec3& scale) { draw_shape(sphere_element_range, position, scale); }
+
+void draw_aabb(const AABB& aabb) {
+  const vec3 scale = aabb.max - aabb.min;
+  const vec3 position = aabb.min + scale * 0.5f;
+
+  draw_box(position, scale);
+}
+
+void draw_all_aabb() {
+  for (const auto [entity, transform, renderable] : world::registry->view<comp::Transform, comp::Renderable>().each()) {
+    AABB global_aabb = { // TODO precalc gloabl AABB
+        .min = renderable.mesh.local_aabb.min + transform.translation,
+        .max = renderable.mesh.local_aabb.max + transform.translation,
+    };
+
+    draw_aabb(global_aabb);
+  }
+}
 
 void finish_pass() {
   assert(shapes_pass_active);

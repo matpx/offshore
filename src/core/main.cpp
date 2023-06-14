@@ -50,7 +50,7 @@ int main() {
     gfx::draw_world();
 
     gfx::shapes::begin_pass();
-    // ...
+    gfx::shapes::draw_all_aabb();
     gfx::shapes::finish_pass();
 
     gfx::ui::finish_pass();

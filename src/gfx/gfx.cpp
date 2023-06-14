@@ -10,6 +10,7 @@
 
 #include "../core/log.hpp"
 #include "material.hpp"
+#include "renderable.hpp"
 #include "shapes.hpp"
 #include "ui.hpp"
 #include "window.hpp"
@@ -58,6 +59,18 @@ Mesh create_mesh(const std::span<Vertex> vertex_data, const std::span<index_t> i
                                                  .size = vertex_data.size() * sizeof(Vertex),
                                              }};
 
+  AABB aabb = {{0, 0, 0}, {0, 0, 0}};
+
+  for (const Vertex& vertex : vertex_data) { // TODO: not always needed
+    if (vertex.positions[0] < aabb.min.x) aabb.min.x = vertex.positions[0];
+    if (vertex.positions[1] < aabb.min.y) aabb.min.y = vertex.positions[1];
+    if (vertex.positions[2] < aabb.min.z) aabb.min.z = vertex.positions[2];
+
+    if (vertex.positions[0] > aabb.max.x) aabb.max.x = vertex.positions[0];
+    if (vertex.positions[1] > aabb.max.y) aabb.max.y = vertex.positions[1];
+    if (vertex.positions[2] > aabb.max.z) aabb.max.z = vertex.positions[2];
+  }
+
   sg_buffer vertex_buffer = sg_make_buffer(vertex_buffer_desc);
 
   const sg_buffer_desc index_buffer_desc = {
@@ -74,6 +87,7 @@ Mesh create_mesh(const std::span<Vertex> vertex_data, const std::span<index_t> i
   return {
       .bindings = {.vertex_buffers = {vertex_buffer}, .index_buffer = index_buffer},
       .num_elements = static_cast<u32>(index_data.size()),
+      .local_aabb = aabb,
   };
 }
 

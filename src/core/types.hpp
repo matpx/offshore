@@ -21,7 +21,7 @@ using u16 = uint16_t;
 using u32 = uint32_t;
 using u64 = uint64_t;
 
-// HMM
+// glm
 
 using vec2 = glm::vec2;
 using vec3 = glm::vec3;
@@ -39,3 +39,10 @@ using mat3 = glm::mat4;
 using mat4 = glm::mat4;
 
 using quat = glm::quat;
+
+// helper
+
+struct AABB {
+    vec3 min;
+    vec3 max;
+};
