@@ -20,7 +20,7 @@ static_assert(sizeof(index_t) == 2);
 
 static SDL_GLContext context = nullptr;
 
-mat4 current_vp;
+static mat4 current_vp = mat4(1.0);
 
 void init() {
   LOG_INFO("gfx::init()");
