@@ -1,6 +1,10 @@
 #include "terrain.hpp"
 
+#include <rjm/rjm_mc.h>
+#include <stb/stb_perlin.h>
+
 #include <entt/entity/registry.hpp>
+#include <limits>
 
 #include "../core/log.hpp"
 #include "../gfx/gfx.hpp"
@@ -9,93 +13,13 @@
 
 namespace systems {
 
-/*
-constexpr u16 dim = 4;
-constexpr float radius = 2;
+static float testIsoFn(const float *position, [[maybe_unused]] float *extra, [[maybe_unused]] void *userparam) {
+  // const vec3 xn = glm::normalize(x) * 2.0f;
+  // return glm::length2(x) - 90 - std::max(0.0f, stb_perlin_noise3(xn.x, xn.y, xn.z, 0, 0, 0) * 10.0f);
 
-gfx::Mesh make_plane(const std::function<vec3(vec3)>& remapper, const bool inverted_indices) {
-  container::Vector<gfx::Vertex> vertex_data;
-  container::Vector<gfx::index_t> index_data;
+  const vec3 xv = vec3{position[0], position[1], position[2]} * 2.0f;
 
-  for (i32 x = 0; x < dim; x++) {
-    for (i32 y = 0; y < dim; y++) {
-      vec3 remapped;
-
-      remapped = remapper({x, y, 0});
-      vertex_data.push(gfx::Vertex{remapped.x, remapped.y, remapped.z});
-
-      remapped = remapper({x + 1, y, 0});
-      vertex_data.push(gfx::Vertex{{remapped.x, remapped.y, remapped.z}});
-
-      remapped = remapper({x, y + 1, 0});
-      vertex_data.push(gfx::Vertex{{remapped.x, remapped.y, remapped.z}});
-
-      remapped = remapper({x + 1, y + 1, 0});
-      vertex_data.push(gfx::Vertex{{remapped.x, remapped.y, remapped.z}});
-
-      remapped = remapper({x, y + 1, 0});
-      vertex_data.push(gfx::Vertex{{remapped.x, remapped.y, remapped.z}});
-
-      remapped = remapper({x + 1, y, 0});
-      vertex_data.push(gfx::Vertex{{remapped.x, remapped.y, remapped.z}});
-    }
-  }
-
-  if (inverted_indices) {
-    for (i32 i = dim * dim * 6 - 1; i >= 0; i--) {
-      index_data.push(i);
-    }
-  } else {
-    for (i32 i = 0; i < dim * dim * 6; i++) {
-      index_data.push(i);
-    }
-  }
-
-  gfx::Mesh mesh = gfx::create_mesh(vertex_data, index_data);
-
-  vertex_data.clear();
-  index_data.clear();
-
-  return mesh;
-}
-
-void create() {
-  constexpr float hd = dim / 2.0f;
-
-  gfx::Mesh m;
-
-  m = make_plane([](vec3 i) -> vec3 { return glm::normalize(vec3{i.x - hd, i.y - hd, hd}) * radius; }, false);
-  world::create(world::Entity({}, comp::Renderable{m, gfx::material::get()}));
-
-  m = make_plane([](vec3 i) -> vec3 { return glm::normalize(vec3{i.x - hd, i.y - hd, -hd}) * radius; }, true);
-  world::create(world::Entity({}, comp::Renderable{m, gfx::material::get()}));
-
-  m = make_plane([](vec3 i) -> vec3 { return glm::normalize(vec3{i.x - hd, -hd, i.y - hd}) * radius; }, false);
-  world::create(world::Entity({}, comp::Renderable{m, gfx::material::get()}));
-
-  m = make_plane([](vec3 i) -> vec3 { return glm::normalize(vec3{i.x - hd, hd, i.y - hd}) * radius; }, true);
-  world::create(world::Entity({}, comp::Renderable{m, gfx::material::get()}));
-
-  m = make_plane([](vec3 i) -> vec3 { return glm::normalize(vec3{-hd, i.y - hd, i.x - hd}) * radius; }, false);
-  world::create(world::Entity({}, comp::Renderable{m, gfx::material::get()}));
-
-  m = make_plane([](vec3 i) -> vec3 { return glm::normalize(vec3{hd, i.y - hd, i.x - hd}) * radius; }, true);
-  world::create(world::Entity({}, comp::Renderable{m, gfx::material::get()}));
-}
-*/
-
-#define MC_IMPLEMENTATION
-#include <rjm/rjm_mc.h>
-
-#define STB_PERLIN_IMPLEMENTATION
-#include <stb/stb_perlin.h>
-
-static float testIsoFn(const float *pos, [[maybe_unused]] float *extra, [[maybe_unused]] void *userparam) {
-  const vec3 x{pos[0], pos[1], pos[2]};
-
-  const vec3 xn = glm::normalize(x) * 2.0f;
-
-  return glm::length2(x) - 90 - std::max(0.0f, stb_perlin_noise3(xn.x, xn.y, xn.z, 0, 0, 0) * 10.0f);
+  return std::sin(xv.x) + std::sin(xv.y) + std::sin(xv.z) - 1.5f;
 }
 
 void Terrain::setup() {
@@ -125,6 +49,9 @@ void Terrain::setup() {
     index_data[n * 3 + 1] = iso_mesh.indices[n * 3 + 1];
     index_data[n * 3 + 2] = iso_mesh.indices[n * 3 + 2];
   }
+
+  assert(vertex_data.size() > 0 && vertex_data.size() < std::numeric_limits<gfx::index_t>::max());
+  assert(index_data.size() > 0);
 
   const gfx::Mesh mesh = gfx::create_mesh(vertex_data, index_data);
 

@@ -27,7 +27,7 @@ void init() {
       .compare = SG_COMPAREFUNC_LESS_EQUAL,
       .write_enabled = true,
   };
-  basic_desc.cull_mode = SG_CULLMODE_FRONT;
+  // basic_desc.cull_mode = SG_CULLMODE_FRONT; // TODO: enable
 
   basic_pipeline = sg_make_pipeline(basic_desc);
 }

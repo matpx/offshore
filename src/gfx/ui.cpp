@@ -9,7 +9,7 @@
 
 #include "../core/log.hpp"
 #include "gfx.hpp"
-#include "sokol_impl.h"
+#include "thirdparty_impl.h"
 #include "window.hpp"
 
 namespace gfx::ui {
