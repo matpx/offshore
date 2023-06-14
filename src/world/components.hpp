@@ -27,7 +27,10 @@ struct Transform {
     world = parent.world * world;
   }
 
-  inline AABB transform_aabb(const AABB& aabb) { // TODO move
+  inline AABB transform_aabb(const AABB& aabb) {  // TODO move
+
+    // TODO: https://zeux.io/2010/10/17/aabb-from-obb-with-component-wise-abs/
+
     vec3 corners[8] = {
         aabb.min,
         {aabb.min.x, aabb.min.y, aabb.max.z},
