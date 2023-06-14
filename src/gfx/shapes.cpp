@@ -148,12 +148,7 @@ void draw_aabb(const AABB& aabb) {
 
 void draw_all_aabb() {
   for (const auto [entity, transform, renderable] : world::registry->view<comp::Transform, comp::Renderable>().each()) {
-    AABB global_aabb = { // TODO precalc gloabl AABB
-        .min = renderable.mesh.local_aabb.min + transform.translation,
-        .max = renderable.mesh.local_aabb.max + transform.translation,
-    };
-
-    draw_aabb(global_aabb);
+    draw_aabb(transform.transform_aabb(renderable.mesh.local_aabb));
   }
 }
 

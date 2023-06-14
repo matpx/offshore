@@ -7,6 +7,7 @@
 
 #include <cassert>
 #include <entt/entity/registry.hpp>
+#include <limits>
 
 #include "../core/log.hpp"
 #include "material.hpp"
@@ -59,9 +60,12 @@ Mesh create_mesh(const std::span<Vertex> vertex_data, const std::span<index_t> i
                                                  .size = vertex_data.size() * sizeof(Vertex),
                                              }};
 
-  AABB aabb = {{0, 0, 0}, {0, 0, 0}};
+  AABB aabb = {
+      .min = vec3(std::numeric_limits<float>::infinity()),
+      .max = -vec3(std::numeric_limits<float>::infinity()),
+  };
 
-  for (const Vertex& vertex : vertex_data) { // TODO: not always needed
+  for (const Vertex& vertex : vertex_data) {  // TODO: not always needed
     if (vertex.positions[0] < aabb.min.x) aabb.min.x = vertex.positions[0];
     if (vertex.positions[1] < aabb.min.y) aabb.min.y = vertex.positions[1];
     if (vertex.positions[2] < aabb.min.z) aabb.min.z = vertex.positions[2];
