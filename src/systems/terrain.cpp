@@ -24,19 +24,16 @@ static float testIsoFn(const float *position, [[maybe_unused]] float *extra, [[m
   return std::sin(glm::length(xv) * 1.0f);
 }
 
-gfx::Mesh build_chunk(const vec3 base_offset) {
-  LOG_DEBUG("chunk create");
-
+gfx::Mesh build_chunk(const vec3 chunk_offset) {
   constexpr float radius = 8.0f;
 
-  float bmin[3] = {-radius, -radius, -radius};
-  float bmax[3] = {+radius, +radius, +radius};
-  float res = 0.5f;
+  const vec3 base_offset = chunk_offset * (radius * 2);
+
+  constexpr float bmin[3] = {-(radius - 1), -(radius - 1), -(radius - 1)};
+  constexpr float bmax[3] = {+(radius - 1), +(radius - 1), +(radius - 1)};
+  constexpr float res = 0.5f;
 
   McMesh iso_mesh = mcGenerate(bmin, bmax, res, testIsoFn, (void *)&base_offset);
-
-  LOG_DEBUG("terrain verts: %d", iso_mesh.nverts);
-  LOG_DEBUG("terrain indices: %d", iso_mesh.ntris * 3);
 
   std::vector<gfx::Vertex> vertex_data(iso_mesh.nverts);
   std::vector<gfx::index_t> index_data(iso_mesh.ntris * 3);
@@ -58,7 +55,13 @@ gfx::Mesh build_chunk(const vec3 base_offset) {
   assert(vertex_data.size() < std::numeric_limits<gfx::index_t>::max());
   assert(index_data.size() > 0);
 
+  LOG_DEBUG("vertices: %d, indices: %d", iso_mesh.nverts, iso_mesh.ntris * 3);
+
   const gfx::Mesh mesh = gfx::create_mesh(vertex_data, index_data);
+  const entt::entity terrain_chunk = world::registry->create();
+
+  world::registry->emplace<comp::Transform>(terrain_chunk, comp::Transform{.translation = base_offset});
+  world::registry->emplace<comp::Renderable>(terrain_chunk, comp::Renderable{mesh, gfx::material::get()});
 
   mcFree(&iso_mesh);
 
@@ -68,13 +71,17 @@ gfx::Mesh build_chunk(const vec3 base_offset) {
 void Terrain::setup() {
   LOG_DEBUG("terrain create");
 
-  const vec3 base_offset = {0, 0, 0};
+  build_chunk({0, 0, 0});
 
-  const gfx::Mesh mesh = build_chunk(base_offset);
-  const entt::entity terrain_chunk = world::registry->create();
+  for (i32 x = -1; x <= 1; x++) {
+    for (i32 y = -1; y <= 1; y++) {
+      for (i32 z = -1; z <= 1; z++) {
+        if (x == 0 && y == 0 && z == 0) continue;
 
-  world::registry->emplace<comp::Transform>(terrain_chunk, comp::Transform{.translation = base_offset});
-  world::registry->emplace<comp::Renderable>(terrain_chunk, comp::Renderable{mesh, gfx::material::get()});
+        build_chunk({x, y, z});
+      }
+    }
+  }
 }
 
 }  // namespace systems

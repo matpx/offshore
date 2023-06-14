@@ -13,7 +13,7 @@ static entt::entity player_entity = entt::null;
 void Player::setup() {
   player_entity = world::registry->create();
 
-  world::registry->emplace<comp::Transform>(player_entity, comp::Transform{.translation = {0, 0, 22}});
+  world::registry->emplace<comp::Transform>(player_entity, comp::Transform{.translation = {0, 0, 50}});
   world::registry->emplace<comp::Player>(player_entity, comp::Player{});
 
   world::main_camera = world::registry->create();
@@ -24,7 +24,7 @@ void Player::setup() {
 
 void Player::update(double delta_time) {
   constexpr float look_multiplier = 0.005f;
-  constexpr float velocity_multiplier = 0.005f;
+  constexpr float velocity_multiplier = 0.02f;
 
   comp::Transform& player_transform = world::registry->get<comp::Transform>(player_entity);
   comp::Transform& camera_transform = world::registry->get<comp::Transform>(world::main_camera);
