@@ -4,7 +4,7 @@
 
 namespace geometry {
 
-AABB aabb_from_vertex_data(std::span<const gfx::Vertex> vertex_data) {
+AABB AABB::from_vertex_data(std::span<const gfx::Vertex> vertex_data) {
   vec3 min = vec3(std::numeric_limits<float>::infinity());
   vec3 max = -vec3(std::numeric_limits<float>::infinity());
 
@@ -26,7 +26,7 @@ AABB aabb_from_vertex_data(std::span<const gfx::Vertex> vertex_data) {
   };
 }
 
-AABB transform_aabb(const AABB& aabb, const mat4 transform_matrix) {
+AABB AABB::transform_aabb(const mat4 transform_matrix) const {
   // https://zeux.io/2010/10/17/aabb-from-obb-with-component-wise-abs/
 
   mat4 rotation_mat = (mat3)transform_matrix;
@@ -37,8 +37,8 @@ AABB transform_aabb(const AABB& aabb, const mat4 transform_matrix) {
     rotation_mat_ptr[i] = std::abs(rotation_mat_ptr[i]);
   }
 
-  const vec3 new_center = transform_matrix * vec4(aabb.center, 1.0f);
-  const vec3 new_extent = rotation_mat * vec4(aabb.extent, 1.0f);
+  const vec3 new_center = transform_matrix * vec4(this->center, 1.0f);
+  const vec3 new_extent = rotation_mat * vec4(this->extent, 1.0f);
 
   return {new_center, new_extent};
 }

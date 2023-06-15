@@ -29,7 +29,7 @@ void update() {
     comp::Renderable* renderable = world::registry->try_get<comp::Renderable>(entity);
 
     if (renderable) {
-      transform.global_aabb = geometry::transform_aabb(renderable->mesh.local_aabb, transform.world);
+      transform.global_aabb = renderable->mesh.local_aabb.transform_aabb(transform.world);
     }
   }
 }

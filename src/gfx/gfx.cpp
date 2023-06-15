@@ -61,7 +61,7 @@ Mesh create_mesh(const std::span<Vertex> vertex_data, const std::span<index_t> i
                                                  .size = vertex_data.size() * sizeof(Vertex),
                                              }};
 
-  geometry::AABB aabb = geometry::aabb_from_vertex_data(vertex_data);
+  geometry::AABB aabb = geometry::AABB::from_vertex_data(vertex_data);
 
   sg_buffer vertex_buffer = sg_make_buffer(vertex_buffer_desc);
 
