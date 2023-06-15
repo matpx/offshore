@@ -8,7 +8,7 @@ namespace gfx {
 
 void init();
 
-Mesh create_mesh(const std::span<Vertex> vertex_data, const std::span<index_t> index_data);
+Mesh create_mesh(const std::span<const Vertex> vertex_data, const std::span<const index_t> index_data);
 
 void begin_frame(entt::entity camera);
 
