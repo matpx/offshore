@@ -27,14 +27,14 @@ static float testIsoFn(const float *position, [[maybe_unused]] float *extra, [[m
 
   UserParam *up = (UserParam *)userparam;
 
-  // const vec3 base_offset = up->base_offset;
+  const vec3 base_offset = up->base_offset;
   const vec3 local_offset = vec3{position[0], position[1], position[2]};
-  // const vec3 xv = base_offset + local_offset;
+  const vec3 xv = base_offset + local_offset;
 
-  return glm::length(local_offset) - up->radius * 0.2f;
+  return glm::length(xv) - 100.0f;
 }
 
-void build_chunk(const vec3 base_offset, const vec3 &chunk_offset, const u32 level) {
+void build_chunk(const vec3 &base_offset, const vec3 &chunk_offset, const u32 level) {
   assert(level > 0);
 
   const float radius = base_radius * level;
@@ -46,8 +46,8 @@ void build_chunk(const vec3 base_offset, const vec3 &chunk_offset, const u32 lev
   const float res = 1.0f * level;
 
   UserParam up = {
-      local_offset,
-      radius,
+      .base_offset = base_radius * base_offset + local_offset,
+      .radius = radius,
   };
 
   McMesh iso_mesh = mcGenerate(bmin, bmax, res, testIsoFn, (void *)&up);
