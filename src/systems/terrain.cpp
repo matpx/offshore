@@ -6,7 +6,6 @@
 #include <cassert>
 #include <entt/entity/registry.hpp>
 #include <glm/ext/quaternion_trigonometric.hpp>
-#include <limits>
 
 #include "../core/log.hpp"
 #include "../gfx/gfx.hpp"

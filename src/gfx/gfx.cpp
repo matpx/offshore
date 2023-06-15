@@ -5,9 +5,7 @@
 #include <sokol/sokol_log.h>
 #include <sokol/util/sokol_color.h>
 
-#include <cassert>
 #include <entt/entity/registry.hpp>
-#include <limits>
 
 #include "../core/geometry.hpp"
 #include "../core/log.hpp"
