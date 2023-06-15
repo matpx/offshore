@@ -13,15 +13,41 @@ std::unique_ptr<entt::registry> registry;
 
 entt::entity main_camera = entt::null;
 
+AABB transform_aabb(const AABB& aabb, const mat4 transform_matrix) {  // TODO move
+  mat4 rotation_mat = (mat3)transform_matrix;
+
+  float* rotation_mat_ptr = glm::value_ptr(rotation_mat);
+
+  for (i32 i = 0; i < 4 * 4; i++) {
+    rotation_mat_ptr[i] = std::abs(rotation_mat_ptr[i]);
+  }
+
+  const vec3 center = (aabb.min + aabb.max) / 2.0f;
+  const vec3 extent = (aabb.max - aabb.min) / 2.0f;
+
+  const vec3 new_center = transform_matrix * vec4(center, 1.0f);
+  const vec3 new_extent = rotation_mat * vec4(extent, 1.0f);
+
+  return {new_center - new_extent, new_center + new_extent};
+}
+
 void init() { registry = std::make_unique<entt::registry>(); }
 
 void update() {
   for (auto [entity, transform] : world::registry->view<comp::Transform>().each()) {
     if (transform.parent_id != entt::null) {
       const comp::Transform& parent_transform = world::registry->get<comp::Transform>(transform.parent_id);
-      transform.update_from_parent(parent_transform);
+
+      transform.world = glm::translate(glm::identity<mat4>(), transform.translation) * glm::toMat4(transform.rotation);
+      transform.world = parent_transform.world * transform.world;
     } else {
-      transform.update();
+      transform.world = glm::translate(glm::identity<mat4>(), transform.translation) * glm::toMat4(transform.rotation);
+    }
+
+    comp::Renderable* renderable = world::registry->try_get<comp::Renderable>(entity);
+
+    if (renderable) {
+      transform.global_aabb = transform_aabb(renderable->mesh.local_aabb, transform.world);
     }
   }
 }

@@ -147,8 +147,8 @@ void draw_aabb(const AABB& aabb) {
 }
 
 void draw_all_aabb() {
-  for (const auto [entity, transform, renderable] : world::registry->view<comp::Transform, comp::Renderable>().each()) {
-    draw_aabb(transform.transform_aabb(renderable.mesh.local_aabb));
+  for (const auto [entity, transform] : world::registry->view<comp::Transform>().each()) {
+    draw_aabb(transform.global_aabb);
   }
 }
 
