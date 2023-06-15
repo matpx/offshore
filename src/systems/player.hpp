@@ -5,11 +5,9 @@
 namespace systems {
 
 struct Player final : System {
-  void setup();
+  void setup() override;
 
-  void update(double delta_time);
-
-  void finish() {}
+  void update(double delta_time) override;
 };
 
 }  // namespace systems

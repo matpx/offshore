@@ -3,9 +3,9 @@
 namespace systems {
 
 struct System {
-  virtual void setup() = 0;
-  virtual void update(double delta_time) = 0;
-  virtual void finish() = 0;
+  virtual void setup(){};
+  virtual void update([[maybe_unused]] double delta_time){};
+  virtual void finish(){};
 };
 
 }  // namespace systems
