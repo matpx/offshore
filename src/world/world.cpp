@@ -13,7 +13,9 @@ std::unique_ptr<entt::registry> registry;
 
 entt::entity main_camera = entt::null;
 
-AABB transform_aabb(const AABB& aabb, const mat4 transform_matrix) {  // TODO move
+AABB transform_aabb(const AABB& aabb, const mat4 transform_matrix) { 
+  // https://zeux.io/2010/10/17/aabb-from-obb-with-component-wise-abs/
+  
   mat4 rotation_mat = (mat3)transform_matrix;
 
   float* rotation_mat_ptr = glm::value_ptr(rotation_mat);
@@ -22,13 +24,10 @@ AABB transform_aabb(const AABB& aabb, const mat4 transform_matrix) {  // TODO mo
     rotation_mat_ptr[i] = std::abs(rotation_mat_ptr[i]);
   }
 
-  const vec3 center = (aabb.min + aabb.max) / 2.0f;
-  const vec3 extent = (aabb.max - aabb.min) / 2.0f;
+  const vec3 new_center = transform_matrix * vec4(aabb.center, 1.0f);
+  const vec3 new_extent = rotation_mat * vec4(aabb.extent, 1.0f);
 
-  const vec3 new_center = transform_matrix * vec4(center, 1.0f);
-  const vec3 new_extent = rotation_mat * vec4(extent, 1.0f);
-
-  return {new_center - new_extent, new_center + new_extent};
+  return {new_center, new_extent};
 }
 
 void init() { registry = std::make_unique<entt::registry>(); }

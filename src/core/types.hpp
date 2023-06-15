@@ -43,6 +43,6 @@ using quat = glm::quat;
 // helper
 
 struct AABB {
-    vec3 min = vec3(0);
-    vec3 max = vec3(0);
+    vec3 center = vec3(0);
+    vec3 extent = vec3(0);
 };

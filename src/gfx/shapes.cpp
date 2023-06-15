@@ -122,10 +122,10 @@ void begin_pass() {
   shapes_pass_active = true;
 }
 
-static void draw_shape(const sshape_element_range_t& element_range, const vec3& position, const vec3& scale) {
+static void draw_shape(const sshape_element_range_t& element_range, const vec3& center, const vec3& scale) {
   assert(shapes_pass_active);
 
-  const mat4 mvp = gfx::get_current_vp() * glm::scale(glm::translate(glm::identity<mat4>(), position), scale);
+  const mat4 mvp = gfx::get_current_vp() * glm::scale(glm::translate(glm::identity<mat4>(), center), scale);
 
   MVP_t MVP = {
       .mvp = mvp,
@@ -135,15 +135,12 @@ static void draw_shape(const sshape_element_range_t& element_range, const vec3& 
   sg_draw(element_range.base_element, element_range.num_elements, 1);
 }
 
-void draw_box(const vec3& position, const vec3& scale) { draw_shape(box_element_range, position, scale); }
+void draw_box(const vec3& center, const vec3& scale) { draw_shape(box_element_range, center, scale); }
 
-void draw_sphere(const vec3& position, const vec3& scale) { draw_shape(sphere_element_range, position, scale); }
+void draw_sphere(const vec3& center, const vec3& scale) { draw_shape(sphere_element_range, center, scale); }
 
 void draw_aabb(const AABB& aabb) {
-  const vec3 scale = aabb.max - aabb.min;
-  const vec3 position = aabb.min + scale * 0.5f;
-
-  draw_box(position, scale);
+  draw_box(aabb.center, aabb.extent * 2.0f);
 }
 
 void draw_all_aabb() {
