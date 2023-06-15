@@ -33,6 +33,8 @@ struct Camera {
   void update() { projection = glm::perspective(fov, (float)width / (float)height, near, far); }
 };
 
+struct TerrainChunk {};
+
 struct Player {};
 
 struct Renderable {

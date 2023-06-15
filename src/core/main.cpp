@@ -43,7 +43,7 @@ int main() {
 
     input::end();
 
-    systems::router::frame(delta_time);
+    systems::router::update(delta_time);
     world::update();
 
     gfx::begin_frame(world::main_camera);

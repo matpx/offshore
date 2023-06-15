@@ -81,6 +81,11 @@ Mesh create_mesh(const std::span<const Vertex> vertex_data, const std::span<cons
   };
 }
 
+void destroy_mesh(const Mesh& mesh) {
+  sg_destroy_buffer(mesh.bindings.index_buffer);
+  sg_destroy_buffer(mesh.bindings.vertex_buffers[0]);
+}
+
 void begin_frame(entt::entity camera) {
   const sg_pass_action pass_action = {
       .colors = {{

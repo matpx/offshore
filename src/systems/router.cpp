@@ -8,13 +8,13 @@ namespace systems::router {
 static Player player;
 static Terrain terrain;
 
-void setup() {
-  player.setup();
-  terrain.setup();
-}
+void setup() { player.setup(); }
 
-void frame(double delta_time) { player.update(delta_time); }
+void update(double delta_time) {
+  terrain.update(delta_time);
+  player.update(delta_time);
+}
 
 void finish() {}
 
-}  // namespace router
+}  // namespace systems::router

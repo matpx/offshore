@@ -14,6 +14,8 @@
 
 namespace systems {
 
+constexpr float base_radius = 8.0f;
+
 struct UserParam {
   vec3 base_offset;
   float radius;
@@ -29,22 +31,22 @@ static float testIsoFn(const float *position, [[maybe_unused]] float *extra, [[m
   const vec3 local_offset = vec3{position[0], position[1], position[2]};
   // const vec3 xv = base_offset + local_offset;
 
-  return glm::length(local_offset) - up->radius * 1.2f;
+  return glm::length(local_offset) - up->radius * 0.2f;
 }
 
-void build_chunk(const vec3 chunk_offset, const u32 level) {
+void build_chunk(const vec3 base_offset, const vec3 &chunk_offset, const u32 level) {
   assert(level > 0);
 
-  const float radius = 8.0f * level;
+  const float radius = base_radius * level;
 
-  const vec3 base_offset = chunk_offset * (radius * 2.0f);
+  const vec3 local_offset = chunk_offset * (radius * 2.0f);
 
   const float bmin[3] = {-radius, -radius, -radius};
   const float bmax[3] = {+radius, +radius, +radius};
   const float res = 1.0f * level;
 
   UserParam up = {
-      base_offset,
+      local_offset,
       radius,
   };
 
@@ -73,8 +75,11 @@ void build_chunk(const vec3 chunk_offset, const u32 level) {
     const gfx::Mesh mesh = gfx::create_mesh(vertex_data, index_data);
     const entt::entity terrain_chunk = world::registry->create();
 
-    world::registry->emplace<comp::Transform>(
-        terrain_chunk, comp::Transform{.translation = base_offset, .rotation = glm::angleAxis(0.5f, vec3{1, 0, 0})});
+    world::registry->emplace<comp::TerrainChunk>(terrain_chunk, comp::TerrainChunk{});
+    world::registry->emplace<comp::Transform>(terrain_chunk,
+                                              comp::Transform{
+                                                  .translation = base_radius * base_offset + local_offset,
+                                              });
     world::registry->emplace<comp::Renderable>(terrain_chunk, comp::Renderable{mesh, gfx::material::get()});
   } else {
     LOG_DEBUG("chunk skipped");
@@ -83,17 +88,17 @@ void build_chunk(const vec3 chunk_offset, const u32 level) {
   mcFree(&iso_mesh);
 }
 
-void Terrain::setup() {
-  LOG_DEBUG("terrain create");
+void rebuild(const vec3 &root_center) {
+  LOG_DEBUG("terrain rebuild");
 
-  build_chunk({0, 0, 0}, 1);
+  build_chunk(root_center, vec3{0, 0, 0}, 1);
 
   for (i32 x = -1; x <= 1; x++) {
     for (i32 y = -1; y <= 1; y++) {
       for (i32 z = -1; z <= 1; z++) {
         if (x == 0 && y == 0 && z == 0) continue;
 
-        build_chunk({x, y, z}, 1);
+        build_chunk(root_center, vec3{x, y, z}, 1);
       }
     }
   }
@@ -103,7 +108,7 @@ void Terrain::setup() {
       for (i32 z = -1; z <= 1; z++) {
         if (x == 0 && y == 0 && z == 0) continue;
 
-        build_chunk({x, y, z}, 3);
+        build_chunk(root_center, vec3{x, y, z}, 3);
       }
     }
   }
@@ -113,8 +118,39 @@ void Terrain::setup() {
       for (i32 z = -1; z <= 1; z++) {
         if (x == 0 && y == 0 && z == 0) continue;
 
-        build_chunk({x, y, z}, 9);
+        build_chunk(root_center, vec3{x, y, z}, 9);
       }
+    }
+  }
+}
+
+void Terrain::update(double delta_time) {
+  static ivec3 root_center = {0, 0, 0};
+  static bool present = false;
+
+  if (!present) {
+    rebuild(root_center);
+
+    present = true;
+  } else {
+    ivec3 camera_translation = world::registry->get<comp::Transform>(world::main_camera).world[3];
+    camera_translation /= base_radius;
+
+    const ivec3 dist = camera_translation - root_center;
+
+    if (dist.x != 0 || dist.y != 0 || dist.z != 0) {
+      LOG_DEBUG("delete terrain");
+      LOG_DEBUG("%s", glm::to_string(root_center + dist).c_str());
+
+      for (const auto &[entity, renderable] : world::registry->view<comp::Renderable, comp::TerrainChunk>().each()) {
+        gfx::destroy_mesh(renderable.mesh);
+
+        world::registry->destroy(entity);
+      }
+
+      root_center = camera_translation;
+
+      rebuild(root_center);
     }
   }
 }
