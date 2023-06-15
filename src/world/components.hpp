@@ -1,7 +1,6 @@
 #pragma once
 
 #include <entt/entity/entity.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "../gfx/renderable.hpp"
 
@@ -12,7 +11,7 @@ struct Transform {
   quat rotation = glm::identity<quat>();
   mat4 world = glm::identity<mat4>();
 
-  AABB global_aabb = {};
+  geometry::AABB global_aabb = {};
 
   entt::entity parent_id = entt::null;
 };

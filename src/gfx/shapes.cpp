@@ -139,7 +139,7 @@ void draw_box(const vec3& center, const vec3& scale) { draw_shape(box_element_ra
 
 void draw_sphere(const vec3& center, const vec3& scale) { draw_shape(sphere_element_range, center, scale); }
 
-void draw_aabb(const AABB& aabb) {
+void draw_aabb(const geometry::AABB& aabb) {
   draw_box(aabb.center, aabb.extent * 2.0f);
 }
 

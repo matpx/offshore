@@ -9,6 +9,7 @@
 #include <entt/entity/registry.hpp>
 #include <limits>
 
+#include "../core/geometry.hpp"
 #include "../core/log.hpp"
 #include "material.hpp"
 #include "renderable.hpp"
@@ -60,25 +61,7 @@ Mesh create_mesh(const std::span<Vertex> vertex_data, const std::span<index_t> i
                                                  .size = vertex_data.size() * sizeof(Vertex),
                                              }};
 
-  vec3 min = vec3(std::numeric_limits<float>::infinity());
-  vec3 max = -vec3(std::numeric_limits<float>::infinity());
-
-  for (const Vertex& vertex : vertex_data) {  // TODO: not always needed
-    if (vertex.positions[0] < min.x) min.x = vertex.positions[0];
-    if (vertex.positions[1] < min.y) min.y = vertex.positions[1];
-    if (vertex.positions[2] < min.z) min.z = vertex.positions[2];
-
-    if (vertex.positions[0] > max.x) max.x = vertex.positions[0];
-    if (vertex.positions[1] > max.y) max.y = vertex.positions[1];
-    if (vertex.positions[2] > max.z) max.z = vertex.positions[2];
-  }
-
-  const vec3 center = (min + max) / 2.0f;
-
-  AABB aabb = {
-      .center = center,
-      .extent = max - center,
-  };
+  geometry::AABB aabb = geometry::aabb_from_vertex_data(vertex_data);
 
   sg_buffer vertex_buffer = sg_make_buffer(vertex_buffer_desc);
 

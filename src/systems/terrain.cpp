@@ -26,9 +26,9 @@ static float testIsoFn(const float *position, [[maybe_unused]] float *extra, [[m
 
   UserParam *up = (UserParam *)userparam;
 
-  const vec3 base_offset = up->base_offset;
+  // const vec3 base_offset = up->base_offset;
   const vec3 local_offset = vec3{position[0], position[1], position[2]};
-  const vec3 xv = base_offset + local_offset;
+  // const vec3 xv = base_offset + local_offset;
 
   return glm::length(local_offset) - up->radius * 1.2f;
 }

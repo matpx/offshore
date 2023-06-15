@@ -39,10 +39,3 @@ using mat3 = glm::mat3;
 using mat4 = glm::mat4;
 
 using quat = glm::quat;
-
-// helper
-
-struct AABB {
-    vec3 center = vec3(0);
-    vec3 extent = vec3(0);
-};

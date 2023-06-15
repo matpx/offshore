@@ -13,23 +13,6 @@ std::unique_ptr<entt::registry> registry;
 
 entt::entity main_camera = entt::null;
 
-AABB transform_aabb(const AABB& aabb, const mat4 transform_matrix) { 
-  // https://zeux.io/2010/10/17/aabb-from-obb-with-component-wise-abs/
-  
-  mat4 rotation_mat = (mat3)transform_matrix;
-
-  float* rotation_mat_ptr = glm::value_ptr(rotation_mat);
-
-  for (i32 i = 0; i < 4 * 4; i++) {
-    rotation_mat_ptr[i] = std::abs(rotation_mat_ptr[i]);
-  }
-
-  const vec3 new_center = transform_matrix * vec4(aabb.center, 1.0f);
-  const vec3 new_extent = rotation_mat * vec4(aabb.extent, 1.0f);
-
-  return {new_center, new_extent};
-}
-
 void init() { registry = std::make_unique<entt::registry>(); }
 
 void update() {
@@ -46,7 +29,7 @@ void update() {
     comp::Renderable* renderable = world::registry->try_get<comp::Renderable>(entity);
 
     if (renderable) {
-      transform.global_aabb = transform_aabb(renderable->mesh.local_aabb, transform.world);
+      transform.global_aabb = geometry::transform_aabb(renderable->mesh.local_aabb, transform.world);
     }
   }
 }
