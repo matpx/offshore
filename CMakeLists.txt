@@ -10,7 +10,7 @@ file(GLOB OffshoreSources CONFIGURE_DEPENDS src/**/*.cpp src/**/*.hpp src/**/*.c
 
 add_executable(offshore ${OffshoreSources})
 
-target_compile_definitions(offshore PRIVATE GLM_FORCE_ALIGNED GLM_FORCE_SSE)
+target_compile_definitions(offshore PRIVATE GLM_FORCE_ALIGNED GLM_FORCE_SSE2)
 
 target_include_directories(offshore SYSTEM PRIVATE thirdparty)
 target_include_directories(offshore SYSTEM PRIVATE assets/shader/include)
