@@ -14,7 +14,9 @@
 
 namespace systems {
 
-constexpr float base_radius = 32.0f;
+constexpr float min_chunk_radius = 32.0f;
+
+static ivec3 terrain_center = {0, 0, 0};
 
 struct UserParams {
   vec3 global_offset;
@@ -34,17 +36,17 @@ static float testIsoFn(const float *position, [[maybe_unused]] float *extra, [[m
   return glm::length(xv) - 100.0f;
 }
 
-ivec2 build_chunk(const vec3 &base_offset, const vec3 &chunk_offset, const u32 level) {
-  assert(level > 0);
+ivec2 build_chunk(const vec3 &chunk_position, const u32 scale) {
+  assert(scale > 0);
 
-  const float scaled_radius = base_radius * level;
+  const float scaled_radius = min_chunk_radius * scale;
 
-  const vec3 local_offset = chunk_offset * (scaled_radius * 2.0f);
-  const vec3 global_offset = base_radius * base_offset + local_offset;
+  const vec3 chunk_offset = chunk_position * (scaled_radius * 2.0f);
+  const vec3 global_offset = chunk_offset + min_chunk_radius * (vec3)terrain_center;
 
   const float bmin[3] = {-scaled_radius, -scaled_radius, -scaled_radius};
   const float bmax[3] = {+scaled_radius, +scaled_radius, +scaled_radius};
-  const float res = 4.0f * level;
+  const float res = 4.0f * scale;
 
   UserParams up = {
       global_offset,
@@ -87,17 +89,17 @@ ivec2 build_chunk(const vec3 &base_offset, const vec3 &chunk_offset, const u32 l
   return {vertex_data.size(), index_data.size()};
 }
 
-void rebuild(const vec3 &root_center) {
+void rebuild() {
   ivec2 vertex_index_count = {0, 0};
 
-  vertex_index_count += build_chunk(root_center, vec3{0, 0, 0}, 1);
+  vertex_index_count += build_chunk(vec3{0, 0, 0}, 1);
 
   for (i32 x = -1; x <= 1; x++) {
     for (i32 y = -1; y <= 1; y++) {
       for (i32 z = -1; z <= 1; z++) {
         if (x == 0 && y == 0 && z == 0) continue;
 
-        vertex_index_count += build_chunk(root_center, vec3{x, y, z}, 1);
+        vertex_index_count += build_chunk(vec3{x, y, z}, 1);
       }
     }
   }
@@ -107,7 +109,7 @@ void rebuild(const vec3 &root_center) {
       for (i32 z = -1; z <= 1; z++) {
         if (x == 0 && y == 0 && z == 0) continue;
 
-        vertex_index_count += build_chunk(root_center, vec3{x, y, z}, 3);
+        vertex_index_count += build_chunk(vec3{x, y, z}, 3);
       }
     }
   }
@@ -117,7 +119,7 @@ void rebuild(const vec3 &root_center) {
       for (i32 z = -1; z <= 1; z++) {
         if (x == 0 && y == 0 && z == 0) continue;
 
-        vertex_index_count += build_chunk(root_center, vec3{x, y, z}, 9);
+        vertex_index_count += build_chunk(vec3{x, y, z}, 9);
       }
     }
   }
@@ -125,31 +127,21 @@ void rebuild(const vec3 &root_center) {
   LOG_DEBUG("terrain rebuild, vertices: %d, indices: %d", vertex_index_count.x, vertex_index_count.y);
 }
 
+void Terrain::setup() { rebuild(); }
+
 void Terrain::update([[maybe_unused]] double delta_time) {
-  static ivec3 root_center = {0, 0, 0};
-  static bool present = false;
+  const ivec3 camera_translation = world::registry->get<comp::Transform>(world::main_camera).world[3] / min_chunk_radius;
+  const ivec3 camera_to_root = camera_translation - terrain_center;
 
-  if (!present) {
-    rebuild(root_center);
-
-    present = true;
-  } else {
-    ivec3 camera_translation = world::registry->get<comp::Transform>(world::main_camera).world[3];
-    camera_translation /= base_radius;
-
-    const ivec3 dist = camera_translation - root_center;
-
-    if (dist.x != 0 || dist.y != 0 || dist.z != 0) {
-      for (const auto &[entity, renderable] : world::registry->view<comp::Renderable, comp::TerrainChunk>().each()) {
-        gfx::destroy_mesh(renderable.mesh);
-
-        world::registry->destroy(entity);
-      }
-
-      root_center = camera_translation;
-
-      rebuild(root_center);
+  if (camera_to_root.x != 0 || camera_to_root.y != 0 || camera_to_root.z != 0) {
+    for (const auto &[entity, renderable] : world::registry->view<comp::Renderable, comp::TerrainChunk>().each()) {
+      gfx::destroy_mesh(renderable.mesh);
+      world::registry->destroy(entity);
     }
+
+    terrain_center = camera_translation;
+
+    rebuild();
   }
 }
 

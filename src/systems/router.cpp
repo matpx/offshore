@@ -8,7 +8,10 @@ namespace systems::router {
 static Player player;
 static Terrain terrain;
 
-void setup() { player.setup(); }
+void setup() {
+  terrain.setup();
+  player.setup();
+}
 
 void update(double delta_time) {
   terrain.update(delta_time);
