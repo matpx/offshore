@@ -32,13 +32,13 @@ target_compile_definitions(
 if(MSVC)
   target_compile_definitions(offshore PRIVATE _HAS_EXCEPTIONS=0)
 
-  target_include_directories(offshore PRIVATE "platform/win32/include")
-  target_link_directories(offshore PRIVATE "platform/win32/lib")
+  target_include_directories(offshore PRIVATE platform/win32/include)
+  target_link_directories(offshore PRIVATE platform/win32/lib)
   target_link_libraries(offshore PRIVATE SDL2)
 
   target_compile_options(offshore PRIVATE /W4 /GR-)
 
-  configure_file("platform/win32/lib/SDL2.dll" ${CMAKE_BINARY_DIR} COPYONLY)
+  configure_file(platform/win32/lib/SDL2.dll ${CMAKE_BINARY_DIR} COPYONLY)
 else()
   target_compile_definitions(offshore PRIVATE _GLIBCXX_DEBUG _LIBCPP_DEBUG)
 
