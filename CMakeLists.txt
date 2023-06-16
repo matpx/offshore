@@ -36,7 +36,7 @@ if(MSVC)
   target_link_directories(offshore PRIVATE platform/win32/lib)
   target_link_libraries(offshore PRIVATE SDL2)
 
-  target_compile_options(offshore PRIVATE /W4 /GR-)
+  target_compile_options(offshore PRIVATE /W4 /EHs-c- /GR-)
 
   configure_file(platform/win32/lib/SDL2.dll ${CMAKE_BINARY_DIR} COPYONLY)
 else()
