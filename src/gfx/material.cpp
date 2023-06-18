@@ -23,6 +23,7 @@ void init() {
   basic_desc.layout.attrs[ATTR_vs_a_position] = {.format = SG_VERTEXFORMAT_FLOAT3};
   basic_desc.layout.attrs[ATTR_vs_a_normal] = {.format = SG_VERTEXFORMAT_FLOAT3};
   basic_desc.index_type = SG_INDEXTYPE_UINT16;
+  // basic_desc.primitive_type = SG_PRIMITIVETYPE_LINES;
   basic_desc.depth = {
       .compare = SG_COMPAREFUNC_LESS_EQUAL,
       .write_enabled = true,

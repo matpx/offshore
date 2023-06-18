@@ -4,6 +4,7 @@
 #include <stb/stb_perlin.h>
 
 #include <cassert>
+#include <cmath>
 #include <entt/entity/registry.hpp>
 #include <glm/ext/quaternion_trigonometric.hpp>
 
@@ -13,6 +14,12 @@
 #include "../world/world.hpp"
 
 namespace systems {
+
+enum class TerrainLOD {
+  HIGH = 0,
+  MEDIUM = 1,
+  LOW = 2,
+};
 
 constexpr float min_chunk_radius = 32.0f;
 
@@ -36,21 +43,19 @@ static float testIsoFn(const float *position, [[maybe_unused]] float *extra, [[m
   return glm::length(xv) - 100.0f;
 }
 
-ivec2 build_chunk(const vec3 &chunk_position, const u32 scale) {
-  assert(scale > 0);
+ivec2 build_chunk(const vec3 &chunk_position, const TerrainLOD level) {
+  const float radius = min_chunk_radius * std::pow(3.0f, (float)level);
 
-  const float scaled_radius = min_chunk_radius * scale;
-
-  const vec3 chunk_offset = chunk_position * (scaled_radius * 2.0f);
+  const vec3 chunk_offset = chunk_position * (radius * 2.0f);
   const vec3 global_offset = chunk_offset + min_chunk_radius * (vec3)terrain_center;
 
-  const float bmin[3] = {-scaled_radius, -scaled_radius, -scaled_radius};
-  const float bmax[3] = {+scaled_radius, +scaled_radius, +scaled_radius};
-  const float res = 4.0f * scale;
+  const float bmin[3] = {-radius, -radius, -radius};
+  const float bmax[3] = {+radius, +radius, +radius};
+  const float res = 10.0f * ((float)level + 1.0f);
 
   UserParams up = {
       global_offset,
-      scaled_radius,
+      radius,
   };
 
   McMesh iso_mesh = mcGenerate(bmin, bmax, res, testIsoFn, (void *)&up);
@@ -92,14 +97,14 @@ ivec2 build_chunk(const vec3 &chunk_position, const u32 scale) {
 void rebuild() {
   ivec2 vertex_index_count = {0, 0};
 
-  vertex_index_count += build_chunk(vec3{0, 0, 0}, 1);
+  vertex_index_count += build_chunk(vec3{0, 0, 0}, TerrainLOD::HIGH);
 
   for (i32 x = -1; x <= 1; x++) {
     for (i32 y = -1; y <= 1; y++) {
       for (i32 z = -1; z <= 1; z++) {
         if (x == 0 && y == 0 && z == 0) continue;
 
-        vertex_index_count += build_chunk(vec3{x, y, z}, 1);
+        vertex_index_count += build_chunk(vec3{x, y, z}, TerrainLOD::HIGH);
       }
     }
   }
@@ -109,7 +114,7 @@ void rebuild() {
       for (i32 z = -1; z <= 1; z++) {
         if (x == 0 && y == 0 && z == 0) continue;
 
-        vertex_index_count += build_chunk(vec3{x, y, z}, 3);
+        vertex_index_count += build_chunk(vec3{x, y, z}, TerrainLOD::MEDIUM);
       }
     }
   }
@@ -119,7 +124,7 @@ void rebuild() {
       for (i32 z = -1; z <= 1; z++) {
         if (x == 0 && y == 0 && z == 0) continue;
 
-        vertex_index_count += build_chunk(vec3{x, y, z}, 9);
+        vertex_index_count += build_chunk(vec3{x, y, z}, TerrainLOD::LOW);
       }
     }
   }
@@ -130,7 +135,8 @@ void rebuild() {
 void Terrain::setup() { rebuild(); }
 
 void Terrain::update([[maybe_unused]] double delta_time) {
-  const ivec3 camera_translation = world::registry->get<comp::Transform>(world::main_camera).world[3] / min_chunk_radius;
+  const ivec3 camera_translation =
+      world::registry->get<comp::Transform>(world::main_camera).world[3] / min_chunk_radius;
   const ivec3 camera_to_root = camera_translation - terrain_center;
 
   if (camera_to_root.x != 0 || camera_to_root.y != 0 || camera_to_root.z != 0) {
