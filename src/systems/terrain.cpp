@@ -40,7 +40,7 @@ static float testIsoFn(const float *position, [[maybe_unused]] float *extra, [[m
   const vec3 local_offset = vec3{position[0], position[1], position[2]};
   const vec3 xv = base_offset + local_offset;
 
-  return glm::length(xv) - 100.0f;
+  return glm::length(xv) - 600.0f;
 }
 
 ivec2 build_chunk(const vec3 &chunk_position, const TerrainLOD level) {

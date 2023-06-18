@@ -46,7 +46,7 @@ static void init_pipeline() {
   unlit_desc.index_type = SG_INDEXTYPE_NONE;
   unlit_desc.depth = {
       .compare = SG_COMPAREFUNC_LESS_EQUAL,
-      .write_enabled = true,
+      .write_enabled = false,
   };
 
   unlit_pipeline = sg_make_pipeline(unlit_desc);
