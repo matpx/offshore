@@ -49,9 +49,9 @@ ivec2 build_chunk(const vec3 &chunk_position, const TerrainLOD level) {
   const vec3 chunk_offset = chunk_position * (radius * 2.0f);
   const vec3 global_offset = chunk_offset + min_chunk_radius * (vec3)terrain_center;
 
-  const float bmin[3] = {-radius, -radius, -radius};
-  const float bmax[3] = {+radius, +radius, +radius};
-  const float res = 10.0f * ((float)level + 1.0f);
+  const float bmin[3] = {-(radius), -(radius), -(radius)};
+  const float bmax[3] = {+(radius), +(radius), +(radius)};
+  const float res = 8.0f * ((float)level + 1.0f);
 
   UserParams up = {
       global_offset,

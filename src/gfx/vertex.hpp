@@ -11,4 +11,8 @@ struct Vertex {
     float normal[3];
 };
 
+struct SimpleVertex {
+    float positions[3];
+};
+
 }

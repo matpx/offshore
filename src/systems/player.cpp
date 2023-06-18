@@ -13,7 +13,7 @@ static entt::entity player_entity = entt::null;
 void Player::setup() {
   player_entity = world::registry->create();
 
-  world::registry->emplace<comp::Transform>(player_entity, comp::Transform{.translation = {0, 0, 120}});
+  world::registry->emplace<comp::Transform>(player_entity, comp::Transform{.translation = {0, 0, 10}});
   world::registry->emplace<comp::Player>(player_entity, comp::Player{});
 
   world::main_camera = world::registry->create();

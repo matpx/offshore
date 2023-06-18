@@ -9,8 +9,6 @@ void init();
 
 void begin_pass();
 
-void draw_sphere(const vec3& position, const vec3& scale = {1, 1, 1});
-
 void draw_box(const vec3& position, const vec3& scale = {1, 1, 1});
 
 void draw_aabb(const geometry::AABB& aabb);

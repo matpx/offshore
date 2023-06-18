@@ -8,7 +8,6 @@
 #include <sokol/sokol_gfx.h>
 #include <sokol/sokol_log.h>
 #include <sokol/util/sokol_nuklear.h>
-#include <sokol/util/sokol_shape.h>
 
 #define MC_IMPLEMENTATION
 #include <rjm/rjm_mc.h>
