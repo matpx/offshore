@@ -1,8 +1,9 @@
 #include "window.hpp"
 
+#include <SDL2/SDL.h>
+
 #include <cassert>
 
-#include <SDL2/SDL.h>
 #include "../core/log.hpp"
 #include "../core/types.hpp"
 
@@ -28,7 +29,7 @@ void init() {
   LOG_DEBUG("SDL_version: %d.%d.%d", sdl_version.major, sdl_version.minor, sdl_version.patch);
 
   window = SDL_CreateWindow("game", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, window_width, window_height,
-                            SDL_WINDOW_OPENGL);
+                            SDL_WINDOW_VULKAN);
 
   if (window == nullptr) {
     FATAL("SDL_CreateWindow() failed");

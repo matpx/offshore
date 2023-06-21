@@ -19,22 +19,12 @@ namespace gfx {
 
 static_assert(sizeof(index_t) == 2);
 
-static SDL_GLContext context = nullptr;
-
 static mat4 current_vp = mat4(1.0);
 
 void init() {
   LOG_INFO("gfx::init()");
 
   window::init();
-
-  assert(context == nullptr);
-
-  context = SDL_GL_CreateContext(window::get_sdl_window());
-
-  if (context == nullptr) {
-    FATAL("SDL_GL_CreateContext() failed");
-  }
 
   // sg_desc desc = {
   //     .buffer_pool_size = 256,
@@ -133,15 +123,11 @@ void end_frame() {
 void present() { SDL_GL_SwapWindow(window::get_sdl_window()); }
 
 void finish() {
-  assert(context != nullptr);
-
   // ui::finish();
   shapes::finish();
   material::finish();
 
   // sg_shutdown();
-
-  SDL_GL_DeleteContext(context);
 
   window::finish();
 
