@@ -16,7 +16,7 @@ target_compile_definitions(offshore PRIVATE GLM_FORCE_ALIGNED GLM_FORCE_SSE2)
 
 target_include_directories(offshore SYSTEM PRIVATE thirdparty)
 target_include_directories(offshore SYSTEM PRIVATE assets/shader/include)
-# target_link_options(offshore PRIVATE -fsanitize=address -fno-omit-frame-pointer)
+target_link_options(offshore PRIVATE -fsanitize=address -fno-omit-frame-pointer)
 
 target_compile_definitions(
   offshore
@@ -31,6 +31,10 @@ target_compile_definitions(
   SOKOL_NUKLEAR_NO_SOKOL_APP
 )
 
+add_subdirectory(thirdparty/nvrhi)
+
+target_link_libraries(offshore PRIVATE nvrhi_vk nvrhi)
+
 if(MSVC)
   target_compile_definitions(offshore PRIVATE _HAS_EXCEPTIONS=0)
 
@@ -38,15 +42,15 @@ if(MSVC)
   target_link_directories(offshore PRIVATE platform/win32/lib)
   target_link_libraries(offshore PRIVATE SDL2)
 
-  target_compile_options(offshore PRIVATE /W4 /EHs-c- /GR- /Od)
+  target_compile_options(offshore PRIVATE /W4 /Od)
 
   configure_file(platform/win32/lib/SDL2.dll ${CMAKE_BINARY_DIR} COPYONLY)
 else()
   target_compile_definitions(offshore PRIVATE _GLIBCXX_DEBUG _LIBCPP_DEBUG)
 
-  target_compile_options(offshore PRIVATE -Wall -Wextra -Wpedantic -fno-exceptions -fno-rtti)
+  target_compile_options(offshore PRIVATE -Wall -Wextra -Wpedantic)
   target_compile_options(offshore PRIVATE -O0 -g)
 
-  target_link_options(offshore PRIVATE -lSDL2 -lGL)
+  target_link_options(offshore PRIVATE -lSDL2)
 endif()
 

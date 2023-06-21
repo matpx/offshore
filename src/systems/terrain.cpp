@@ -89,7 +89,7 @@ ivec2 build_chunk(const vec3 &chunk_position, const TerrainLOD level) {
     world::registry->emplace<comp::Renderable>(terrain_chunk, comp::Renderable{mesh, gfx::material::get()});
   }
 
-  mcFree(&iso_mesh);
+  mcFree(&iso_mesh); // TODO LEAK
 
   return {vertex_data.size(), index_data.size()};
 }

@@ -13,7 +13,7 @@ add_subdirectory(nvrhi)
 add_executable(nvport main.cpp VkBootstrap.cpp VkBootstrap.h VkBootstrapDispatch.h)
 target_link_libraries(nvport PUBLIC nvrhi_vk nvrhi)
 
-# target_link_options(nvport PRIVATE -fsanitize=address -fno-omit-frame-pointer)
+target_link_options(nvport PRIVATE -fsanitize=address -fno-omit-frame-pointer)
 
 # target_include_directories(nvport PUBLIC ${Vulkan_INCLUDE_DIRS})
 # target_link_directories(nvport PUBLIC ${Vulkan_LIBRARY_DIRS})

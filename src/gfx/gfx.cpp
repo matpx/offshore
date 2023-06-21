@@ -9,6 +9,7 @@
 
 #include "../core/geometry.hpp"
 #include "../core/log.hpp"
+#include "device.hpp"
 #include "material.hpp"
 #include "renderable.hpp"
 #include "shapes.hpp"
@@ -38,6 +39,7 @@ void init() {
 
   // sg_setup(desc);
 
+  device::init();
   material::init();
   shapes::init();
   // ui::init();
@@ -120,12 +122,15 @@ void end_frame() {
   // sg_commit();
 }
 
-void present() { SDL_GL_SwapWindow(window::get_sdl_window()); }
+void present() { 
+  // SDL_GL_SwapWindow(window::get_sdl_window()); 
+}
 
 void finish() {
   // ui::finish();
   shapes::finish();
   material::finish();
+  device::finish();
 
   // sg_shutdown();
 
