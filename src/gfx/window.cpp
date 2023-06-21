@@ -19,7 +19,7 @@ void init() {
 
   assert(window == nullptr);
 
-  if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0) {
     FATAL("SDL_Init() failed");
   }
 

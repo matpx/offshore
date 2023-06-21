@@ -10,28 +10,44 @@
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
+static vkb::Instance vkb_inst;
+static VkSurfaceKHR surface;
+static vkb::Device vkb_device;
+static vkb::Swapchain swapchain;
+
+static nvrhi::DeviceHandle nvrhiDevice = nullptr;
+
 namespace gfx::device {
 
 void init() {
-  // SDL_Vulkan_GetInstanceExtensions
-  // debug utils messanger
+  u32 extension_count = 0;
+  SDL_Vulkan_GetInstanceExtensions(window::get_sdl_window(), &extension_count, nullptr);
+
+  assert(extension_count > 0);
+
+  std::vector<const char*> instance_extensions(extension_count);
+  SDL_Vulkan_GetInstanceExtensions(window::get_sdl_window(), &extension_count, instance_extensions.data());
 
   vkb::InstanceBuilder builder;
-  auto inst_ret = builder.set_app_name("Example Vulkan Application")
-                      .request_validation_layers()
-                      .use_default_debug_messenger()
-                      .require_api_version(VKB_VK_API_VERSION_1_2)
+  builder.set_app_name("Example Vulkan Application")
+      .use_default_debug_messenger()
+      .require_api_version(VKB_VK_API_VERSION_1_2)
 #ifndef NDEBUG
-                      .enable_validation_layers()
+      .enable_validation_layers();
 #endif
-                      .build();
+
+  for (const auto extension : instance_extensions) {
+    builder.enable_extension(extension);
+  }
+
+  auto inst_ret = builder.build();
   if (!inst_ret) {
     const auto msg = inst_ret.error().message();
     FATAL("Failed to create Vulkan instance. Error: %s", msg.c_str());
   }
-  vkb::Instance vkb_inst = inst_ret.value();
+  vkb_inst = inst_ret.value();
 
-  VkSurfaceKHR surface;
+  ;
   if (SDL_Vulkan_CreateSurface(gfx::window::get_sdl_window(), vkb_inst.instance, &surface) != SDL_TRUE) {
     FATAL("SDL_Vulkan_CreateSurface() failed");
   }
@@ -53,7 +69,7 @@ void init() {
     const auto msg = dev_ret.error().message();
     FATAL("Failed to create Vulkan device. Error: %s", msg.c_str());
   }
-  vkb::Device vkb_device = dev_ret.value();
+  vkb_device = dev_ret.value();
 
   auto graphics_queue_ret = vkb_device.get_queue(vkb::QueueType::graphics);
   if (!graphics_queue_ret) {
@@ -74,12 +90,12 @@ void init() {
     const auto msg = swap_ret.error().message();
     FATAL("Failed to get Swapchain. Error: %s", msg.c_str());
   }
-  vkb::Swapchain swapchain = swap_ret.value();
+  swapchain = swap_ret.value();
 
-  const std::vector<std::string> extensions = vkb_device.physical_device.get_extensions();
-  static std::vector<const char*> extensions_cstr;
+  const std::vector<std::string> device_extensions = vkb_device.physical_device.get_extensions();
+  static std::vector<const char*> device_extensions_cstr;
 
-  std::transform(extensions.begin(), extensions.end(), std::back_inserter(extensions_cstr),
+  std::transform(device_extensions.begin(), device_extensions.end(), std::back_inserter(device_extensions_cstr),
                  [](const auto& s) { return s.c_str(); });
 
   class NvrhiMessageCallback : nvrhi::IMessageCallback {
@@ -98,8 +114,8 @@ void init() {
     deviceDesc.device = vkb_device.device;
     deviceDesc.graphicsQueue = graphics_queue_ret.value();
     deviceDesc.graphicsQueueIndex = graphics_queue_index_ret.value();
-    deviceDesc.deviceExtensions = extensions_cstr.data();
-    deviceDesc.numDeviceExtensions = extensions_cstr.size();
+    deviceDesc.deviceExtensions = device_extensions_cstr.data();
+    deviceDesc.numDeviceExtensions = device_extensions_cstr.size();
 
     const static vk::DynamicLoader dl;
     const static PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr =
@@ -109,20 +125,21 @@ void init() {
     VULKAN_HPP_DEFAULT_DISPATCHER.init(deviceDesc.instance);
     VULKAN_HPP_DEFAULT_DISPATCHER.init(deviceDesc.device);
 
-    nvrhi::DeviceHandle nvrhiDevice = nvrhi::vulkan::createDevice(deviceDesc);
+    nvrhiDevice = nvrhi::vulkan::createDevice(deviceDesc);
 
 #ifndef NDEBUG
-    nvrhi::DeviceHandle nvrhiValidationLayer = nvrhi::validation::createValidationLayer(nvrhiDevice);
-    nvrhiDevice = nvrhiValidationLayer;
+    nvrhiDevice = nvrhi::validation::createValidationLayer(nvrhiDevice);
 #endif
   }
+}
+
+void finish() {
+  nvrhiDevice = nullptr;
 
   vkb::destroy_swapchain(swapchain);
   vkb::destroy_device(vkb_device);
   vkb::destroy_surface(vkb_inst, surface);
   vkb::destroy_instance(vkb_inst);
 }
-
-void finish() {}
 
 }  // namespace gfx::device
