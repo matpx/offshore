@@ -53,9 +53,9 @@ int main() {
     gfx::shapes::draw_all_aabb();
     gfx::shapes::finish_pass();
 
-    gfx::ui::finish_pass();
+    // gfx::ui::finish_pass();
     // ...
-    gfx::ui::begin_pass();
+    // gfx::ui::begin_pass();
 
     gfx::end_frame();
 
