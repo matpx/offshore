@@ -33,6 +33,7 @@ target_compile_definitions(
 
 add_subdirectory(thirdparty/nvrhi)
 
+target_include_directories(offshore SYSTEM PRIVATE thirdparty/nvrhi/include)
 target_link_libraries(offshore PRIVATE nvrhi_vk nvrhi)
 
 if(MSVC)
