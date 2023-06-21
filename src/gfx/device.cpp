@@ -25,14 +25,14 @@ void init() {
 
   assert(extension_count > 0);
 
-  std::vector<const char*> instance_extensions(extension_count);
+  static std::vector<const char*> instance_extensions(extension_count);
   SDL_Vulkan_GetInstanceExtensions(window::get_sdl_window(), &extension_count, instance_extensions.data());
 
   vkb::InstanceBuilder builder;
-  builder.set_app_name("Example Vulkan Application")
-      .use_default_debug_messenger()
+  builder.set_app_name("offshore")
       .require_api_version(VKB_VK_API_VERSION_1_2)
 #ifndef NDEBUG
+      .use_default_debug_messenger()
       .enable_validation_layers();
 #endif
 
@@ -114,6 +114,8 @@ void init() {
     deviceDesc.device = vkb_device.device;
     deviceDesc.graphicsQueue = graphics_queue_ret.value();
     deviceDesc.graphicsQueueIndex = graphics_queue_index_ret.value();
+    deviceDesc.instanceExtensions = instance_extensions.data();
+    deviceDesc.numInstanceExtensions = instance_extensions.size();
     deviceDesc.deviceExtensions = device_extensions_cstr.data();
     deviceDesc.numDeviceExtensions = device_extensions_cstr.size();
 
