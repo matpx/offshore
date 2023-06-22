@@ -10,7 +10,11 @@ file(GLOB OffshoreSources CONFIGURE_DEPENDS src/**/*.cpp src/**/*.hpp src/**/*.c
 
 file(GLOB ThirdpartySources CONFIGURE_DEPENDS thirdparty/vk-bootstrap/*.cpp thirdparty/vk-bootstrap/*.h)
 
+set(OFFSHORE_BIN_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
+
 add_executable(offshore ${OffshoreSources} ${ThirdpartySources})
+
+set_target_properties (offshore PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OFFSHORE_BIN_OUTPUT_PATH}/$<CONFIG>")
 
 target_compile_definitions(offshore PRIVATE GLM_FORCE_ALIGNED GLM_FORCE_SSE2)
 
@@ -31,7 +35,11 @@ target_compile_definitions(
   SOKOL_NUKLEAR_NO_SOKOL_APP
 )
 
+set(NVRHI_WITH_SHADER_COMPILER OFF CACHE BOOL "Build the NVRHI shader compiler executable")
 add_subdirectory(thirdparty/nvrhi)
+
+set (SHADERMAKE_BIN_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/tools/ShaderMake/bin" CACHE STRING "")
+add_subdirectory(tools/ShaderMake)
 
 target_include_directories(offshore SYSTEM PRIVATE thirdparty/nvrhi/include)
 target_link_libraries(offshore PRIVATE nvrhi_vk nvrhi)
@@ -45,7 +53,7 @@ if(MSVC)
 
   target_compile_options(offshore PRIVATE /W4 /Od)
 
-  configure_file(platform/win32/lib/SDL2.dll ${CMAKE_BINARY_DIR} COPYONLY)
+  configure_file(platform/win32/lib/SDL2.dll ${OFFSHORE_BIN_OUTPUT_PATH} COPYONLY)
 else()
   target_compile_definitions(offshore PRIVATE _GLIBCXX_DEBUG _LIBCPP_DEBUG)
 
