@@ -38,7 +38,7 @@ target_compile_definitions(
 set(NVRHI_WITH_SHADER_COMPILER OFF CACHE BOOL "Build the NVRHI shader compiler executable")
 add_subdirectory(thirdparty/nvrhi)
 
-set (SHADERMAKE_BIN_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/tools/ShaderMake/bin" CACHE STRING "")
+set (SHADERMAKE_BIN_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/tools/bin" CACHE STRING "")
 add_subdirectory(tools/ShaderMake)
 
 target_include_directories(offshore SYSTEM PRIVATE thirdparty/nvrhi/include)

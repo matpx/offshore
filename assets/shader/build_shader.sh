@@ -2,5 +2,5 @@
 
 cd "$(dirname "$0")"
 
-../../tools/bin/linux/sokol-shdc -i unlit.glsl -o include/unlit.h --slang=glsl330
-../../tools/bin/linux/sokol-shdc -i debug.glsl -o include/debug.h --slang=glsl330
+../../tools/ShaderMake/bin/ShaderMake -c shader.cfg -o include --header -p SPIRV --compiler ${VULKAN_SDK}/bin/dxc
+../../tools/ShaderMake/bin/ShaderMake -c shader.cfg -o include --header -p SPIRV --compiler ${VULKAN_SDK}/bin/dxc
