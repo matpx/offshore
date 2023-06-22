@@ -115,6 +115,8 @@ void init() {
                           .format = (VkFormat)nvrhi::vulkan::convertFormat(swapchain_format),
                           .colorSpace = swapchain_colorspace,
                       })
+                      .set_image_usage_flags(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+                                             VK_IMAGE_USAGE_SAMPLED_BIT)
                       .set_composite_alpha_flags(VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
                       .build();
 
