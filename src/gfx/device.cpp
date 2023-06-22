@@ -61,7 +61,6 @@ void init() {
   }
   vkb_inst = inst_ret.value();
 
-  ;
   if (SDL_Vulkan_CreateSurface(gfx::window::get_sdl_window(), vkb_inst.instance, &surface) != SDL_TRUE) {
     FATAL("SDL_Vulkan_CreateSurface() failed");
   }
@@ -204,6 +203,9 @@ void begin_frame() {
 }
 
 void finish_frame() {
+  // auto framebufferDesc = nvrhi::FramebufferDesc().addColorAttachment(std::get<1>(swapchain_images[swapchain_index]));
+  // nvrhi::FramebufferHandle framebuffer = nvrhiDevice->createFramebuffer(framebufferDesc);
+
   nvrhiDevice->queueSignalSemaphore(nvrhi::CommandQueue::Graphics, present_semaphore, 0);
 
   barrier_command_list->open();  // umm...
