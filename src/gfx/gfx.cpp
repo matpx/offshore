@@ -103,6 +103,8 @@ void begin_frame(entt::entity camera) {
   }
 
   current_vp = camera_component.projection * glm::inverse(camera_transform.world);
+
+  device::begin_frame();
 }
 
 void draw_world() {
@@ -120,10 +122,8 @@ void draw_world() {
 void end_frame() {
   // sg_end_pass();
   // sg_commit();
-}
 
-void present() { 
-  // SDL_GL_SwapWindow(window::get_sdl_window()); 
+  device::finish_frame();
 }
 
 void finish() {

@@ -10,14 +10,24 @@
 
 VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
+namespace gfx::device {
+
 static vkb::Instance vkb_inst;
 static VkSurfaceKHR surface;
 static vkb::Device vkb_device;
-static vkb::Swapchain swapchain;
+static vkb::Swapchain vkb_swapchain;
 
-static nvrhi::DeviceHandle nvrhiDevice = nullptr;
+static vk::Device device = nullptr;
+static vk::Queue present_queue = nullptr;
+static vk::SwapchainKHR swapchain = nullptr;
 
-namespace gfx::device {
+static nvrhi::vulkan::DeviceHandle nvrhiDevice = nullptr;
+static nvrhi::DeviceHandle nvrhiDeviceWrapped = nullptr;
+
+static vk::Semaphore present_semaphore = nullptr;
+static u32 swapchain_index = 0;
+
+nvrhi::CommandListHandle barrier_command_list = nullptr;
 
 void init() {
   u32 extension_count = 0;
@@ -71,6 +81,8 @@ void init() {
   }
   vkb_device = dev_ret.value();
 
+  device = vkb_device.device;
+
   auto graphics_queue_ret = vkb_device.get_queue(vkb::QueueType::graphics);
   if (!graphics_queue_ret) {
     const auto msg = graphics_queue_ret.error().message();
@@ -83,6 +95,14 @@ void init() {
     FATAL("Failed to get graphics queue index. Error: %s", msg.c_str());
   }
 
+  auto present_queue_ret = vkb_device.get_queue(vkb::QueueType::present);
+  if (!present_queue_ret) {
+    const auto msg = present_queue_ret.error().message();
+    FATAL("Failed to get present queue. Error: %s", msg.c_str());
+  }
+
+  present_queue = present_queue_ret.value();
+
   vkb::SwapchainBuilder swapchain_builder{vkb_device};
   auto swap_ret = swapchain_builder.set_composite_alpha_flags(VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR).build();
 
@@ -90,7 +110,9 @@ void init() {
     const auto msg = swap_ret.error().message();
     FATAL("Failed to get Swapchain. Error: %s", msg.c_str());
   }
-  swapchain = swap_ret.value();
+  vkb_swapchain = swap_ret.value();
+
+  swapchain = vkb_swapchain.swapchain;
 
   const std::vector<std::string> device_extensions = vkb_device.physical_device.get_extensions();
   static std::vector<const char*> device_extensions_cstr;
@@ -130,15 +152,50 @@ void init() {
     nvrhiDevice = nvrhi::vulkan::createDevice(deviceDesc);
 
 #ifndef NDEBUG
-    nvrhiDevice = nvrhi::validation::createValidationLayer(nvrhiDevice);
+    nvrhiDeviceWrapped = nvrhi::validation::createValidationLayer(nvrhiDevice);
 #endif
   }
+
+  barrier_command_list = nvrhiDevice->createCommandList();
+  present_semaphore = device.createSemaphore(vk::SemaphoreCreateInfo());
+}
+
+void begin_frame() {
+  const vk::Result res = device.acquireNextImageKHR(swapchain, std::numeric_limits<uint64_t>::max(), present_semaphore,
+                                                    vk::Fence(), &swapchain_index);
+
+  assert(res == vk::Result::eSuccess);
+
+  nvrhiDevice->queueWaitForSemaphore(nvrhi::CommandQueue::Graphics, present_semaphore, 0);
+}
+
+void finish_frame() {
+  nvrhiDevice->queueSignalSemaphore(nvrhi::CommandQueue::Graphics, present_semaphore, 0);
+
+  barrier_command_list->open();  // umm...
+  barrier_command_list->close();
+  nvrhiDevice->executeCommandList(barrier_command_list);
+
+  vk::PresentInfoKHR info = vk::PresentInfoKHR()
+                                .setWaitSemaphoreCount(1)
+                                .setPWaitSemaphores(&present_semaphore)
+                                .setSwapchainCount(1)
+                                .setPSwapchains(&swapchain)
+                                .setPImageIndices(&swapchain_index);
+
+  const vk::Result res = present_queue.presentKHR(&info);
+  assert(res == vk::Result::eSuccess || res == vk::Result::eErrorOutOfDateKHR);
+
+  present_queue.waitIdle();
 }
 
 void finish() {
+  device.destroySemaphore(present_semaphore);
+  barrier_command_list = nullptr;
+
   nvrhiDevice = nullptr;
 
-  vkb::destroy_swapchain(swapchain);
+  vkb::destroy_swapchain(vkb_swapchain);
   vkb::destroy_device(vkb_device);
   vkb::destroy_surface(vkb_inst, surface);
   vkb::destroy_instance(vkb_inst);

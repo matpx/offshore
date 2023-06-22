@@ -58,8 +58,6 @@ int main() {
     // gfx::ui::begin_pass();
 
     gfx::end_frame();
-
-    gfx::present();
   }
 
   gfx::finish();

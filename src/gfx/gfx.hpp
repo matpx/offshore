@@ -20,8 +20,6 @@ void draw_sphere();
 
 void end_frame();
 
-void present();
-
 void finish();
 
 const mat4& get_current_vp();
