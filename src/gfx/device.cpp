@@ -3,6 +3,8 @@
 #include <SDL2/SDL_vulkan.h>
 #include <vk-bootstrap/VkBootstrap.h>
 
+#include <tuple>
+
 #include "../core/log.hpp"
 #include "nvrhi/validation.h"
 #include "nvrhi/vulkan.h"
@@ -20,6 +22,8 @@ static vkb::Swapchain vkb_swapchain;
 static vk::Device device = nullptr;
 static vk::Queue present_queue = nullptr;
 static vk::SwapchainKHR swapchain = nullptr;
+
+static std::vector<std::tuple<vk::Image, nvrhi::TextureHandle>> swapchain_images;
 
 static nvrhi::vulkan::DeviceHandle nvrhiDevice = nullptr;
 static nvrhi::DeviceHandle nvrhiDeviceWrapped = nullptr;
@@ -103,14 +107,24 @@ void init() {
 
   present_queue = present_queue_ret.value();
 
+  const nvrhi::Format swapchain_format = nvrhi::Format::SRGBA8_UNORM;
+  const VkColorSpaceKHR swapchain_colorspace = (VkColorSpaceKHR)vk::ColorSpaceKHR::eSrgbNonlinear;
+
   vkb::SwapchainBuilder swapchain_builder{vkb_device};
-  auto swap_ret = swapchain_builder.set_composite_alpha_flags(VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR).build();
+  auto swap_ret = swapchain_builder
+                      .set_desired_format({
+                          .format = (VkFormat)nvrhi::vulkan::convertFormat(swapchain_format),
+                          .colorSpace = swapchain_colorspace,
+                      })
+                      .set_composite_alpha_flags(VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
+                      .build();
 
   if (!swap_ret) {
     const auto msg = swap_ret.error().message();
     FATAL("Failed to get Swapchain. Error: %s", msg.c_str());
   }
   vkb_swapchain = swap_ret.value();
+  LOG_DEBUG("%d", vkb_swapchain.image_count);
 
   swapchain = vkb_swapchain.swapchain;
 
@@ -156,6 +170,26 @@ void init() {
 #endif
   }
 
+  const auto images = vkb_swapchain.get_images().value();
+  for (auto image : images) {
+    std::tuple<vk::Image, nvrhi::TextureHandle> sci;
+    std::get<0>(sci) = image;
+
+    nvrhi::TextureDesc textureDesc;
+    textureDesc.width = vkb_swapchain.extent.width;
+    textureDesc.height = vkb_swapchain.extent.width;
+    textureDesc.format = swapchain_format;
+    textureDesc.debugName = "Swap chain image";
+    textureDesc.initialState = nvrhi::ResourceStates::Present;
+    textureDesc.keepInitialState = true;
+    textureDesc.isRenderTarget = true;
+
+    std::get<1>(sci) = nvrhiDevice->createHandleForNativeTexture(nvrhi::ObjectTypes::VK_Image,
+                                                                 nvrhi::Object(std::get<0>(sci)), textureDesc);
+
+    swapchain_images.push_back(sci);
+  }
+
   barrier_command_list = nvrhiDevice->createCommandList();
   present_semaphore = device.createSemaphore(vk::SemaphoreCreateInfo());
 }
@@ -193,6 +227,9 @@ void finish() {
   device.destroySemaphore(present_semaphore);
   barrier_command_list = nullptr;
 
+  swapchain_images.clear();
+
+  nvrhiDeviceWrapped = nullptr;
   nvrhiDevice = nullptr;
 
   vkb::destroy_swapchain(vkb_swapchain);
