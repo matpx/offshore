@@ -3,6 +3,7 @@
 // #include <sokol/sokol_gfx.h>
 
 #include <nvrhi/nvrhi.h>
+#include <nvrhi/utils.h>
 
 #include <array>
 #include <cassert>
@@ -36,8 +37,11 @@ static nvrhi::GraphicsPipelineHandle graphics_pipeline = nullptr;
 static void init_pipeline() {
   LOG_DEBUG("gfx::shapes::init_pipeline()");
 
-  nvrhi::ShaderHandle vertex_shader = device::get_device()->createShader(
-      nvrhi::ShaderDesc(nvrhi::ShaderType::Vertex), g_debug_main_vs_spirv, sizeof(g_debug_main_vs_spirv));
+  nvrhi::ShaderDesc vertex_shader_desc(nvrhi::ShaderType::Vertex);
+  vertex_shader_desc.entryName = "main_vs";
+
+  nvrhi::ShaderHandle vertex_shader =
+      device::get_device()->createShader(vertex_shader_desc, g_debug_main_vs_spirv, sizeof(g_debug_main_vs_spirv));
 
   const nvrhi::VertexAttributeDesc attributes[] = {
       nvrhi::VertexAttributeDesc()
@@ -47,20 +51,23 @@ static void init_pipeline() {
           .setElementStride(sizeof(SimpleVertex)),
   };
 
-  const nvrhi::InputLayoutHandle inputLayout =
+  const nvrhi::InputLayoutHandle input_layout =
       device::get_device()->createInputLayout(attributes, uint32_t(std::size(attributes)), vertex_shader);
 
-  nvrhi::ShaderHandle pixel_shader = device::get_device()->createShader(
-      nvrhi::ShaderDesc(nvrhi::ShaderType::Pixel), g_debug_main_ps_spirv, sizeof(g_debug_main_ps_spirv));
+  nvrhi::ShaderDesc pixel_shader_desc(nvrhi::ShaderType::Pixel);
+  pixel_shader_desc.entryName = "main_ps";
 
-  const auto layoutDesc = nvrhi::BindingLayoutDesc()
-                              .setVisibility(nvrhi::ShaderType::All)
-                              .addItem(nvrhi::BindingLayoutItem::VolatileConstantBuffer(0));
+  nvrhi::ShaderHandle pixel_shader =
+      device::get_device()->createShader(pixel_shader_desc, g_debug_main_ps_spirv, sizeof(g_debug_main_ps_spirv));
 
-  const nvrhi::BindingLayoutHandle binding_layout = device::get_device()->createBindingLayout(layoutDesc);
+  const auto layout_desc = nvrhi::BindingLayoutDesc()
+                               .setVisibility(nvrhi::ShaderType::All)
+                               .addItem(nvrhi::BindingLayoutItem::VolatileConstantBuffer(0));
+
+  const nvrhi::BindingLayoutHandle binding_layout = device::get_device()->createBindingLayout(layout_desc);
 
   const auto pipeline_desc = nvrhi::GraphicsPipelineDesc()
-                                 .setInputLayout(inputLayout)
+                                 .setInputLayout(input_layout)
                                  .setVertexShader(vertex_shader)
                                  .setPixelShader(pixel_shader)
                                  .addBindingLayout(binding_layout);
@@ -71,28 +78,28 @@ static void init_pipeline() {
 static void init_buffer() {
   LOG_DEBUG("gfx::shapes::init_buffer()");
 
-  const auto constant_buffer_desc = nvrhi::BufferDesc()
-                                        .setByteSize(sizeof(mat4))
-                                        .setIsConstantBuffer(true)
-                                        .setIsVolatile(true)
-                                        .setMaxVersions(16);  // TODO too low?
+  // const auto constant_buffer_desc = nvrhi::BufferDesc()
+  //                                       .setByteSize(sizeof(mat4))
+  //                                       .setIsConstantBuffer(true)
+  //                                       .setIsVolatile(true)
+  //                                       .setMaxVersions(16);  // TODO too low?
 
-  nvrhi::BufferHandle constant_buffer = device::get_device()->createBuffer(constant_buffer_desc);
+  // nvrhi::BufferHandle constant_buffer = device::get_device()->createBuffer(constant_buffer_desc);
 
-  const auto vertex_buffer_desc = nvrhi::BufferDesc()
-                                      .setByteSize(sizeof(cube_vertex_data))
-                                      .setIsVertexBuffer(true)
-                                      .setInitialState(nvrhi::ResourceStates::VertexBuffer)
-                                      .setKeepInitialState(true)
-                                      .setDebugName("Vertex Buffer");
+  // const auto vertex_buffer_desc = nvrhi::BufferDesc()
+  //                                     .setByteSize(sizeof(cube_vertex_data))
+  //                                     .setIsVertexBuffer(true)
+  //                                     .setInitialState(nvrhi::ResourceStates::VertexBuffer)
+  //                                     .setKeepInitialState(true)
+  //                                     .setDebugName("Vertex Buffer");
 
-  nvrhi::BufferHandle vertex_buffer = device::get_device()->createBuffer(vertex_buffer_desc);
+  // nvrhi::BufferHandle vertex_buffer = device::get_device()->createBuffer(vertex_buffer_desc);
 
-  const auto binding_set_desc =
-      nvrhi::BindingSetDesc().addItem(nvrhi::BindingSetItem::ConstantBuffer(0, constant_buffer));
+  // const auto binding_set_desc =
+  //     nvrhi::BindingSetDesc().addItem(nvrhi::BindingSetItem::ConstantBuffer(0, constant_buffer));
 
-  nvrhi::BindingSetHandle binding_set =
-      device::get_device()->createBindingSet(binding_set_desc, graphics_pipeline->getDesc().bindingLayouts[0]);
+  // nvrhi::BindingSetHandle binding_set =
+  //     device::get_device()->createBindingSet(binding_set_desc, graphics_pipeline->getDesc().bindingLayouts[0]);
 
   // commandList->open();
 
@@ -156,10 +163,7 @@ void finish_pass() {
 void finish() {
   assert(!shapes_pass_active);
 
-  // sg_destroy_buffer(cube_bindings.vertex_buffers[0]);
-
-  // sg_destroy_pipeline(unlit_pipeline);
-  // sg_destroy_shader(unlit_shader);
+  graphics_pipeline = nullptr;
 
   LOG_INFO("gfx::shapes::finish()");
 }

@@ -1,6 +1,7 @@
 #include "device.hpp"
 
 #include <SDL2/SDL_vulkan.h>
+#include <nvrhi/nvrhi.h>
 #include <nvrhi/utils.h>
 #include <vk-bootstrap/VkBootstrap.h>
 
@@ -43,13 +44,9 @@ static u32 current_swapchain_index = 0;
 
 nvrhi::CommandListHandle barrier_command_list = nullptr;
 
-nvrhi::DeviceHandle get_device() {
-  return nvrhi_device_wrapped;
-}
+nvrhi::DeviceHandle get_device() { return nvrhi_device_wrapped; }
 
-std::span<nvrhi::FramebufferHandle> get_framebuffers() {
-  return nvrhi_framebuffers;
-}
+std::span<nvrhi::FramebufferHandle> get_framebuffers() { return nvrhi_framebuffers; }
 
 void init() {
   u32 extension_count = 0;
@@ -200,10 +197,26 @@ void init() {
     std::get<1>(image_handle) = nvrhi_device->createHandleForNativeTexture(
         nvrhi::ObjectTypes::VK_Image, nvrhi::Object(std::get<0>(image_handle)), textureDesc);
 
+    const auto depth_texture_desc = nvrhi::TextureDesc{
+        .width = vkb_swapchain.extent.width,
+        .height = vkb_swapchain.extent.height,
+        .format = nvrhi::Format::D24S8,
+        .dimension = nvrhi::TextureDimension::Texture2D,
+        .debugName = "Depth Buffer",
+        .isRenderTarget = true,
+        .clearValue = nvrhi::Color(0.0f),
+        .useClearValue = true,
+        .initialState = nvrhi::ResourceStates::DepthWrite,
+        .keepInitialState = true,
+    };
+
+    const nvrhi::TextureHandle depth_texture = nvrhi_device->createTexture(depth_texture_desc);
+
     swapchain_image_handles.push_back(image_handle);
 
     const nvrhi::FramebufferDesc framebuffer_desc =
-        nvrhi::FramebufferDesc().addColorAttachment(std::get<1>(image_handle));
+        nvrhi::FramebufferDesc().addColorAttachment(std::get<1>(image_handle)).setDepthAttachment(depth_texture);
+
     nvrhi_framebuffers.push_back(nvrhi_device->createFramebuffer(framebuffer_desc));
   }
 
