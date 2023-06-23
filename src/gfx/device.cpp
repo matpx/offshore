@@ -1,7 +1,6 @@
 #include "device.hpp"
 
 #include <SDL2/SDL_vulkan.h>
-#include <nvrhi/nvrhi.h>
 #include <nvrhi/utils.h>
 #include <vk-bootstrap/VkBootstrap.h>
 
@@ -43,6 +42,10 @@ static vk::Semaphore vk_present_semaphore = nullptr;
 static u32 current_swapchain_index = 0;
 
 nvrhi::CommandListHandle barrier_command_list = nullptr;
+
+nvrhi::DeviceHandle get_device() {
+  return nvrhi_device_wrapped;
+}
 
 void init() {
   u32 extension_count = 0;
@@ -171,6 +174,8 @@ void init() {
 
 #ifndef NDEBUG
   nvrhi_device_wrapped = nvrhi::validation::createValidationLayer(nvrhi_device);
+#else
+  nvrhi_device_wrapped = nvrhi_device;
 #endif
 
   const std::vector<VkImage> swapchain_images = vkb_swapchain.get_images().value();
