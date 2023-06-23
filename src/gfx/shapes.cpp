@@ -55,7 +55,6 @@ static void init_pipeline() {
 
   const auto layoutDesc = nvrhi::BindingLayoutDesc()
                               .setVisibility(nvrhi::ShaderType::All)
-                              .addItem(nvrhi::BindingLayoutItem::Texture_SRV(0))
                               .addItem(nvrhi::BindingLayoutItem::VolatileConstantBuffer(0));
 
   const nvrhi::BindingLayoutHandle binding_layout = device::get_device()->createBindingLayout(layoutDesc);
