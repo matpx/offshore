@@ -1,5 +1,6 @@
 #pragma once
 
+#include <span>
 #include <nvrhi/nvrhi.h>
 
 namespace gfx::device {
@@ -13,5 +14,7 @@ void finish_frame();
 void finish();
 
 nvrhi::DeviceHandle get_device();
+
+std::span<nvrhi::FramebufferHandle> get_framebuffers();
 
 }  // namespace gfx::device

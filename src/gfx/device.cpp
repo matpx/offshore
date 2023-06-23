@@ -17,7 +17,7 @@ namespace gfx::device {
 
 class NvrhiMessageCallback : nvrhi::IMessageCallback {
   void message([[maybe_unused]] nvrhi::MessageSeverity severity, const char* messageText) override {
-    LOG_INFO("nvrhi: %s", messageText);
+    LOG_ERROR("nvrhi: %s", messageText);
   };
 };
 
@@ -45,6 +45,10 @@ nvrhi::CommandListHandle barrier_command_list = nullptr;
 
 nvrhi::DeviceHandle get_device() {
   return nvrhi_device_wrapped;
+}
+
+std::span<nvrhi::FramebufferHandle> get_framebuffers() {
+  return nvrhi_framebuffers;
 }
 
 void init() {

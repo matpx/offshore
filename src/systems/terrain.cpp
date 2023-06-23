@@ -65,7 +65,7 @@ ivec2 build_chunk(const vec3 &chunk_position, const TerrainLOD level) {
 
   for (size_t n = 0; n < vertex_data.size(); n++) {
     vertex_data[n] = {
-        .positions = {iso_mesh.verts[n].x, iso_mesh.verts[n].y, iso_mesh.verts[n].z},
+        .position = {iso_mesh.verts[n].x, iso_mesh.verts[n].y, iso_mesh.verts[n].z},
         .normal = {iso_mesh.verts[n].nx, iso_mesh.verts[n].ny, iso_mesh.verts[n].nz},
     };
   }

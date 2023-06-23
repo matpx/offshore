@@ -9,13 +9,13 @@ AABB AABB::from_vertex_data(std::span<const gfx::Vertex> vertex_data) {
   vec3 max = -vec3(std::numeric_limits<float>::infinity());
 
   for (const gfx::Vertex& vertex : vertex_data) {  // TODO: not always needed
-    if (vertex.positions[0] < min.x) min.x = vertex.positions[0];
-    if (vertex.positions[1] < min.y) min.y = vertex.positions[1];
-    if (vertex.positions[2] < min.z) min.z = vertex.positions[2];
+    if (vertex.position[0] < min.x) min.x = vertex.position[0];
+    if (vertex.position[1] < min.y) min.y = vertex.position[1];
+    if (vertex.position[2] < min.z) min.z = vertex.position[2];
 
-    if (vertex.positions[0] > max.x) max.x = vertex.positions[0];
-    if (vertex.positions[1] > max.y) max.y = vertex.positions[1];
-    if (vertex.positions[2] > max.z) max.z = vertex.positions[2];
+    if (vertex.position[0] > max.x) max.x = vertex.position[0];
+    if (vertex.position[1] > max.y) max.y = vertex.position[1];
+    if (vertex.position[2] > max.z) max.z = vertex.position[2];
   }
 
   const vec3 center = (min + max) / 2.0f;
