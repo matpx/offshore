@@ -1,6 +1,7 @@
 #include "device.hpp"
 
 #include <SDL2/SDL_vulkan.h>
+#include <nvrhi/nvrhi.h>
 #include <nvrhi/utils.h>
 #include <vk-bootstrap/VkBootstrap.h>
 
@@ -15,24 +16,31 @@ VULKAN_HPP_DEFAULT_DISPATCH_LOADER_DYNAMIC_STORAGE
 
 namespace gfx::device {
 
-static vkb::Instance vkb_inst;
+class NvrhiMessageCallback : nvrhi::IMessageCallback {
+  void message([[maybe_unused]] nvrhi::MessageSeverity severity, const char* messageText) override {
+    LOG_INFO("nvrhi: %s", messageText);
+  };
+};
+
+static vkb::Instance vkb_instance;
 static VkSurfaceKHR surface;
 static vkb::Device vkb_device;
 static vkb::Swapchain vkb_swapchain;
 
-static vk::Device device = nullptr;
-static vk::Queue present_queue = nullptr;
-static vk::SwapchainKHR swapchain = nullptr;
+static vk::Device vk_device = nullptr;
+static vk::Queue vk_present_queue = nullptr;
+static vk::SwapchainKHR vk_swapchain = nullptr;
 
-static std::vector<std::tuple<vk::Image, nvrhi::TextureHandle>> swapchain_images;
+static std::vector<std::tuple<vk::Image, nvrhi::TextureHandle>> swapchain_image_handles;
 
-static nvrhi::vulkan::DeviceHandle nvrhiDevice = nullptr;
-static nvrhi::DeviceHandle nvrhiDeviceWrapped = nullptr;
+static const NvrhiMessageCallback message_callback;
+static nvrhi::vulkan::DeviceHandle nvrhi_device = nullptr;
+static nvrhi::DeviceHandle nvrhi_device_wrapped = nullptr;
 
-static std::vector<nvrhi::FramebufferHandle> framebuffers;
+static std::vector<nvrhi::FramebufferHandle> nvrhi_framebuffers;
 
-static vk::Semaphore present_semaphore = nullptr;
-static u32 swapchain_index = 0;
+static vk::Semaphore vk_present_semaphore = nullptr;
+static u32 current_swapchain_index = 0;
 
 nvrhi::CommandListHandle barrier_command_list = nullptr;
 
@@ -40,217 +48,211 @@ void init() {
   u32 extension_count = 0;
   SDL_Vulkan_GetInstanceExtensions(window::get_sdl_window(), &extension_count, nullptr);
 
-  assert(extension_count > 0);
-
-  static std::vector<const char*> instance_extensions(extension_count);
+  std::vector<const char*> instance_extensions(extension_count);
   SDL_Vulkan_GetInstanceExtensions(window::get_sdl_window(), &extension_count, instance_extensions.data());
 
-  vkb::InstanceBuilder builder;
-  builder.set_app_name("offshore")
+  vkb::InstanceBuilder instance_builder;
+  instance_builder.set_app_name("offshore")
       .require_api_version(VKB_VK_API_VERSION_1_2)
-#ifndef NDEBUG
       .use_default_debug_messenger()
+#ifndef NDEBUG
       .enable_validation_layers();
 #endif
 
-  for (const auto extension : instance_extensions) {
-    builder.enable_extension(extension);
+  for (const char* extension : instance_extensions) {
+    instance_builder.enable_extension(extension);
   }
 
-  auto inst_ret = builder.build();
-  if (!inst_ret) {
-    const auto msg = inst_ret.error().message();
+  vkb::Result<vkb::Instance> instance_builder_ret = instance_builder.build();
+  if (!instance_builder_ret) {
+    const std::string msg = instance_builder_ret.error().message();
     FATAL("Failed to create Vulkan instance. Error: %s", msg.c_str());
   }
-  vkb_inst = inst_ret.value();
+  vkb_instance = instance_builder_ret.value();
 
-  if (SDL_Vulkan_CreateSurface(gfx::window::get_sdl_window(), vkb_inst.instance, &surface) != SDL_TRUE) {
+  if (SDL_Vulkan_CreateSurface(gfx::window::get_sdl_window(), vkb_instance.instance, &surface) != SDL_TRUE) {
     FATAL("SDL_Vulkan_CreateSurface() failed");
   }
 
-  VkPhysicalDeviceVulkan12Features features12 = {
+  const VkPhysicalDeviceVulkan12Features features12 = {
       .timelineSemaphore = true,
   };
 
-  vkb::PhysicalDeviceSelector selector{vkb_inst};
-  auto phys_ret = selector.set_surface(surface).set_minimum_version(1, 2).set_required_features_12(features12).select();
-  if (!phys_ret) {
-    const auto msg = phys_ret.error().message();
+  vkb::PhysicalDeviceSelector device_selector{vkb_instance};
+  vkb::Result<vkb::PhysicalDevice> device_selector_ret =
+      device_selector.set_surface(surface).set_minimum_version(1, 2).set_required_features_12(features12).select();
+  if (!device_selector_ret) {
+    const std::string msg = device_selector_ret.error().message();
     FATAL("Failed to select Vulkan Physical Device. Error: %s", msg.c_str());
   }
 
-  vkb::DeviceBuilder device_builder{phys_ret.value()};
-  auto dev_ret = device_builder.build();
-  if (!dev_ret) {
-    const auto msg = dev_ret.error().message();
+  vkb::DeviceBuilder device_builder{device_selector_ret.value()};
+  vkb::Result<vkb::Device> device_ret = device_builder.build();
+  if (!device_ret) {
+    const std::string msg = device_ret.error().message();
     FATAL("Failed to create Vulkan device. Error: %s", msg.c_str());
   }
-  vkb_device = dev_ret.value();
 
-  device = vkb_device.device;
+  vkb_device = device_ret.value();
+  vk_device = vkb_device.device;
 
-  auto graphics_queue_ret = vkb_device.get_queue(vkb::QueueType::graphics);
+  vkb::Result<VkQueue> graphics_queue_ret = vkb_device.get_queue(vkb::QueueType::graphics);
   if (!graphics_queue_ret) {
-    const auto msg = graphics_queue_ret.error().message();
+    const std::string msg = graphics_queue_ret.error().message();
     FATAL("Failed to get graphics queue. Error: %s", msg.c_str());
   }
 
-  auto graphics_queue_index_ret = vkb_device.get_queue_index(vkb::QueueType::graphics);
+  vkb::Result<u32> graphics_queue_index_ret = vkb_device.get_queue_index(vkb::QueueType::graphics);
   if (!graphics_queue_index_ret) {
-    const auto msg = graphics_queue_index_ret.error().message();
+    const std::string msg = graphics_queue_index_ret.error().message();
     FATAL("Failed to get graphics queue index. Error: %s", msg.c_str());
   }
 
-  auto present_queue_ret = vkb_device.get_queue(vkb::QueueType::present);
+  vkb::Result<VkQueue> present_queue_ret = vkb_device.get_queue(vkb::QueueType::present);
   if (!present_queue_ret) {
-    const auto msg = present_queue_ret.error().message();
+    const std::string msg = present_queue_ret.error().message();
     FATAL("Failed to get present queue. Error: %s", msg.c_str());
   }
 
-  present_queue = present_queue_ret.value();
+  vk_present_queue = present_queue_ret.value();
 
   const nvrhi::Format swapchain_format = nvrhi::Format::BGRA8_UNORM;
   const VkColorSpaceKHR swapchain_colorspace = (VkColorSpaceKHR)vk::ColorSpaceKHR::eSrgbNonlinear;
 
   vkb::SwapchainBuilder swapchain_builder{vkb_device};
-  auto swap_ret = swapchain_builder
-                      .set_desired_format({
-                          .format = (VkFormat)nvrhi::vulkan::convertFormat(swapchain_format),
-                          .colorSpace = swapchain_colorspace,
-                      })
-                      .set_desired_extent(window::get_width_height().x, window::get_width_height().y)
-                      .set_image_usage_flags(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
-                                             VK_IMAGE_USAGE_SAMPLED_BIT)
-                      .set_composite_alpha_flags(VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
-                      .build();
+  const vkb::Result<vkb::Swapchain> swapchain_builder_ret =
+      swapchain_builder
+          .set_desired_format({
+              .format = (VkFormat)nvrhi::vulkan::convertFormat(swapchain_format),
+              .colorSpace = swapchain_colorspace,
+          })
+          .set_desired_extent(window::get_width_height().x, window::get_width_height().y)
+          .set_image_usage_flags(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
+                                 VK_IMAGE_USAGE_SAMPLED_BIT)
+          .set_composite_alpha_flags(VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
+          .build();
 
-  if (!swap_ret) {
-    const auto msg = swap_ret.error().message();
+  if (!swapchain_builder_ret) {
+    const std::string msg = swapchain_builder_ret.error().message();
     FATAL("Failed to get Swapchain. Error: %s", msg.c_str());
   }
-  vkb_swapchain = swap_ret.value();
 
-  swapchain = vkb_swapchain.swapchain;
+  vkb_swapchain = swapchain_builder_ret.value();
+  vk_swapchain = vkb_swapchain.swapchain;
 
   const std::vector<std::string> device_extensions = vkb_device.physical_device.get_extensions();
-  static std::vector<const char*> device_extensions_cstr;
+  std::vector<const char*> device_extensions_cstr;
 
-  std::transform(device_extensions.begin(), device_extensions.end(), std::back_inserter(device_extensions_cstr),
-                 [](const auto& s) { return s.c_str(); });
-
-  class NvrhiMessageCallback : nvrhi::IMessageCallback {
-    void message([[maybe_unused]] nvrhi::MessageSeverity severity, const char* messageText) override {
-      LOG_INFO("nvrhi: %s", messageText);
-    };
-  };
-
-  const static NvrhiMessageCallback message_callback;
-
-  {
-    nvrhi::vulkan::DeviceDesc deviceDesc = {};
-    deviceDesc.errorCB = (nvrhi::IMessageCallback*)&message_callback;
-    deviceDesc.instance = vkb_inst.instance;
-    deviceDesc.physicalDevice = vkb_device.physical_device;
-    deviceDesc.device = vkb_device.device;
-    deviceDesc.graphicsQueue = graphics_queue_ret.value();
-    deviceDesc.graphicsQueueIndex = graphics_queue_index_ret.value();
-    deviceDesc.instanceExtensions = instance_extensions.data();
-    deviceDesc.numInstanceExtensions = instance_extensions.size();
-    deviceDesc.deviceExtensions = device_extensions_cstr.data();
-    deviceDesc.numDeviceExtensions = device_extensions_cstr.size();
-
-    const static vk::DynamicLoader dl;
-    const static PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr =
-        dl.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
-
-    VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);
-    VULKAN_HPP_DEFAULT_DISPATCHER.init(deviceDesc.instance);
-    VULKAN_HPP_DEFAULT_DISPATCHER.init(deviceDesc.device);
-
-    nvrhiDevice = nvrhi::vulkan::createDevice(deviceDesc);
-
-#ifndef NDEBUG
-    nvrhiDeviceWrapped = nvrhi::validation::createValidationLayer(nvrhiDevice);
-#endif
+  for (const std::string& extension : device_extensions) {
+    device_extensions_cstr.push_back((extension.c_str()));
   }
 
-  const auto images = vkb_swapchain.get_images().value();
-  for (auto image : images) {
+  nvrhi::vulkan::DeviceDesc deviceDesc = {};
+  deviceDesc.errorCB = (nvrhi::IMessageCallback*)&message_callback;
+  deviceDesc.instance = vkb_instance.instance;
+  deviceDesc.physicalDevice = vkb_device.physical_device;
+  deviceDesc.device = vkb_device.device;
+  deviceDesc.graphicsQueue = graphics_queue_ret.value();
+  deviceDesc.graphicsQueueIndex = graphics_queue_index_ret.value();
+  deviceDesc.instanceExtensions = instance_extensions.data();
+  deviceDesc.numInstanceExtensions = instance_extensions.size();
+  deviceDesc.deviceExtensions = device_extensions_cstr.data();
+  deviceDesc.numDeviceExtensions = device_extensions_cstr.size();
+
+  const vk::DynamicLoader dl;
+  const PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr =
+      dl.getProcAddress<PFN_vkGetInstanceProcAddr>("vkGetInstanceProcAddr");
+
+  VULKAN_HPP_DEFAULT_DISPATCHER.init(vkGetInstanceProcAddr);
+  VULKAN_HPP_DEFAULT_DISPATCHER.init(deviceDesc.instance);
+  VULKAN_HPP_DEFAULT_DISPATCHER.init(deviceDesc.device);
+
+  nvrhi_device = nvrhi::vulkan::createDevice(deviceDesc);
+
+#ifndef NDEBUG
+  nvrhi_device_wrapped = nvrhi::validation::createValidationLayer(nvrhi_device);
+#endif
+
+  const std::vector<VkImage> swapchain_images = vkb_swapchain.get_images().value();
+  for (const VkImage& image : swapchain_images) {
     std::tuple<vk::Image, nvrhi::TextureHandle> image_handle;
     std::get<0>(image_handle) = image;
 
-    nvrhi::TextureDesc textureDesc;
-    textureDesc.width = vkb_swapchain.extent.width;
-    textureDesc.height = vkb_swapchain.extent.height;
-    textureDesc.format = swapchain_format;
-    textureDesc.debugName = "Swap chain image";
-    textureDesc.initialState = nvrhi::ResourceStates::Present;
-    textureDesc.keepInitialState = true;
-    textureDesc.isRenderTarget = true;
+    nvrhi::TextureDesc textureDesc = {
+        .width = vkb_swapchain.extent.width,
+        .height = vkb_swapchain.extent.height,
+        .format = swapchain_format,
+        .debugName = "Swap chain image",
+        .isRenderTarget = true,
+        .initialState = nvrhi::ResourceStates::Present,
+        .keepInitialState = true,
+    };
 
-    std::get<1>(image_handle) = nvrhiDevice->createHandleForNativeTexture(
+    std::get<1>(image_handle) = nvrhi_device->createHandleForNativeTexture(
         nvrhi::ObjectTypes::VK_Image, nvrhi::Object(std::get<0>(image_handle)), textureDesc);
 
-    swapchain_images.push_back(image_handle);
+    swapchain_image_handles.push_back(image_handle);
 
-    auto framebufferDesc = nvrhi::FramebufferDesc().addColorAttachment(std::get<1>(image_handle));
-    framebuffers.push_back(nvrhiDevice->createFramebuffer(framebufferDesc));
+    const nvrhi::FramebufferDesc framebuffer_desc =
+        nvrhi::FramebufferDesc().addColorAttachment(std::get<1>(image_handle));
+    nvrhi_framebuffers.push_back(nvrhi_device->createFramebuffer(framebuffer_desc));
   }
 
-  barrier_command_list = nvrhiDevice->createCommandList();
-  present_semaphore = device.createSemaphore(vk::SemaphoreCreateInfo());
+  barrier_command_list = nvrhi_device->createCommandList();
+  vk_present_semaphore = vk_device.createSemaphore(vk::SemaphoreCreateInfo());
 }
 
 void begin_frame() {
-  const vk::Result res = device.acquireNextImageKHR(swapchain, std::numeric_limits<uint64_t>::max(), present_semaphore,
-                                                    vk::Fence(), &swapchain_index);
+  const vk::Result res = vk_device.acquireNextImageKHR(vk_swapchain, std::numeric_limits<uint64_t>::max(),
+                                                       vk_present_semaphore, vk::Fence(), &current_swapchain_index);
 
   assert(res == vk::Result::eSuccess);
 
-  nvrhiDevice->queueWaitForSemaphore(nvrhi::CommandQueue::Graphics, present_semaphore, 0);
+  nvrhi_device->queueWaitForSemaphore(nvrhi::CommandQueue::Graphics, vk_present_semaphore, 0);
 
-  nvrhi::CommandListHandle commandList = nvrhiDevice->createCommandList();
+  nvrhi::CommandListHandle clear_command_list = nvrhi_device->createCommandList();
 
-  commandList->open();
-  nvrhi::utils::ClearColorAttachment(commandList, framebuffers[swapchain_index], 0, nvrhi::Color(0.1, 0, 0, 1));
-  commandList->close();
-  nvrhiDevice->executeCommandList(commandList);
+  clear_command_list->open();
+  nvrhi::utils::ClearColorAttachment(clear_command_list, nvrhi_framebuffers[current_swapchain_index], 0,
+                                     nvrhi::Color(0.1, 0, 0, 1));
+  clear_command_list->close();
+  nvrhi_device->executeCommandList(clear_command_list);
 }
 
 void finish_frame() {
-  nvrhiDevice->queueSignalSemaphore(nvrhi::CommandQueue::Graphics, present_semaphore, 0);
+  nvrhi_device->queueSignalSemaphore(nvrhi::CommandQueue::Graphics, vk_present_semaphore, 0);
 
   barrier_command_list->open();  // umm...
   barrier_command_list->close();
-  nvrhiDevice->executeCommandList(barrier_command_list);
+  nvrhi_device->executeCommandList(barrier_command_list);
 
   vk::PresentInfoKHR info = vk::PresentInfoKHR()
                                 .setWaitSemaphoreCount(1)
-                                .setPWaitSemaphores(&present_semaphore)
+                                .setPWaitSemaphores(&vk_present_semaphore)
                                 .setSwapchainCount(1)
-                                .setPSwapchains(&swapchain)
-                                .setPImageIndices(&swapchain_index);
+                                .setPSwapchains(&vk_swapchain)
+                                .setPImageIndices(&current_swapchain_index);
 
-  const vk::Result res = present_queue.presentKHR(&info);
+  const vk::Result res = vk_present_queue.presentKHR(&info);
   assert(res == vk::Result::eSuccess || res == vk::Result::eErrorOutOfDateKHR);
 
-  present_queue.waitIdle();
+  vk_present_queue.waitIdle();
 }
 
 void finish() {
-  device.destroySemaphore(present_semaphore);
+  vk_device.destroySemaphore(vk_present_semaphore);
   barrier_command_list = nullptr;
 
-  framebuffers.clear();
-  swapchain_images.clear();
+  nvrhi_framebuffers.clear();
+  swapchain_image_handles.clear();
 
-  nvrhiDeviceWrapped = nullptr;
-  nvrhiDevice = nullptr;
+  nvrhi_device_wrapped = nullptr;
+  nvrhi_device = nullptr;
 
   vkb::destroy_swapchain(vkb_swapchain);
   vkb::destroy_device(vkb_device);
-  vkb::destroy_surface(vkb_inst, surface);
-  vkb::destroy_instance(vkb_inst);
+  vkb::destroy_surface(vkb_instance, surface);
+  vkb::destroy_instance(vkb_instance);
 }
 
 }  // namespace gfx::device
