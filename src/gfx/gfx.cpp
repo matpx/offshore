@@ -127,6 +127,8 @@ void end_frame() {
 }
 
 void finish() {
+  device::wait_idle();
+
   // ui::finish();
   shapes::finish();
   material::finish();

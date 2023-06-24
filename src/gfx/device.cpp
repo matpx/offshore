@@ -23,6 +23,8 @@ class NvrhiMessageCallback : nvrhi::IMessageCallback {
   };
 };
 
+constexpr u32 max_frames_in_flight = 2;
+
 static vkb::Instance vkb_instance;
 static VkSurfaceKHR surface;
 static vkb::Device vkb_device;
@@ -41,7 +43,10 @@ static nvrhi::DeviceHandle nvrhi_device = nullptr;
 static std::vector<nvrhi::FramebufferHandle> nvrhi_framebuffers;
 
 static vk::Semaphore vk_present_semaphore = nullptr;
+static std::vector<nvrhi::EventQueryHandle> query_pool;
+
 static u32 current_swapchain_index = 0;
+static u32 current_frame_index = 0;
 
 nvrhi::CommandListHandle barrier_command_list = nullptr;
 
@@ -172,6 +177,7 @@ void init() {
                                  VK_IMAGE_USAGE_SAMPLED_BIT)
           .set_composite_alpha_flags(VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
           .set_composite_alpha_flags_alternative(VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
+          .set_desired_present_mode(VK_PRESENT_MODE_IMMEDIATE_KHR)
           .build();
 
   if (!swapchain_builder_ret) {
@@ -262,6 +268,10 @@ void init() {
 
   barrier_command_list = nvrhi_device->createCommandList();
   vk_present_semaphore = vk_device.createSemaphore(vk::SemaphoreCreateInfo());
+
+  for (u32 i = 0; i < max_frames_in_flight; i++) {
+    query_pool.push_back(nvrhi_device->createEventQuery());
+  }
 }
 
 void begin_frame() {
@@ -303,9 +313,19 @@ void finish_frame() {
   const vk::Result res = vk_present_queue.presentKHR(&info);
   assert(res == vk::Result::eSuccess || res == vk::Result::eErrorOutOfDateKHR);
 
-  vk_present_queue.waitIdle();
+  // vk_present_queue.waitIdle();
+
+  nvrhi_device->waitEventQuery(query_pool[current_frame_index]);
+  nvrhi_device->resetEventQuery(query_pool[current_frame_index]);
+  nvrhi_device->setEventQuery(query_pool[current_frame_index], nvrhi::CommandQueue::Graphics);
+
+  current_frame_index = (current_frame_index + 1) % max_frames_in_flight;
 
   nvrhi_device->runGarbageCollection();
+}
+
+void wait_idle() {
+  nvrhi_device->waitForIdle();
 }
 
 void finish() {

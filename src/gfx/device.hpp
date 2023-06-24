@@ -11,6 +11,8 @@ void begin_frame();
 
 void finish_frame();
 
+void wait_idle();
+
 void finish();
 
 nvrhi::DeviceHandle get_device();

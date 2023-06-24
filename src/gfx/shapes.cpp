@@ -94,7 +94,7 @@ static void init_buffer() {
                                         .setByteSize(sizeof(mat4))
                                         .setIsConstantBuffer(true)
                                         .setIsVolatile(true)
-                                        .setMaxVersions(32);  // TODO too low?
+                                        .setMaxVersions(256);  // TODO too low?
 
   constant_buffer = device::get_device()->createBuffer(constant_buffer_desc);
 
