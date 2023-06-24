@@ -12,7 +12,7 @@ struct Vertex {
 };
 
 struct SimpleVertex {
-    float position[3];
+    float position[4];
 };
 
 }

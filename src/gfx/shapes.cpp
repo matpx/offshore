@@ -83,36 +83,36 @@ static void init_pipeline() {
 static void init_buffer() {
   LOG_DEBUG("gfx::shapes::init_buffer()");
 
-  const auto constant_buffer_desc = nvrhi::BufferDesc()
-                                        .setByteSize(sizeof(mat4))
-                                        .setIsConstantBuffer(true)
-                                        .setIsVolatile(true)
-                                        .setMaxVersions(32);  // TODO too low?
+  // const auto constant_buffer_desc = nvrhi::BufferDesc()
+  //                                       .setByteSize(sizeof(mat4))
+  //                                       .setIsConstantBuffer(true)
+  //                                       .setIsVolatile(true)
+  //                                       .setMaxVersions(32);  // TODO too low?
 
-  constant_buffer = device::get_device()->createBuffer(constant_buffer_desc);
+  // constant_buffer = device::get_device()->createBuffer(constant_buffer_desc);
 
-  const auto vertex_buffer_desc = nvrhi::BufferDesc()
-                                      .setByteSize(sizeof(cube_vertex_data))
-                                      .setIsVertexBuffer(true)
-                                      .setInitialState(nvrhi::ResourceStates::VertexBuffer)
-                                      .setKeepInitialState(true)
-                                      .setDebugName("Vertex Buffer");
+  // const auto vertex_buffer_desc = nvrhi::BufferDesc()
+  //                                     .setByteSize(sizeof(cube_vertex_data))
+  //                                     .setIsVertexBuffer(true)
+  //                                     .setInitialState(nvrhi::ResourceStates::VertexBuffer)
+  //                                     .setKeepInitialState(true)
+  //                                     .setDebugName("Vertex Buffer");
 
-  cube_vertex_buffer = device::get_device()->createBuffer(vertex_buffer_desc);
+  // cube_vertex_buffer = device::get_device()->createBuffer(vertex_buffer_desc);
 
-  const auto binding_set_desc =
-      nvrhi::BindingSetDesc().addItem(nvrhi::BindingSetItem::ConstantBuffer(0, constant_buffer));
+  // const auto binding_set_desc =
+  //     nvrhi::BindingSetDesc().addItem(nvrhi::BindingSetItem::ConstantBuffer(0, constant_buffer));
 
-  cube_binding_set =
-      device::get_device()->createBindingSet(binding_set_desc, graphics_pipeline->getDesc().bindingLayouts[0]);
+  // cube_binding_set =
+  //     device::get_device()->createBindingSet(binding_set_desc, graphics_pipeline->getDesc().bindingLayouts[0]);
 
-  nvrhi::CommandListHandle upload_command_list = device::get_device()->createCommandList();
+  // nvrhi::CommandListHandle upload_command_list = device::get_device()->createCommandList();
 
-  upload_command_list->open();
-  upload_command_list->writeBuffer(cube_vertex_buffer, cube_vertex_data.data(), sizeof(cube_vertex_data));
-  upload_command_list->close();
+  // upload_command_list->open();
+  // upload_command_list->writeBuffer(cube_vertex_buffer, cube_vertex_data.data(), sizeof(cube_vertex_data));
+  // upload_command_list->close();
 
-  device::get_device()->executeCommandList(upload_command_list);
+  // device::get_device()->executeCommandList(upload_command_list);
 }
 
 void init() {
@@ -136,32 +136,32 @@ static void draw_shape(const u32 base_element, const u32 num_elements, const vec
 
   const mat4 mvp = gfx::get_current_vp() * glm::scale(glm::translate(glm::identity<mat4>(), center), scale);
 
-  nvrhi::CommandListHandle draw_command_list = device::get_device()->createCommandList();
+  // nvrhi::CommandListHandle draw_command_list = device::get_device()->createCommandList();
 
-  draw_command_list->open();
+  // draw_command_list->open();
 
-  draw_command_list->writeBuffer(constant_buffer, glm::value_ptr(mvp), sizeof(mvp));
+  // draw_command_list->writeBuffer(constant_buffer, glm::value_ptr(mvp), sizeof(mvp));
 
-  const auto vertex_buffer_binding = nvrhi::VertexBufferBinding{
-      .buffer = cube_vertex_buffer,
-      .offset = base_element,
-  };
+  // const auto vertex_buffer_binding = nvrhi::VertexBufferBinding{
+  //     .buffer = cube_vertex_buffer,
+  //     .offset = base_element,
+  // };
 
-  const auto graphicsState = nvrhi::GraphicsState()
-                           .setPipeline(graphics_pipeline)
-                           .setFramebuffer(device::get_current_framebuffer())
-                           .setViewport(nvrhi::ViewportState().addViewportAndScissorRect(
-                               nvrhi::Viewport(window::get_width_height().x, window::get_width_height().y)))
-                           .addBindingSet(cube_binding_set)
-                           .addVertexBuffer(vertex_buffer_binding);
+  // const auto graphicsState = nvrhi::GraphicsState()
+  //                          .setPipeline(graphics_pipeline)
+  //                          .setFramebuffer(device::get_current_framebuffer())
+  //                          .setViewport(nvrhi::ViewportState().addViewportAndScissorRect(
+  //                              nvrhi::Viewport(window::get_width_height().x, window::get_width_height().y)))
+  //                          .addBindingSet(cube_binding_set)
+  //                          .addVertexBuffer(vertex_buffer_binding);
 
-  draw_command_list->setGraphicsState(graphicsState);
+  // draw_command_list->setGraphicsState(graphicsState);
 
-  const auto drawArguments = nvrhi::DrawArguments().setVertexCount(num_elements);
-  draw_command_list->draw(drawArguments);
+  // const auto drawArguments = nvrhi::DrawArguments().setVertexCount(num_elements);
+  // draw_command_list->draw(drawArguments);
 
-  draw_command_list->close();
-  device::get_device()->executeCommandList(draw_command_list);
+  // draw_command_list->close();
+  // device::get_device()->executeCommandList(draw_command_list);
 }
 
 void draw_box(const vec3& center, const vec3& scale) { draw_shape(0, cube_vertex_data.size(), center, scale); }
