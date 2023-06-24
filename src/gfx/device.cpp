@@ -98,15 +98,17 @@ void init() {
       .descriptorBindingVariableDescriptorCount = true,
       .runtimeDescriptorArray = true,
       .timelineSemaphore = true,
-      .bufferDeviceAddress = true, // TODO optional?
+      .bufferDeviceAddress = true,  // TODO optional?
   };
 
   vkb::PhysicalDeviceSelector device_selector{vkb_instance};
-  vkb::Result<vkb::PhysicalDevice> device_selector_ret = device_selector.set_surface(surface)
-                                                             .set_minimum_version(1, 2)
-                                                             .set_required_features(features)
-                                                             .set_required_features_12(features12)
-                                                             .select();
+  vkb::Result<vkb::PhysicalDevice> device_selector_ret =
+      device_selector.set_surface(surface)
+          .set_minimum_version(1, 2)
+          .set_required_features(features)
+          .set_required_features_12(features12)
+          .add_required_extension_features(vk::PhysicalDeviceMaintenance4Features())
+          .select();
 
   if (!device_selector_ret) {
     const std::string msg = device_selector_ret.error().message();

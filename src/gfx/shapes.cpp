@@ -65,17 +65,33 @@ static void init_pipeline() {
   nvrhi::ShaderHandle pixel_shader =
       device::get_device()->createShader(pixel_shader_desc, g_debug_main_ps_spirv, sizeof(g_debug_main_ps_spirv));
 
-  const auto layout_desc = nvrhi::BindingLayoutDesc()
-                               .setVisibility(nvrhi::ShaderType::All)
-                               .addItem(nvrhi::BindingLayoutItem::VolatileConstantBuffer(0));
+  const auto constant_buffer_desc = nvrhi::BufferDesc()
+                                        .setByteSize(sizeof(mat4))
+                                        .setIsConstantBuffer(true)
+                                        .setIsVolatile(true)
+                                        .setMaxVersions(32);  // TODO too low?
 
-  const nvrhi::BindingLayoutHandle binding_layout = device::get_device()->createBindingLayout(layout_desc);
+  constant_buffer = device::get_device()->createBuffer(constant_buffer_desc);
+
+  // const auto layout_desc = nvrhi::BindingLayoutDesc()
+  //                              .setVisibility(nvrhi::ShaderType::All)
+  //                              .addItem(nvrhi::BindingLayoutItem::VolatileConstantBuffer(0));
+
+  nvrhi::BindingLayoutHandle binding_layout;  // = device::get_device()->createBindingLayout(layout_desc);
+
+  nvrhi::BindingSetDesc binding_set_desc;
+  binding_set_desc.bindings = {nvrhi::BindingSetItem::ConstantBuffer(0, constant_buffer)};
+
+  if (!nvrhi::utils::CreateBindingSetAndLayout(device::get_device(), nvrhi::ShaderType::All, 0, binding_set_desc,
+                                               binding_layout, cube_binding_set)) {
+    FATAL("Couldn't create the binding set or layout");
+  }
 
   const auto pipeline_desc = nvrhi::GraphicsPipelineDesc()
+                                 .addBindingLayout(binding_layout)
                                  .setInputLayout(input_layout)
                                  .setVertexShader(vertex_shader)
-                                 .setPixelShader(pixel_shader)
-                                 .addBindingLayout(binding_layout);
+                                 .setPixelShader(pixel_shader);
 
   graphics_pipeline = device::get_device()->createGraphicsPipeline(pipeline_desc, device::get_current_framebuffer());
 }
