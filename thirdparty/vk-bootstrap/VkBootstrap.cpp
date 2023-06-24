@@ -1993,6 +1993,12 @@ SwapchainBuilder& SwapchainBuilder::set_composite_alpha_flags(VkCompositeAlphaFl
 	return *this;
 }
 
+bool SwapchainBuilder::is_composit_alpha_flag_supported(VkCompositeAlphaFlagBitsKHR composite_alpha_flags) {
+	auto surface_support_ret = detail::query_surface_support_details(info.physical_device, info.surface);
+
+	return surface_support_ret->capabilities.supportedCompositeAlpha & composite_alpha_flags;
+}
+
 void SwapchainBuilder::add_desired_formats(std::vector<VkSurfaceFormatKHR>& formats) const {
 	formats.push_back({ VK_FORMAT_B8G8R8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR });
 	formats.push_back({ VK_FORMAT_R8G8B8A8_SRGB, VK_COLOR_SPACE_SRGB_NONLINEAR_KHR });
