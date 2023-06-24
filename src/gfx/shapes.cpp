@@ -22,14 +22,18 @@
 namespace gfx::shapes {
 
 const static std::array<SimpleVertex, 24> cube_vertex_data = {
-    SimpleVertex{{-0.5, -0.5f, -0.5f, 1.0f}}, SimpleVertex{{0.5, -0.5f, -0.5f, 1.0f}},  SimpleVertex{{0.5, -0.5f, -0.5f, 1.0f}},
-    SimpleVertex{{0.5, 0.5f, -0.5f, 1.0f}},   SimpleVertex{{0.5, 0.5f, -0.5f, 1.0f}},   SimpleVertex{{-0.5, 0.5f, -0.5f, 1.0f}},
-    SimpleVertex{{-0.5, 0.5f, -0.5f, 1.0f}},  SimpleVertex{{-0.5, -0.5f, -0.5f, 1.0f}}, SimpleVertex{{-0.5, -0.5f, 0.5f, 1.0f}},
-    SimpleVertex{{0.5, -0.5f, 0.5f, 1.0f}},   SimpleVertex{{0.5, -0.5f, 0.5f, 1.0f}},   SimpleVertex{{0.5, 0.5f, 0.5f, 1.0f}},
-    SimpleVertex{{0.5, 0.5f, 0.5f, 1.0f}},    SimpleVertex{{-0.5, 0.5f, 0.5f, 1.0f}},   SimpleVertex{{-0.5, 0.5f, 0.5f, 1.0f}},
-    SimpleVertex{{-0.5, -0.5f, 0.5f, 1.0f}},  SimpleVertex{{-0.5, -0.5f, -0.5f, 1.0f}}, SimpleVertex{{-0.5, -0.5f, 0.5f, 1.0f}},
-    SimpleVertex{{0.5, -0.5f, -0.5f, 1.0f}},  SimpleVertex{{0.5, -0.5f, 0.5f, 1.0f}},   SimpleVertex{{0.5, 0.5f, -0.5f, 1.0f}},
-    SimpleVertex{{0.5, 0.5f, 0.5f, 1.0f}},    SimpleVertex{{-0.5, 0.5f, -0.5f, 1.0f}},  SimpleVertex{{-0.5, 0.5f, 0.5f, 1.0f}},
+    SimpleVertex{{-0.5, -0.5f, -0.5f, 1.0f}}, SimpleVertex{{0.5, -0.5f, -0.5f, 1.0f}},
+    SimpleVertex{{0.5, -0.5f, -0.5f, 1.0f}},  SimpleVertex{{0.5, 0.5f, -0.5f, 1.0f}},
+    SimpleVertex{{0.5, 0.5f, -0.5f, 1.0f}},   SimpleVertex{{-0.5, 0.5f, -0.5f, 1.0f}},
+    SimpleVertex{{-0.5, 0.5f, -0.5f, 1.0f}},  SimpleVertex{{-0.5, -0.5f, -0.5f, 1.0f}},
+    SimpleVertex{{-0.5, -0.5f, 0.5f, 1.0f}},  SimpleVertex{{0.5, -0.5f, 0.5f, 1.0f}},
+    SimpleVertex{{0.5, -0.5f, 0.5f, 1.0f}},   SimpleVertex{{0.5, 0.5f, 0.5f, 1.0f}},
+    SimpleVertex{{0.5, 0.5f, 0.5f, 1.0f}},    SimpleVertex{{-0.5, 0.5f, 0.5f, 1.0f}},
+    SimpleVertex{{-0.5, 0.5f, 0.5f, 1.0f}},   SimpleVertex{{-0.5, -0.5f, 0.5f, 1.0f}},
+    SimpleVertex{{-0.5, -0.5f, -0.5f, 1.0f}}, SimpleVertex{{-0.5, -0.5f, 0.5f, 1.0f}},
+    SimpleVertex{{0.5, -0.5f, -0.5f, 1.0f}},  SimpleVertex{{0.5, -0.5f, 0.5f, 1.0f}},
+    SimpleVertex{{0.5, 0.5f, -0.5f, 1.0f}},   SimpleVertex{{0.5, 0.5f, 0.5f, 1.0f}},
+    SimpleVertex{{-0.5, 0.5f, -0.5f, 1.0f}},  SimpleVertex{{-0.5, 0.5f, 0.5f, 1.0f}},
 };
 
 static bool shapes_pass_active = false;
@@ -71,15 +75,16 @@ static void init_pipeline() {
 
   nvrhi::BindingLayoutHandle binding_layout = device::get_device()->createBindingLayout(layout_desc);
 
-  const auto pipeline_desc = nvrhi::GraphicsPipelineDesc()
-                                 .addBindingLayout(binding_layout)
-                                 .setInputLayout(input_layout)
-                                 .setVertexShader(vertex_shader)
-                                 .setPixelShader(pixel_shader);
+  const auto pipeline_desc =
+      nvrhi::GraphicsPipelineDesc()
+          .addBindingLayout(binding_layout)
+          .setInputLayout(input_layout)
+          .setVertexShader(vertex_shader)
+          .setPixelShader(pixel_shader)
+          .setPrimType(nvrhi::PrimitiveType::LineList)
+          .setRenderState({.depthStencilState = {.depthFunc = nvrhi::ComparisonFunc::GreaterOrEqual}});
 
   graphics_pipeline = device::get_device()->createGraphicsPipeline(pipeline_desc, device::get_current_framebuffer());
-
-  std::abort();
 }
 
 static void init_buffer() {

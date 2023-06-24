@@ -6,8 +6,6 @@
 #include <vk-bootstrap/VkBootstrap.h>
 #include <vulkan/vulkan_core.h>
 
-#include <chrono>
-#include <thread>
 #include <tuple>
 
 #include "../core/log.hpp"
@@ -106,7 +104,8 @@ void init() {
       .maintenance4 = vk::PhysicalDeviceMaintenance4Features().maintenance4,
   };
 
-  const std::vector<const char*> desired_extensions = { // TODO dont need all those?
+  const std::vector<const char*> desired_extensions = {
+      // TODO dont need all those?
       "VK_EXT_DEBUG_MARKER_EXTENSION_NAME",          "VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME",
       "VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME", "VK_NV_MESH_SHADER_EXTENSION_NAME",
       "VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME", "VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME",
@@ -170,7 +169,7 @@ void init() {
           .set_desired_extent(window::get_width_height().x, window::get_width_height().y)
           .set_image_usage_flags(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
                                  VK_IMAGE_USAGE_SAMPLED_BIT)
-          .set_composite_alpha_flags(VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
+          // .set_composite_alpha_flags(VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
           .build();
 
   if (!swapchain_builder_ret) {
@@ -252,7 +251,9 @@ void init() {
     swapchain_image_handles.push_back(image_handle);
 
     const nvrhi::FramebufferDesc framebuffer_desc =
-        nvrhi::FramebufferDesc().addColorAttachment(std::get<1>(image_handle)).setDepthAttachment(depth_texture);
+        nvrhi::FramebufferDesc()
+            .addColorAttachment(std::get<1>(image_handle), nvrhi::AllSubresources)
+            .setDepthAttachment(depth_texture);
 
     nvrhi_framebuffers.push_back(nvrhi_device->createFramebuffer(framebuffer_desc));
   }
@@ -272,8 +273,13 @@ void begin_frame() {
   nvrhi::CommandListHandle clear_command_list = nvrhi_device->createCommandList();
 
   clear_command_list->open();
-  nvrhi::utils::ClearColorAttachment(clear_command_list, nvrhi_framebuffers[current_swapchain_index], 0,
-                                     nvrhi::Color(0.1, 0, 0, 1));
+
+  const auto framebuffer_desc = get_current_framebuffer()->getDesc();
+  clear_command_list->clearTextureFloat(framebuffer_desc.colorAttachments[0].texture,
+                                        framebuffer_desc.colorAttachments[0].subresources, nvrhi::Color(0.1, 0, 0, 1));
+  clear_command_list->clearDepthStencilTexture(framebuffer_desc.depthAttachment.texture,
+                                               framebuffer_desc.depthAttachment.subresources, true, 0.0f, true, 0);
+
   clear_command_list->close();
   nvrhi_device->executeCommandList(clear_command_list);
 }
@@ -298,8 +304,6 @@ void finish_frame() {
   vk_present_queue.waitIdle();
 
   nvrhi_device->runGarbageCollection();
-
-  std::this_thread::sleep_for(std::chrono::milliseconds(250));
 }
 
 void finish() {
