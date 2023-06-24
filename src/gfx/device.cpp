@@ -60,7 +60,7 @@ void init() {
 
   vkb::InstanceBuilder instance_builder;
   instance_builder.set_app_name("offshore")
-      .require_api_version(VKB_VK_API_VERSION_1_2)
+      .require_api_version(VKB_VK_API_VERSION_1_3)
       .use_default_debug_messenger()
 #ifndef NDEBUG
       .enable_validation_layers();
@@ -101,13 +101,18 @@ void init() {
       .bufferDeviceAddress = true,  // TODO optional?
   };
 
+  const VkPhysicalDeviceVulkan13Features features13 = {
+    .synchronization2 = true,
+    .maintenance4 = vk::PhysicalDeviceMaintenance4Features().maintenance4,
+  };
+
   vkb::PhysicalDeviceSelector device_selector{vkb_instance};
   vkb::Result<vkb::PhysicalDevice> device_selector_ret =
       device_selector.set_surface(surface)
-          .set_minimum_version(1, 2)
+          .set_minimum_version(1, 3)
           .set_required_features(features)
           .set_required_features_12(features12)
-          .add_required_extension_features(vk::PhysicalDeviceMaintenance4Features())
+          .set_required_features_13(features13)
           .select();
 
   if (!device_selector_ret) {
