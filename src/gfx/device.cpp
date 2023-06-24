@@ -177,7 +177,8 @@ void init() {
                                  VK_IMAGE_USAGE_SAMPLED_BIT)
           .set_composite_alpha_flags(VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
           .set_composite_alpha_flags_alternative(VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
-          .set_desired_present_mode(VK_PRESENT_MODE_IMMEDIATE_KHR)
+          // .set_desired_present_mode(VK_PRESENT_MODE_IMMEDIATE_KHR)
+          .set_desired_present_mode(VK_PRESENT_MODE_FIFO_KHR)
           .build();
 
   if (!swapchain_builder_ret) {

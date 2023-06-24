@@ -28,11 +28,6 @@ int main() {
 
     delta_time = (double)((current_time - last_time) * 1000 / (double)SDL_GetPerformanceFrequency());
 
-    static float avg_delta_time = delta_time;
-    avg_delta_time += (delta_time - avg_delta_time) * 0.002f;
-
-    printf("%f\n", avg_delta_time);
-
     input::begin();
 
     while (SDL_PollEvent(&sdl_event)) {
