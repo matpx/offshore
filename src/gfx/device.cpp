@@ -169,7 +169,7 @@ void init() {
           .set_desired_extent(window::get_width_height().x, window::get_width_height().y)
           .set_image_usage_flags(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
                                  VK_IMAGE_USAGE_SAMPLED_BIT)
-          // .set_composite_alpha_flags(VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
+          .set_composite_alpha_flags(VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
           .build();
 
   if (!swapchain_builder_ret) {
