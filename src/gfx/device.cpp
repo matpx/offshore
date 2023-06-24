@@ -249,7 +249,6 @@ void init() {
         .dimension = nvrhi::TextureDimension::Texture2D,
         .debugName = "Depth Buffer",
         .isRenderTarget = true,
-        .clearValue = nvrhi::Color(0.0f),
         .useClearValue = true,
         .initialState = nvrhi::ResourceStates::DepthWrite,
         .keepInitialState = true,
@@ -292,7 +291,7 @@ void begin_frame() {
                                         framebuffer_desc.colorAttachments[0].subresources,
                                         nvrhi::Color(0.0f, 0.0f, 0.0f, 1.0f));
   clear_command_list->clearDepthStencilTexture(framebuffer_desc.depthAttachment.texture,
-                                               framebuffer_desc.depthAttachment.subresources, true, 0.0f, true, 0.0f);
+                                               framebuffer_desc.depthAttachment.subresources, true, 1.0f, true, 0.0f);
 
   clear_command_list->close();
   nvrhi_device->executeCommandList(clear_command_list);

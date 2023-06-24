@@ -81,8 +81,7 @@ static void init_pipeline() {
           .setInputLayout(input_layout)
           .setVertexShader(vertex_shader)
           .setPixelShader(pixel_shader)
-          .setPrimType(nvrhi::PrimitiveType::LineList)
-          .setRenderState({.depthStencilState = {.depthFunc = nvrhi::ComparisonFunc::GreaterOrEqual}});
+          .setPrimType(nvrhi::PrimitiveType::LineList);
 
   graphics_pipeline = device::get_device()->createGraphicsPipeline(pipeline_desc, device::get_current_framebuffer());
 }

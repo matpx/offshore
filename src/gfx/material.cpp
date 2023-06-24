@@ -56,12 +56,9 @@ void init() {
                                  .setInputLayout(input_layout)
                                  .setVertexShader(vertex_shader)
                                  .setPixelShader(pixel_shader)
-                                 .setRenderState({
-                                     .depthStencilState =
-                                         {
-                                             .depthFunc = nvrhi::ComparisonFunc::GreaterOrEqual,
-                                         },
-                                 });
+                                 .setRenderState({.rasterState = {
+                                                      .cullMode = nvrhi::RasterCullMode::None, // TODO outside only
+                                                  }});
 
   basic_pipeline = device::get_device()->createGraphicsPipeline(pipeline_desc, device::get_current_framebuffer());
 
