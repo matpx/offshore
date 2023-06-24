@@ -8,6 +8,7 @@
 #include <array>
 #include <cassert>
 #include <entt/entity/registry.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <vector>
 
 #include "../core/log.hpp"
@@ -16,6 +17,7 @@
 #include "device.hpp"
 #include "gfx.hpp"
 #include "vertex.hpp"
+#include "window.hpp"
 
 namespace gfx::shapes {
 
@@ -33,6 +35,9 @@ const static std::array<SimpleVertex, 24> cube_vertex_data = {
 static bool shapes_pass_active = false;
 
 static nvrhi::GraphicsPipelineHandle graphics_pipeline = nullptr;
+static nvrhi::BufferHandle constant_buffer = nullptr;
+static nvrhi::BufferHandle cube_vertex_buffer = nullptr;
+static nvrhi::BindingSetHandle cube_binding_set = nullptr;
 
 static void init_pipeline() {
   LOG_DEBUG("gfx::shapes::init_pipeline()");
@@ -72,47 +77,42 @@ static void init_pipeline() {
                                  .setPixelShader(pixel_shader)
                                  .addBindingLayout(binding_layout);
 
-  graphics_pipeline = device::get_device()->createGraphicsPipeline(pipeline_desc, device::get_framebuffers()[0]);
+  graphics_pipeline = device::get_device()->createGraphicsPipeline(pipeline_desc, device::get_current_framebuffer());
 }
 
 static void init_buffer() {
   LOG_DEBUG("gfx::shapes::init_buffer()");
 
-  // const auto constant_buffer_desc = nvrhi::BufferDesc()
-  //                                       .setByteSize(sizeof(mat4))
-  //                                       .setIsConstantBuffer(true)
-  //                                       .setIsVolatile(true)
-  //                                       .setMaxVersions(16);  // TODO too low?
+  const auto constant_buffer_desc = nvrhi::BufferDesc()
+                                        .setByteSize(sizeof(mat4))
+                                        .setIsConstantBuffer(true)
+                                        .setIsVolatile(true)
+                                        .setMaxVersions(32);  // TODO too low?
 
-  // nvrhi::BufferHandle constant_buffer = device::get_device()->createBuffer(constant_buffer_desc);
+  constant_buffer = device::get_device()->createBuffer(constant_buffer_desc);
 
-  // const auto vertex_buffer_desc = nvrhi::BufferDesc()
-  //                                     .setByteSize(sizeof(cube_vertex_data))
-  //                                     .setIsVertexBuffer(true)
-  //                                     .setInitialState(nvrhi::ResourceStates::VertexBuffer)
-  //                                     .setKeepInitialState(true)
-  //                                     .setDebugName("Vertex Buffer");
+  const auto vertex_buffer_desc = nvrhi::BufferDesc()
+                                      .setByteSize(sizeof(cube_vertex_data))
+                                      .setIsVertexBuffer(true)
+                                      .setInitialState(nvrhi::ResourceStates::VertexBuffer)
+                                      .setKeepInitialState(true)
+                                      .setDebugName("Vertex Buffer");
 
-  // nvrhi::BufferHandle vertex_buffer = device::get_device()->createBuffer(vertex_buffer_desc);
+  cube_vertex_buffer = device::get_device()->createBuffer(vertex_buffer_desc);
 
-  // const auto binding_set_desc =
-  //     nvrhi::BindingSetDesc().addItem(nvrhi::BindingSetItem::ConstantBuffer(0, constant_buffer));
+  const auto binding_set_desc =
+      nvrhi::BindingSetDesc().addItem(nvrhi::BindingSetItem::ConstantBuffer(0, constant_buffer));
 
-  // nvrhi::BindingSetHandle binding_set =
-  //     device::get_device()->createBindingSet(binding_set_desc, graphics_pipeline->getDesc().bindingLayouts[0]);
+  cube_binding_set =
+      device::get_device()->createBindingSet(binding_set_desc, graphics_pipeline->getDesc().bindingLayouts[0]);
 
-  // commandList->open();
+  nvrhi::CommandListHandle upload_command_list = device::get_device()->createCommandList();
 
-  // commandList->writeBuffer(vertexBuffer, g_Vertices, sizeof(g_Vertices));
+  upload_command_list->open();
+  upload_command_list->writeBuffer(cube_vertex_buffer, cube_vertex_data.data(), sizeof(cube_vertex_data));
+  upload_command_list->close();
 
-  // const void* textureData = ...;
-  // const size_t textureRowPitch = ...;
-  // commandList->writeTexture(geometryTexture,
-  //     /* arraySlice = */ 0, /* mipLevel = */ 0,
-  //     textureData, textureRowPitch);
-
-  // commandList->close();
-  // device::get_device()->executeCommandList(commandList);
+  device::get_device()->executeCommandList(upload_command_list);
 }
 
 void init() {
@@ -131,17 +131,37 @@ void begin_pass() {
   shapes_pass_active = true;
 }
 
-static void draw_shape(i32 base_element, i32 num_elements, const vec3& center, const vec3& scale) {
+static void draw_shape(const u32 base_element, const u32 num_elements, const vec3& center, const vec3& scale) {
   assert(shapes_pass_active);
 
   const mat4 mvp = gfx::get_current_vp() * glm::scale(glm::translate(glm::identity<mat4>(), center), scale);
 
-  // MVP_t MVP = {
-  //     .mvp = mvp,
-  // };
-  // sg_apply_uniforms(SG_SHADERSTAGE_VS, SLOT_MVP, SG_RANGE(MVP));
+  nvrhi::CommandListHandle draw_command_list = device::get_device()->createCommandList();
 
-  // sg_draw(base_element, num_elements, 1);
+  draw_command_list->open();
+
+  draw_command_list->writeBuffer(constant_buffer, glm::value_ptr(mvp), sizeof(mvp));
+
+  const auto vertex_buffer_binding = nvrhi::VertexBufferBinding{
+      .buffer = cube_vertex_buffer,
+      .offset = base_element,
+  };
+
+  const auto graphicsState = nvrhi::GraphicsState()
+                           .setPipeline(graphics_pipeline)
+                           .setFramebuffer(device::get_current_framebuffer())
+                           .setViewport(nvrhi::ViewportState().addViewportAndScissorRect(
+                               nvrhi::Viewport(window::get_width_height().x, window::get_width_height().y)))
+                           .addBindingSet(cube_binding_set)
+                           .addVertexBuffer(vertex_buffer_binding);
+
+  draw_command_list->setGraphicsState(graphicsState);
+
+  const auto drawArguments = nvrhi::DrawArguments().setVertexCount(num_elements);
+  draw_command_list->draw(drawArguments);
+
+  draw_command_list->close();
+  device::get_device()->executeCommandList(draw_command_list);
 }
 
 void draw_box(const vec3& center, const vec3& scale) { draw_shape(0, cube_vertex_data.size(), center, scale); }
@@ -163,6 +183,9 @@ void finish_pass() {
 void finish() {
   assert(!shapes_pass_active);
 
+  cube_binding_set = nullptr;
+  cube_vertex_buffer = nullptr;
+  constant_buffer = nullptr;
   graphics_pipeline = nullptr;
 
   LOG_INFO("gfx::shapes::finish()");

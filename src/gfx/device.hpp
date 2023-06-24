@@ -15,6 +15,6 @@ void finish();
 
 nvrhi::DeviceHandle get_device();
 
-std::span<nvrhi::FramebufferHandle> get_framebuffers();
+nvrhi::FramebufferHandle get_current_framebuffer();
 
 }  // namespace gfx::device

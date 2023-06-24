@@ -4,7 +4,10 @@
 #include <nvrhi/nvrhi.h>
 #include <nvrhi/utils.h>
 #include <vk-bootstrap/VkBootstrap.h>
+#include <vulkan/vulkan_core.h>
 
+#include <chrono>
+#include <thread>
 #include <tuple>
 
 #include "../core/log.hpp"
@@ -46,7 +49,7 @@ nvrhi::CommandListHandle barrier_command_list = nullptr;
 
 nvrhi::DeviceHandle get_device() { return nvrhi_device_wrapped; }
 
-std::span<nvrhi::FramebufferHandle> get_framebuffers() { return nvrhi_framebuffers; }
+nvrhi::FramebufferHandle get_current_framebuffer() { return nvrhi_framebuffers[current_swapchain_index]; }
 
 void init() {
   u32 extension_count = 0;
@@ -78,13 +81,33 @@ void init() {
     FATAL("SDL_Vulkan_CreateSurface() failed");
   }
 
+  const VkPhysicalDeviceFeatures features = {
+      .imageCubeArray = true,
+      .geometryShader = true,
+      .tessellationShader = true,
+      .dualSrcBlend = true,
+      .samplerAnisotropy = true,
+      .textureCompressionBC = true,
+      .shaderImageGatherExtended = true,
+  };
+
   const VkPhysicalDeviceVulkan12Features features12 = {
+      .descriptorIndexing = true,
+      .shaderSampledImageArrayNonUniformIndexing = true,
+      .descriptorBindingPartiallyBound = true,
+      .descriptorBindingVariableDescriptorCount = true,
+      .runtimeDescriptorArray = true,
       .timelineSemaphore = true,
+      .bufferDeviceAddress = true, // TODO optional?
   };
 
   vkb::PhysicalDeviceSelector device_selector{vkb_instance};
-  vkb::Result<vkb::PhysicalDevice> device_selector_ret =
-      device_selector.set_surface(surface).set_minimum_version(1, 2).set_required_features_12(features12).select();
+  vkb::Result<vkb::PhysicalDevice> device_selector_ret = device_selector.set_surface(surface)
+                                                             .set_minimum_version(1, 2)
+                                                             .set_required_features(features)
+                                                             .set_required_features_12(features12)
+                                                             .select();
+
   if (!device_selector_ret) {
     const std::string msg = device_selector_ret.error().message();
     FATAL("Failed to select Vulkan Physical Device. Error: %s", msg.c_str());
@@ -259,6 +282,10 @@ void finish_frame() {
   assert(res == vk::Result::eSuccess || res == vk::Result::eErrorOutOfDateKHR);
 
   vk_present_queue.waitIdle();
+
+  nvrhi_device->runGarbageCollection();
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(500));
 }
 
 void finish() {
