@@ -1,22 +1,24 @@
 #pragma once
 
+#include <nvrhi/nvrhi.h>
+
 #include "../core/geometry.hpp"
-
-// #include <sokol/sokol_gfx.h>
-
 #include "vertex.hpp"
 
 namespace gfx {
 
 struct Mesh {
-  // sg_bindings bindings;
+  nvrhi::BufferHandle vertex_buffer;
+  nvrhi::BufferHandle index_buffer;
   u32 base_element;
   u32 num_elements;
   geometry::AABB local_aabb;
 };
 
 struct Material {
-  // sg_pipeline pipeline;
+  nvrhi::GraphicsPipelineHandle pipeline;
+  nvrhi::BufferHandle constant_buffer;
+  nvrhi::BindingSetHandle binding_set;
 };
 
 }  // namespace gfx

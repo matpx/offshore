@@ -85,11 +85,12 @@ ivec2 build_chunk(const vec3 &chunk_position, const TerrainLOD level) {
     world::registry->emplace<comp::TerrainChunk>(terrain_chunk, comp::TerrainChunk{});
     world::registry->emplace<comp::Transform>(terrain_chunk, comp::Transform{
                                                                  .translation = global_offset,
+                                                                 .debug_name = "Terrain Chunk",
                                                              });
     world::registry->emplace<comp::Renderable>(terrain_chunk, comp::Renderable{mesh, gfx::material::get()});
   }
 
-  mcFree(&iso_mesh); // TODO LEAK
+  mcFree(&iso_mesh);  // TODO LEAK
 
   return {vertex_data.size(), index_data.size()};
 }
@@ -141,7 +142,6 @@ void Terrain::update([[maybe_unused]] double delta_time) {
 
   if (camera_to_root.x != 0 || camera_to_root.y != 0 || camera_to_root.z != 0) {
     for (const auto &[entity, renderable] : world::registry->view<comp::Renderable, comp::TerrainChunk>().each()) {
-      gfx::destroy_mesh(renderable.mesh);
       world::registry->destroy(entity);
     }
 

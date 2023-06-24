@@ -289,9 +289,10 @@ void begin_frame() {
 
   const auto framebuffer_desc = get_current_framebuffer()->getDesc();
   clear_command_list->clearTextureFloat(framebuffer_desc.colorAttachments[0].texture,
-                                        framebuffer_desc.colorAttachments[0].subresources, nvrhi::Color(0.1, 0, 0, 1));
+                                        framebuffer_desc.colorAttachments[0].subresources,
+                                        nvrhi::Color(0.0f, 0.0f, 0.0f, 1.0f));
   clear_command_list->clearDepthStencilTexture(framebuffer_desc.depthAttachment.texture,
-                                               framebuffer_desc.depthAttachment.subresources, true, 0.0f, true, 0);
+                                               framebuffer_desc.depthAttachment.subresources, true, 0.0f, true, 0.0f);
 
   clear_command_list->close();
   nvrhi_device->executeCommandList(clear_command_list);
@@ -325,9 +326,7 @@ void finish_frame() {
   nvrhi_device->runGarbageCollection();
 }
 
-void wait_idle() {
-  nvrhi_device->waitForIdle();
-}
+void wait_idle() { nvrhi_device->waitForIdle(); }
 
 void finish() {
   vk_device.destroySemaphore(vk_present_semaphore);

@@ -39,8 +39,8 @@ const static std::array<SimpleVertex, 24> cube_vertex_data = {
 static bool shapes_pass_active = false;
 
 static nvrhi::GraphicsPipelineHandle graphics_pipeline = nullptr;
-static nvrhi::BufferHandle constant_buffer = nullptr;
 static nvrhi::BufferHandle cube_vertex_buffer = nullptr;
+static nvrhi::BufferHandle constant_buffer = nullptr;
 static nvrhi::BindingSetHandle cube_binding_set = nullptr;
 
 static void init_pipeline() {

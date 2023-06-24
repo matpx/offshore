@@ -1,11 +1,10 @@
 #include "gfx.hpp"
 
 #include <SDL2/SDL.h>
-// #include <sokol/sokol_gfx.h>
-// #include <sokol/sokol_log.h>
-// #include <sokol/util/sokol_color.h>
+#include <nvrhi/nvrhi.h>
 
 #include <entt/entity/registry.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "../core/geometry.hpp"
 #include "../core/log.hpp"
@@ -14,11 +13,12 @@
 #include "renderable.hpp"
 #include "shapes.hpp"
 #include "ui.hpp"
+#include "vertex.hpp"
 #include "window.hpp"
 
 namespace gfx {
 
-static_assert(sizeof(index_t) == 2);
+static_assert(sizeof(index_t) == 4);
 
 static mat4 current_vp = mat4(1.0);
 
@@ -27,18 +27,6 @@ void init() {
 
   window::init();
 
-  // sg_desc desc = {
-  //     .buffer_pool_size = 256,
-  //     .logger = {.func = slog_func},
-  // };
-
-  // desc.allocator = {
-  //     .alloc = [](size_t size, [[maybe_unused]] void* user_data) { return allocator::_malloc(size); },
-  //     .free = [](void* ptr, [[maybe_unused]] void* user_data) { allocator::_free(ptr); },
-  // };
-
-  // sg_setup(desc);
-
   device::init();
   material::init();
   shapes::init();
@@ -46,51 +34,45 @@ void init() {
 }
 
 Mesh create_mesh(const std::span<const Vertex> vertex_data, const std::span<const index_t> index_data) {
-  // const sg_buffer_desc vertex_buffer_desc = {.data = {
-  //                                                .ptr = vertex_data.data(),
-  //                                                .size = vertex_data.size() * sizeof(Vertex),
-  //                                            }};
-
   geometry::AABB aabb = geometry::AABB::from_vertex_data(vertex_data);
 
-  // sg_buffer vertex_buffer = sg_make_buffer(vertex_buffer_desc);
+  const auto vertex_buffer_desc = nvrhi::BufferDesc()
+                                      .setByteSize(vertex_data.size_bytes())
+                                      .setIsVertexBuffer(true)
+                                      .setInitialState(nvrhi::ResourceStates::VertexBuffer)
+                                      .setKeepInitialState(true)
+                                      .setDebugName("Vertex Buffer");
 
-  // const sg_buffer_desc index_buffer_desc = {
-  //     .type = SG_BUFFERTYPE_INDEXBUFFER,
-  //     .data =
-  //         {
-  //             .ptr = index_data.data(),
-  //             .size = index_data.size() * sizeof(index_t),
-  //         },
-  // };
+  const auto vertex_buffer = device::get_device()->createBuffer(vertex_buffer_desc);
 
-  // sg_buffer index_buffer = sg_make_buffer(index_buffer_desc);
+  const auto index_buffer_desc = nvrhi::BufferDesc()
+                                     .setByteSize(index_data.size_bytes())
+                                     .setIsIndexBuffer(true)
+                                     .setInitialState(nvrhi::ResourceStates::IndexBuffer)
+                                     .setKeepInitialState(true)
+                                     .setDebugName("Index Buffer");
+
+  const auto index_buffer = device::get_device()->createBuffer(index_buffer_desc);
+
+  nvrhi::CommandListHandle upload_command_list = device::get_device()->createCommandList();
+
+  upload_command_list->open();
+  upload_command_list->writeBuffer(vertex_buffer, vertex_data.data(), vertex_data.size_bytes());
+  upload_command_list->writeBuffer(index_buffer, index_data.data(), index_data.size_bytes());
+  upload_command_list->close();
+
+  device::get_device()->executeCommandList(upload_command_list);
 
   return {
-      // .bindings = {.vertex_buffers = {vertex_buffer}, .index_buffer = index_buffer},
+      .vertex_buffer = vertex_buffer,
+      .index_buffer = index_buffer,
       .num_elements = static_cast<u32>(index_data.size()),
       .local_aabb = aabb,
   };
 }
 
-void destroy_mesh(const Mesh& mesh) {
-  // sg_destroy_buffer(mesh.bindings.index_buffer);
-  // sg_destroy_buffer(mesh.bindings.vertex_buffers[0]);
-}
-
 void begin_frame(entt::entity camera) {
-  // const sg_pass_action pass_action = {
-  //     .colors = {{
-  //         .action = SG_ACTION_CLEAR,
-  //         .value = SG_DARK_GRAY,
-  //     }},
-  // };
-
   const uvec2 window_size = window::get_width_height();
-
-  // sg_begin_default_pass(&pass_action, window_size.x, window_size.y);
-
-  // camera.transform.update();
 
   const comp::Transform& camera_transform = world::registry->get<comp::Transform>(camera);
   comp::Camera& camera_component = world::registry->get<comp::Camera>(camera);
@@ -108,23 +90,41 @@ void begin_frame(entt::entity camera) {
 }
 
 void draw_world() {
-  for (const auto [entity, transform, renderable] : world::registry->view<comp::Transform, comp::Renderable>().each()) {
+  const uvec2 window_size = window::get_width_height();
+
+  nvrhi::FramebufferHandle current_framebuffer = device::get_current_framebuffer();
+  nvrhi::CommandListHandle draw_command_list = device::get_device()->createCommandList();
+
+  draw_command_list->open();
+
+  for (const auto [entity, transform, renderable] :
+       world::registry->view<const comp::Transform, const comp::Renderable>().each()) {
     const mat4 mvp = current_vp * transform.world;
 
-    // sg_apply_pipeline(renderable.material.pipeline);
-    // sg_apply_uniforms(SG_SHADERSTAGE_VS, 0, SG_RANGE(mvp));
+    draw_command_list->writeBuffer(renderable.material.constant_buffer, glm::value_ptr(mvp), sizeof(mvp));
 
-    // sg_apply_bindings(renderable.mesh.bindings);
-    // sg_draw(renderable.mesh.base_element, renderable.mesh.num_elements, 1);
+    auto graphicsState = nvrhi::GraphicsState()
+                             .setPipeline(renderable.material.pipeline)
+                             .setFramebuffer(current_framebuffer)
+                             .setViewport(nvrhi::ViewportState().addViewportAndScissorRect(
+                                 nvrhi::Viewport(window_size.x, window_size.y)))
+                             .addBindingSet(renderable.material.binding_set)
+                             .addVertexBuffer({.buffer = renderable.mesh.vertex_buffer})
+                             .setIndexBuffer({.buffer = renderable.mesh.index_buffer});
+
+    draw_command_list->setGraphicsState(graphicsState);
+
+    auto drawArguments = nvrhi::DrawArguments()
+                             .setStartIndexLocation(renderable.mesh.base_element)
+                             .setVertexCount(renderable.mesh.num_elements);
+    draw_command_list->drawIndexed(drawArguments);
   }
+
+  draw_command_list->close();
+  device::get_device()->executeCommandList(draw_command_list);
 }
 
-void end_frame() {
-  // sg_end_pass();
-  // sg_commit();
-
-  device::finish_frame();
-}
+void end_frame() { device::finish_frame(); }
 
 void finish() {
   device::wait_idle();

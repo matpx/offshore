@@ -1,6 +1,7 @@
 #pragma once
 
 #include <entt/entity/entity.hpp>
+#include <string_view>
 
 #include "../gfx/renderable.hpp"
 
@@ -14,6 +15,8 @@ struct Transform {
   geometry::AABB global_aabb = {};
 
   entt::entity parent_id = entt::null;
+
+  std::string_view debug_name = "";
 };
 
 struct Camera {

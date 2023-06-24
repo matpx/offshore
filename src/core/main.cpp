@@ -7,6 +7,7 @@
 #include "../world/world.hpp"
 #include "input.hpp"
 #include "log.hpp"
+#include <entt/entity/registry.hpp>
 
 int main() {
   LOG_DEBUG("debug mode!");
@@ -59,6 +60,8 @@ int main() {
 
     gfx::end_frame();
   }
+
+  world::registry = {};
 
   gfx::finish();
 

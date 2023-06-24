@@ -10,8 +10,6 @@ void init();
 
 Mesh create_mesh(const std::span<const Vertex> vertex_data, const std::span<const index_t> index_data);
 
-void destroy_mesh(const Mesh& mesh);
-
 void begin_frame(entt::entity camera);
 
 void draw_world();

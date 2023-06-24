@@ -19,12 +19,12 @@ void Player::setup() {
   world::main_camera = world::registry->create();
 
   world::registry->emplace<comp::Transform>(world::main_camera, comp::Transform{.parent_id = player_entity});
-  world::registry->emplace<comp::Camera>(world::main_camera, comp::Camera(1000, 1000, 1.5, 0.1, 1000.0));
+  world::registry->emplace<comp::Camera>(world::main_camera, comp::Camera(1000, 1000, 1.5, 0.1, 2000.0));
 }
 
 void Player::update(double delta_time) {
   constexpr float look_multiplier = 0.005f;
-  constexpr float velocity_multiplier = 0.01f;
+  constexpr float velocity_multiplier = 0.2f;
 
   comp::Transform& player_transform = world::registry->get<comp::Transform>(player_entity);
   comp::Transform& camera_transform = world::registry->get<comp::Transform>(world::main_camera);

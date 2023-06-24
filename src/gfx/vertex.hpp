@@ -4,11 +4,11 @@
 
 namespace gfx {
 
-using index_t = u16;
+using index_t = u32;
 
 struct Vertex {
-    float position[3];
-    float normal[3];
+    float position[4];
+    float normal[4];
 };
 
 struct SimpleVertex {
