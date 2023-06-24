@@ -14,8 +14,6 @@ set(OFFSHORE_BIN_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 
 add_executable(offshore ${OffshoreSources} ${ThirdpartySources})
 
-set_target_properties (offshore PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${OFFSHORE_BIN_OUTPUT_PATH}/$<CONFIG>")
-
 target_compile_definitions(offshore PRIVATE GLM_FORCE_ALIGNED GLM_FORCE_SSE2)
 
 target_include_directories(offshore SYSTEM PRIVATE thirdparty)
@@ -45,8 +43,6 @@ target_include_directories(offshore SYSTEM PRIVATE thirdparty/nvrhi/include)
 target_link_libraries(offshore PRIVATE nvrhi_vk nvrhi)
 
 if(MSVC)
-  target_compile_definitions(offshore PRIVATE _HAS_EXCEPTIONS=0)
-
   target_include_directories(offshore PRIVATE platform/win32/include)
   target_link_directories(offshore PRIVATE platform/win32/lib)
   target_link_libraries(offshore PRIVATE SDL2)
