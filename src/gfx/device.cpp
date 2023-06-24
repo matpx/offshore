@@ -102,18 +102,25 @@ void init() {
   };
 
   const VkPhysicalDeviceVulkan13Features features13 = {
-    .synchronization2 = true,
-    .maintenance4 = vk::PhysicalDeviceMaintenance4Features().maintenance4,
+      .synchronization2 = true,
+      .maintenance4 = vk::PhysicalDeviceMaintenance4Features().maintenance4,
+  };
+
+  const std::vector<const char*> desired_extensions = { // TODO dont need all those?
+      "VK_EXT_DEBUG_MARKER_EXTENSION_NAME",          "VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME",
+      "VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME", "VK_NV_MESH_SHADER_EXTENSION_NAME",
+      "VK_KHR_FRAGMENT_SHADING_RATE_EXTENSION_NAME", "VK_KHR_SYNCHRONIZATION_2_EXTENSION_NAME",
+      "VK_KHR_MAINTENANCE_4_EXTENSION_NAME",
   };
 
   vkb::PhysicalDeviceSelector device_selector{vkb_instance};
-  vkb::Result<vkb::PhysicalDevice> device_selector_ret =
-      device_selector.set_surface(surface)
-          .set_minimum_version(1, 3)
-          .set_required_features(features)
-          .set_required_features_12(features12)
-          .set_required_features_13(features13)
-          .select();
+  vkb::Result<vkb::PhysicalDevice> device_selector_ret = device_selector.set_surface(surface)
+                                                             .set_minimum_version(1, 3)
+                                                             .set_required_features(features)
+                                                             .set_required_features_12(features12)
+                                                             .set_required_features_13(features13)
+                                                             .add_desired_extensions(desired_extensions)
+                                                             .select();
 
   if (!device_selector_ret) {
     const std::string msg = device_selector_ret.error().message();
