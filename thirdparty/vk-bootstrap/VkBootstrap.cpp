@@ -1811,8 +1811,14 @@ Result<Swapchain> SwapchainBuilder::build() const {
 		swapchain_create_info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
 	}
 
+	VkCompositeAlphaFlagBitsKHR composite_alpha = info.composite_alpha;
+
+	if(!(surface_support.capabilities.supportedCompositeAlpha & composite_alpha)) {
+		composite_alpha = info.composite_alpha_alternative;
+	}
+
 	swapchain_create_info.preTransform = pre_transform;
-	swapchain_create_info.compositeAlpha = info.composite_alpha;
+	swapchain_create_info.compositeAlpha = composite_alpha;
 	swapchain_create_info.presentMode = present_mode;
 	swapchain_create_info.clipped = info.clipped;
 	swapchain_create_info.oldSwapchain = info.old_swapchain;
@@ -1993,10 +1999,9 @@ SwapchainBuilder& SwapchainBuilder::set_composite_alpha_flags(VkCompositeAlphaFl
 	return *this;
 }
 
-bool SwapchainBuilder::is_composit_alpha_flag_supported(VkCompositeAlphaFlagBitsKHR composite_alpha_flags) {
-	auto surface_support_ret = detail::query_surface_support_details(info.physical_device, info.surface);
-
-	return surface_support_ret->capabilities.supportedCompositeAlpha & composite_alpha_flags;
+SwapchainBuilder& SwapchainBuilder::set_composite_alpha_flags_alternative(VkCompositeAlphaFlagBitsKHR composite_alpha_flags) {
+	info.composite_alpha_alternative = composite_alpha_flags;
+	return *this;
 }
 
 void SwapchainBuilder::add_desired_formats(std::vector<VkSurfaceFormatKHR>& formats) const {

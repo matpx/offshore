@@ -161,11 +161,6 @@ void init() {
 
   vkb::SwapchainBuilder swapchain_builder{vkb_device};
 
-  VkCompositeAlphaFlagBitsKHR composit_alpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-  if (swapchain_builder.is_composit_alpha_flag_supported(VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)) {
-    composit_alpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
-  }
-
   const vkb::Result<vkb::Swapchain> swapchain_builder_ret =
       swapchain_builder
           .set_desired_format({
@@ -175,7 +170,8 @@ void init() {
           .set_desired_extent(window::get_width_height().x, window::get_width_height().y)
           .set_image_usage_flags(VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT |
                                  VK_IMAGE_USAGE_SAMPLED_BIT)
-          .set_composite_alpha_flags(composit_alpha)
+          .set_composite_alpha_flags(VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR)
+          .set_composite_alpha_flags_alternative(VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR)
           .build();
 
   if (!swapchain_builder_ret) {

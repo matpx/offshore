@@ -27,6 +27,7 @@
 #include <vulkan/vulkan.h>
 
 #include "VkBootstrapDispatch.h"
+#include "vulkan/vulkan_core.h"
 
 #ifdef VK_MAKE_API_VERSION
 #define VKB_MAKE_VK_VERSION(variant, major, minor, patch) VK_MAKE_API_VERSION(variant, major, minor, patch)
@@ -886,8 +887,7 @@ class SwapchainBuilder {
 	SwapchainBuilder& set_pre_transform_flags(VkSurfaceTransformFlagBitsKHR pre_transform_flags);
 	// Set the alpha channel to be used with other windows in on the system. Default is VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR.
 	SwapchainBuilder& set_composite_alpha_flags(VkCompositeAlphaFlagBitsKHR composite_alpha_flags);
-
-	bool is_composit_alpha_flag_supported(VkCompositeAlphaFlagBitsKHR composite_alpha_flags);
+	SwapchainBuilder& set_composite_alpha_flags_alternative(VkCompositeAlphaFlagBitsKHR composite_alpha_flags);
 
 	// Add a structure to the pNext chain of VkSwapchainCreateInfoKHR.
 	// The structure must be valid when SwapchainBuilder::build() is called.
@@ -920,11 +920,8 @@ class SwapchainBuilder {
 		uint32_t graphics_queue_index = 0;
 		uint32_t present_queue_index = 0;
 		VkSurfaceTransformFlagBitsKHR pre_transform = static_cast<VkSurfaceTransformFlagBitsKHR>(0);
-#if defined(__ANDROID__)
-		VkCompositeAlphaFlagBitsKHR composite_alpha = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
-#else
 		VkCompositeAlphaFlagBitsKHR composite_alpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-#endif
+		VkCompositeAlphaFlagBitsKHR composite_alpha_alternative = VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR;
 		std::vector<VkPresentModeKHR> desired_present_modes;
 		bool clipped = true;
 		VkSwapchainKHR old_swapchain = VK_NULL_HANDLE;
