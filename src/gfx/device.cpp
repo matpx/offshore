@@ -37,8 +37,8 @@ static vk::SwapchainKHR vk_swapchain = nullptr;
 static std::vector<std::tuple<vk::Image, nvrhi::TextureHandle>> swapchain_image_handles;
 
 static const NvrhiMessageCallback message_callback;
-static nvrhi::vulkan::DeviceHandle nvrhi_device = nullptr;
-static nvrhi::DeviceHandle nvrhi_device_wrapped = nullptr;
+static nvrhi::vulkan::DeviceHandle nvrhi_device_vk = nullptr;
+static nvrhi::DeviceHandle nvrhi_device = nullptr;
 
 static std::vector<nvrhi::FramebufferHandle> nvrhi_framebuffers;
 
@@ -47,7 +47,7 @@ static u32 current_swapchain_index = 0;
 
 nvrhi::CommandListHandle barrier_command_list = nullptr;
 
-nvrhi::DeviceHandle get_device() { return nvrhi_device_wrapped; }
+nvrhi::DeviceHandle get_device() { return nvrhi_device; }
 
 nvrhi::FramebufferHandle get_current_framebuffer() { return nvrhi_framebuffers[current_swapchain_index]; }
 
@@ -208,12 +208,12 @@ void init() {
   VULKAN_HPP_DEFAULT_DISPATCHER.init(deviceDesc.instance);
   VULKAN_HPP_DEFAULT_DISPATCHER.init(deviceDesc.device);
 
-  nvrhi_device = nvrhi::vulkan::createDevice(deviceDesc);
+  nvrhi_device_vk = nvrhi::vulkan::createDevice(deviceDesc);
 
 #ifndef NDEBUG
-  nvrhi_device_wrapped = nvrhi::validation::createValidationLayer(nvrhi_device);
+  nvrhi_device = nvrhi::validation::createValidationLayer(nvrhi_device_vk);
 #else
-  nvrhi_device_wrapped = nvrhi_device;
+  nvrhi_device = nvrhi_device;
 #endif
 
   const std::vector<VkImage> swapchain_images = vkb_swapchain.get_images().value();
@@ -267,7 +267,7 @@ void begin_frame() {
 
   assert(res == vk::Result::eSuccess);
 
-  nvrhi_device->queueWaitForSemaphore(nvrhi::CommandQueue::Graphics, vk_present_semaphore, 0);
+  nvrhi_device_vk->queueWaitForSemaphore(nvrhi::CommandQueue::Graphics, vk_present_semaphore, 0);
 
   nvrhi::CommandListHandle clear_command_list = nvrhi_device->createCommandList();
 
@@ -279,7 +279,7 @@ void begin_frame() {
 }
 
 void finish_frame() {
-  nvrhi_device->queueSignalSemaphore(nvrhi::CommandQueue::Graphics, vk_present_semaphore, 0);
+  nvrhi_device_vk->queueSignalSemaphore(nvrhi::CommandQueue::Graphics, vk_present_semaphore, 0);
 
   barrier_command_list->open();  // umm...
   barrier_command_list->close();
@@ -309,8 +309,8 @@ void finish() {
   nvrhi_framebuffers.clear();
   swapchain_image_handles.clear();
 
-  nvrhi_device_wrapped = nullptr;
   nvrhi_device = nullptr;
+  nvrhi_device_vk = nullptr;
 
   vkb::destroy_swapchain(vkb_swapchain);
   vkb::destroy_device(vkb_device);
