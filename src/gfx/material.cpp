@@ -31,7 +31,7 @@ void init() {
           .setElementStride(sizeof(Vertex)),
       nvrhi::VertexAttributeDesc()
           .setName("NORMAL")
-          .setFormat(nvrhi::Format::RG32_FLOAT)
+          .setFormat(nvrhi::Format::RGB32_FLOAT)
           .setOffset(offsetof(Vertex, normal))
           .setElementStride(sizeof(Vertex)),
   };

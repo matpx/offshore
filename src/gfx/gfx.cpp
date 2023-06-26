@@ -4,7 +4,6 @@
 #include <nvrhi/nvrhi.h>
 
 #include <entt/entity/registry.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "../core/geometry.hpp"
 #include "../core/log.hpp"
@@ -30,7 +29,7 @@ void init() {
   device::init();
   material::init();
   shapes::init();
-  // ui::init();
+  ui::init();
 }
 
 Mesh create_mesh(const std::span<const Vertex> vertex_data, const std::span<const index_t> index_data) {
@@ -129,12 +128,10 @@ void end_frame() { device::finish_frame(); }
 void finish() {
   device::wait_idle();
 
-  // ui::finish();
+  ui::finish();
   shapes::finish();
   material::finish();
   device::finish();
-
-  // sg_shutdown();
 
   window::finish();
 

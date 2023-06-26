@@ -1,7 +1,5 @@
 #include "geometry.hpp"
 
-#include <glm/gtc/type_ptr.hpp>
-
 namespace geometry {
 
 AABB AABB::from_vertex_data(std::span<const gfx::Vertex> vertex_data) {

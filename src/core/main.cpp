@@ -1,5 +1,7 @@
 #include <SDL2/SDL_timer.h>
 
+#include <entt/entity/registry.hpp>
+
 #include "../gfx/gfx.hpp"
 #include "../gfx/shapes.hpp"
 #include "../gfx/ui.hpp"
@@ -7,7 +9,6 @@
 #include "../world/world.hpp"
 #include "input.hpp"
 #include "log.hpp"
-#include <entt/entity/registry.hpp>
 
 int main() {
   LOG_DEBUG("debug mode!");
@@ -51,12 +52,11 @@ int main() {
     gfx::draw_world();
 
     gfx::shapes::begin_pass();
-    gfx::shapes::draw_all_aabb();
+    // gfx::shapes::draw_all_aabb();
     gfx::shapes::finish_pass();
 
-    // gfx::ui::finish_pass();
-    // ...
-    // gfx::ui::begin_pass();
+    gfx::ui::begin_pass();
+    gfx::ui::finish_pass();
 
     gfx::end_frame();
   }

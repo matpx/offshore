@@ -8,7 +8,6 @@
 #include <array>
 #include <cassert>
 #include <entt/entity/registry.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <vector>
 
 #include "../core/log.hpp"

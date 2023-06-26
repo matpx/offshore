@@ -9,12 +9,12 @@ static Player player;
 static Terrain terrain;
 
 void setup() {
-  terrain.setup();
+  // terrain.setup();
   player.setup();
 }
 
 void update(double delta_time) {
-  terrain.update(delta_time);
+  // terrain.update(delta_time);
   player.update(delta_time);
 }
 

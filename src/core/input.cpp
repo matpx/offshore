@@ -38,16 +38,16 @@ void handle_sdl_event(SDL_Event& window_event) {
     mouse_motion.y += window_event.motion.yrel;
   }
 
-  // gfx::ui::handle_input(&window_event);
+  gfx::ui::handle_input(&window_event);
 }
 
 void begin() {
   mouse_motion = {};
-  // gfx::ui::begin_input();
+  gfx::ui::begin_input();
 }
 
 void end() { 
-  //gfx::ui::finish_input();
+  gfx::ui::finish_input();
 }
 
 bool is_pressed(Actions actions) { return pressed[(size_t)actions]; }
