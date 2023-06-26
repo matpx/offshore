@@ -165,7 +165,7 @@ NK_API void nk_sdl_device_destroy(void) {
 void ensure_buffer_size(nvrhi::BufferHandle &buffer, const size_t required_size, const bool is_index_buffer) {
   assert(required_size > 0);
 
-  if (buffer == nullptr || buffer->getDesc().byteSize < required_size) {  // TODO extra buffer
+  if (buffer == nullptr || buffer->getDesc().byteSize < required_size) {
     nvrhi::BufferDesc vertex_buffer_desc =
         nvrhi::BufferDesc()
             .setByteSize(required_size)
