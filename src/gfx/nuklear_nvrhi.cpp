@@ -35,8 +35,8 @@ struct nk_sdl_vertex {
 static struct nk_sdl {
   SDL_Window *sdl_window;
   nk_nvrhi_device nvrhi_device;
-  nk_context nk_context;
-  nk_font_atlas nk_font_atlas;
+  nk_context context;
+  nk_font_atlas font_atlas;
 } sdl;
 
 NK_API void nk_sdl_device_create(void) {
@@ -233,7 +233,7 @@ NK_API void nk_sdl_render() {
   config.shape_AA = NK_ANTI_ALIASING_ON;
   config.line_AA = NK_ANTI_ALIASING_ON;
 
-  nk_convert(&sdl.nk_context, &dev.cmds, &dev.vertex_data, &dev.index_data, &config);
+  nk_convert(&sdl.context, &dev.cmds, &dev.vertex_data, &dev.index_data, &config);
 
   ensure_buffer_size(dev.vertex_buffer, nk_buffer_total(&dev.vertex_data), false);
   ensure_buffer_size(dev.index_buffer, nk_buffer_total(&dev.index_data), true);
@@ -247,7 +247,7 @@ NK_API void nk_sdl_render() {
 
   const nk_draw_command *cmd = nullptr;
   nk_draw_index offset = 0;
-  nk_draw_foreach(cmd, &sdl.nk_context, &dev.cmds) {
+  nk_draw_foreach(cmd, &sdl.context, &dev.cmds) {
     if (!cmd->elem_count) continue;
 
     const ivec2 window_size = gfx::window::get_width_height();
@@ -307,32 +307,32 @@ static void nk_sdl_clipboard_copy(nk_handle usr, const char *text, int len) {
 }
 
 NK_API void nk_sdl_init_font_stash() {
-  nk_font_atlas_init_default(&sdl.nk_font_atlas);
-  nk_font_atlas_begin(&sdl.nk_font_atlas);
+  nk_font_atlas_init_default(&sdl.font_atlas);
+  nk_font_atlas_begin(&sdl.font_atlas);
 
   const void *image;
   int w, h;
-  image = nk_font_atlas_bake(&sdl.nk_font_atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
+  image = nk_font_atlas_bake(&sdl.font_atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
   nk_sdl_device_upload_atlas(image, w, h);
-  nk_font_atlas_end(&sdl.nk_font_atlas, nk_handle_ptr(sdl.nvrhi_device.font_texture), 0);
-  if (sdl.nk_font_atlas.default_font) nk_style_set_font(&sdl.nk_context, &sdl.nk_font_atlas.default_font->handle);
+  nk_font_atlas_end(&sdl.font_atlas, nk_handle_ptr(sdl.nvrhi_device.font_texture), 0);
+  if (sdl.font_atlas.default_font) nk_style_set_font(&sdl.context, &sdl.font_atlas.default_font->handle);
 }
 
 NK_API struct nk_context *nk_sdl_init(SDL_Window *win) {
   sdl.sdl_window = win;
-  nk_init_default(&sdl.nk_context, 0);
-  sdl.nk_context.clip.copy = nk_sdl_clipboard_copy;
-  sdl.nk_context.clip.paste = nk_sdl_clipboard_paste;
-  sdl.nk_context.clip.userdata = nk_handle_ptr(0);
+  nk_init_default(&sdl.context, 0);
+  sdl.context.clip.copy = nk_sdl_clipboard_copy;
+  sdl.context.clip.paste = nk_sdl_clipboard_paste;
+  sdl.context.clip.userdata = nk_handle_ptr(0);
   nk_sdl_device_create();
 
   nk_sdl_init_font_stash();
 
-  return &sdl.nk_context;
+  return &sdl.context;
 }
 
 NK_API int nk_sdl_handle_event(SDL_Event *evt) {
-  struct nk_context *ctx = &sdl.nk_context;
+  struct nk_context *ctx = &sdl.context;
 
   // if (ctx->input.mouse.grab) {
   //   SDL_SetRelativeMouseMode(SDL_TRUE);
@@ -466,8 +466,8 @@ NK_API int nk_sdl_handle_event(SDL_Event *evt) {
 
 NK_API
 void nk_sdl_shutdown(void) {
-  nk_font_atlas_clear(&sdl.nk_font_atlas);
-  nk_free(&sdl.nk_context);
+  nk_font_atlas_clear(&sdl.font_atlas);
+  nk_free(&sdl.context);
   nk_sdl_device_destroy();
   sdl = {};
 }
