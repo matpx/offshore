@@ -221,7 +221,7 @@ void init() {
 #ifndef NDEBUG
   nvrhi_device = nvrhi::validation::createValidationLayer(nvrhi_device_vk);
 #else
-  nvrhi_device = nvrhi_device;
+  nvrhi_device = nvrhi_device_vk;
 #endif
 
   const std::vector<VkImage> swapchain_images = vkb_swapchain.get_images().value();
