@@ -15,7 +15,6 @@ struct nk_nvrhi_device {
   nk_buffer cmds;
   nk_buffer vertex_data;
   nk_buffer index_data;
-  nk_draw_null_texture tex_null;
 
   nvrhi::GraphicsPipelineHandle graphics_pipeline;
   nvrhi::BufferHandle vertex_buffer;
@@ -138,16 +137,14 @@ NK_INTERN void nk_sdl_device_upload_atlas(const void *image, int width, int heig
 
   command_list->open();
   command_list->beginTrackingTextureState(dev.font_texture, nvrhi::AllSubresources, nvrhi::ResourceStates::Common);
-
   command_list->writeTexture(dev.font_texture, 0, 0, image, width * 4);
-
   command_list->setPermanentTextureState(dev.font_texture, nvrhi::ResourceStates::ShaderResource);
   command_list->commitBarriers();
   command_list->close();
   gfx::device::get_device()->executeCommandList(command_list);
 
   const auto sampler_desc =
-      nvrhi::SamplerDesc().setAllAddressModes(nvrhi::SamplerAddressMode::Wrap).setAllFilters(true);
+      nvrhi::SamplerDesc().setAllAddressModes(nvrhi::SamplerAddressMode::ClampToEdge).setAllFilters(true);
 
   dev.font_sampler = gfx::device::get_device()->createSampler(sampler_desc);
 }
@@ -197,7 +194,6 @@ NK_API void nk_sdl_render() {
       config.vertex_layout = vertex_layout;
       config.vertex_size = sizeof(nk_sdl_vertex);
       config.vertex_alignment = NK_ALIGNOF(nk_sdl_vertex);
-      config.tex_null = dev.tex_null;
       config.circle_segment_count = 22;
       config.curve_segment_count = 22;
       config.arc_segment_count = 22;
