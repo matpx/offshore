@@ -36,7 +36,7 @@ void init() {
     FATAL("SDL_CreateWindow() failed");
   }
 
-  if (SDL_SetRelativeMouseMode(SDL_FALSE) < 0) {
+  if (SDL_SetRelativeMouseMode(SDL_TRUE) < 0) {
     LOG_ERROR("SDL_SetRelativeMouseMode() failed");
   }
 }
