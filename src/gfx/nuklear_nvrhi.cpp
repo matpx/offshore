@@ -4,7 +4,9 @@
 
 #include <cassert>
 #include <glm/ext/matrix_clip_space.hpp>
+#include <unordered_map>
 
+#include "../core/log.hpp"
 #include "../core/types.hpp"
 #include "device.hpp"
 #include "nuklear_main_ps.spirv.h"
@@ -22,6 +24,7 @@ struct nk_nvrhi_device {
   nvrhi::TextureHandle font_texture;
   nvrhi::SamplerHandle font_sampler;
   nvrhi::BufferHandle constant_buffer;
+  std::unordered_map<nvrhi::ITexture *, nvrhi::BindingSetHandle> bindings_cache;
 };
 
 struct nk_sdl_vertex {
@@ -131,7 +134,7 @@ NK_INTERN void nk_sdl_device_upload_atlas(const void *image, int width, int heig
   texture_desc.width = width;
   texture_desc.height = height;
   texture_desc.format = nvrhi::Format::RGBA8_UNORM;
-  texture_desc.debugName = "Nuklear font texture";
+  texture_desc.debugName = "Nuklear Font Texture";
 
   dev.font_texture = gfx::device::get_device()->createTexture(texture_desc);
 
@@ -171,6 +174,31 @@ void ensure_buffer_size(nvrhi::BufferHandle &buffer, const size_t required_size,
 
     buffer = gfx::device::get_device()->createBuffer(vertex_buffer_desc);
   }
+}
+
+nvrhi::IBindingSet *get_binding_set(nvrhi::ITexture *texture) {
+  struct nk_nvrhi_device &dev = sdl.nvrhi_device;
+
+  const auto iter = dev.bindings_cache.find(texture);
+
+  if (iter != dev.bindings_cache.end()) {
+    return iter->second;
+  }
+
+  const auto binding_set_desc = nvrhi::BindingSetDesc()
+                                    .addItem(nvrhi::BindingSetItem::ConstantBuffer(0, dev.constant_buffer))
+                                    .addItem(nvrhi::BindingSetItem::Texture_SRV(0, texture))
+                                    .addItem(nvrhi::BindingSetItem::Sampler(0, dev.font_sampler));
+
+  const std::string debug_name = texture->getDesc().debugName;
+  LOG_DEBUG("create nuklear binding set: %s", debug_name.c_str());
+
+  nvrhi::BindingSetHandle binding_set =
+      gfx::device::get_device()->createBindingSet(binding_set_desc, dev.graphics_pipeline->getDesc().bindingLayouts[0]);
+
+  dev.bindings_cache[texture] = binding_set;
+
+  return binding_set;
 }
 
 NK_API void nk_sdl_render() {
@@ -219,16 +247,6 @@ NK_API void nk_sdl_render() {
     nk_draw_foreach(cmd, &sdl.nk_context, &dev.cmds) {
       if (!cmd->elem_count) continue;
 
-      const auto binding_set_desc =
-          nvrhi::BindingSetDesc()
-              .addItem(nvrhi::BindingSetItem::ConstantBuffer(0, dev.constant_buffer))
-              // .addItem(nvrhi::BindingSetItem::Texture_SRV(0, (nvrhi::ITexture *)cmd->texture.ptr))
-              .addItem(nvrhi::BindingSetItem::Texture_SRV(0, dev.font_texture))  // TODO use id
-              .addItem(nvrhi::BindingSetItem::Sampler(0, dev.font_sampler));
-
-      nvrhi::BindingSetHandle binding_set = gfx::device::get_device()->createBindingSet(
-          binding_set_desc, dev.graphics_pipeline->getDesc().bindingLayouts[0]);
-
       const ivec2 window_size = gfx::window::get_width_height();
 
       nvrhi::ViewportState viewport =
@@ -237,13 +255,16 @@ NK_API void nk_sdl_render() {
               .addScissorRect(nvrhi::Rect(std::max(0.0f, cmd->clip_rect.x), cmd->clip_rect.x + cmd->clip_rect.w,
                                           std::max(0.0f, cmd->clip_rect.y), cmd->clip_rect.y + cmd->clip_rect.h));
 
+      nvrhi::ITexture *texture =
+          cmd->texture.ptr == nullptr ? dev.font_texture.Get() : (nvrhi::ITexture *)cmd->texture.ptr;
+
       nvrhi::GraphicsState graphics_state =
           nvrhi::GraphicsState()
               .setFramebuffer(gfx::device::get_current_framebuffer())
               .setPipeline(dev.graphics_pipeline)
               .addVertexBuffer({.buffer = dev.vertex_buffer})
               .setIndexBuffer({.buffer = dev.index_buffer, .format = nvrhi::Format::R16_UINT})
-              .addBindingSet(binding_set)
+              .addBindingSet(get_binding_set(texture))
               .setViewport(viewport);
 
       nvrhi::DrawArguments draw_arguments;
