@@ -2,6 +2,8 @@
 
 #include <nvrhi/nvrhi.h>
 
+#include <glm/ext/matrix_clip_space.hpp>
+
 #include "../core/types.hpp"
 #include "device.hpp"
 #include "nuklear_main_ps.spirv.h"
@@ -46,11 +48,11 @@ NK_API void nk_sdl_device_create(void) {
   const nvrhi::VertexAttributeDesc attributes[] = {
       nvrhi::VertexAttributeDesc()
           .setName("POSITION")
-          .setFormat(nvrhi::Format::RGB32_FLOAT)
+          .setFormat(nvrhi::Format::RG32_FLOAT)
           .setOffset(offsetof(nk_sdl_vertex, position))
           .setElementStride(sizeof(nk_sdl_vertex)),
       nvrhi::VertexAttributeDesc()
-          .setName("NORMAL")
+          .setName("UV")
           .setFormat(nvrhi::Format::RG32_FLOAT)
           .setOffset(offsetof(nk_sdl_vertex, uv))
           .setElementStride(sizeof(nk_sdl_vertex)),
@@ -151,17 +153,9 @@ NK_API void nk_sdl_device_destroy(void) {
 
 NK_API void nk_sdl_render() {
   struct nk_nvrhi_device &dev = sdl.nvrhi_device;
-  ivec2 width_height = gfx::window::get_width_height();
+  vec2 width_height = gfx::window::get_width_height();
 
-  mat4 ortho = {
-      {2.0f, 0.0f, 0.0f, 0.0f},
-      {0.0f, -2.0f, 0.0f, 0.0f},
-      {0.0f, 0.0f, -1.0f, 0.0f},
-      {-1.0f, 1.0f, 0.0f, 1.0f},
-  };
-
-  ortho[0][0] /= width_height.x;
-  ortho[1][1] /= width_height.y;
+  mat4 ortho = glm::ortho(0.0f, width_height.x, width_height.y, 0.0f);
 
   const nvrhi::CommandListHandle command_list = gfx::device::get_device()->createCommandList();
   command_list->open();
@@ -232,11 +226,6 @@ NK_API void nk_sdl_render() {
     nk_draw_index offset = 0;
     nk_draw_foreach(cmd, &sdl.nk_context, &dev.cmds) {
       if (!cmd->elem_count) continue;
-      //   glBindTexture(GL_TEXTURE_2D, (GLuint)cmd->texture.id);
-      //   glScissor((GLint)(cmd->clip_rect.x * scale.x),
-      //             (GLint)((height - (GLint)(cmd->clip_rect.y + cmd->clip_rect.h)) * scale.y),
-      //             (GLint)(cmd->clip_rect.w * scale.x), (GLint)(cmd->clip_rect.h * scale.y));
-      //   glDrawElements(GL_TRIANGLES, (GLsizei)cmd->elem_count, GL_UNSIGNED_SHORT, offset);
 
       const auto binding_set_desc =
           nvrhi::BindingSetDesc()
@@ -253,26 +242,27 @@ NK_API void nk_sdl_render() {
       printf("element count: %d\n", cmd->elem_count);
       printf("texture id: %d\n", cmd->texture.id);
       printf("%f %f %f %f\n\n", cmd->clip_rect.x, cmd->clip_rect.y, cmd->clip_rect.w, cmd->clip_rect.h);
+      printf("%f %f %f %f\n\n", cmd->clip_rect.x, cmd->clip_rect.x + cmd->clip_rect.w, cmd->clip_rect.y,
+             cmd->clip_rect.y + cmd->clip_rect.h);
 
-      nvrhi::ViewportState viewport = nvrhi::ViewportState()
-                                          .addViewport(nvrhi::Viewport(window_size.x, window_size.y))
-                                          //.addScissorRect(nvrhi::Rect(cmd->clip_rect.x, cmd->clip_rect.x +
-                                          // cmd->clip_rect.w, cmd->clip_rect.y + cmd->clip_rect.h, cmd->clip_rect.h));
-                                          .addScissorRect(nvrhi::Rect(0, 0, window_size.x, window_size.y));
+      nvrhi::ViewportState viewport =
+          nvrhi::ViewportState()
+              .addViewport(nvrhi::Viewport(window_size.x, window_size.y))
+              .addScissorRect(nvrhi::Rect(std::max(0.0f, cmd->clip_rect.x), cmd->clip_rect.x + cmd->clip_rect.w,
+                                          std::max(0.0f, cmd->clip_rect.y), cmd->clip_rect.y + cmd->clip_rect.h));
 
       nvrhi::GraphicsState graphics_state =
           nvrhi::GraphicsState()
               .setFramebuffer(gfx::device::get_current_framebuffer())
               .setPipeline(dev.graphics_pipeline)
               .addVertexBuffer({.buffer = dev.vertex_buffer})
-              .setIndexBuffer({.buffer = dev.index_buffer, .format = nvrhi::Format::RG8_UNORM})
+              .setIndexBuffer({.buffer = dev.index_buffer, .format = nvrhi::Format::R16_UINT})
               .addBindingSet(binding_set)
               .setViewport(viewport);
 
-      nvrhi::DrawArguments draw_arguments;  // TODO unsigned short indices
+      nvrhi::DrawArguments draw_arguments;
       draw_arguments.vertexCount = cmd->elem_count;
       draw_arguments.startIndexLocation = offset;
-      // drawArguments.startVertexLocation = vtxOffset;
 
       command_list->setGraphicsState(graphics_state);
       command_list->drawIndexed(draw_arguments);
@@ -333,7 +323,6 @@ NK_API void nk_sdl_font_stash_end(void) {
 NK_API int nk_sdl_handle_event(SDL_Event *evt) {
   struct nk_context *ctx = &sdl.nk_context;
 
-  /* optional grabbing behavior */
   if (ctx->input.mouse.grab) {
     SDL_SetRelativeMouseMode(SDL_TRUE);
     ctx->input.mouse.grab = 0;
@@ -345,12 +334,12 @@ NK_API int nk_sdl_handle_event(SDL_Event *evt) {
   }
 
   switch (evt->type) {
-    case SDL_KEYUP: /* KEYUP & KEYDOWN share same routine */
+    case SDL_KEYUP:
     case SDL_KEYDOWN: {
       int down = evt->type == SDL_KEYDOWN;
       const Uint8 *state = SDL_GetKeyboardState(0);
       switch (evt->key.keysym.sym) {
-        case SDLK_RSHIFT: /* RSHIFT & LSHIFT share same routine */
+        case SDLK_RSHIFT:
         case SDLK_LSHIFT:
           nk_input_key(ctx, NK_KEY_SHIFT, down);
           break;
@@ -423,7 +412,7 @@ NK_API int nk_sdl_handle_event(SDL_Event *evt) {
     }
       return 1;
 
-    case SDL_MOUSEBUTTONUP: /* MOUSEBUTTONUP & MOUSEBUTTONDOWN share same routine */
+    case SDL_MOUSEBUTTONUP:
     case SDL_MOUSEBUTTONDOWN: {
       int down = evt->type == SDL_MOUSEBUTTONDOWN;
       const int x = evt->button.x, y = evt->button.y;

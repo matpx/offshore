@@ -10,7 +10,7 @@ void main_vs(
 	out float4 o_pos : SV_Position
 )
 {
-  o_pos = mul(float4(i_pos, 1), g_Transform);
+  o_pos = mul(float4(i_pos, 1), g_Transform); // TODO order?
 }
 
 void main_ps(

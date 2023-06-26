@@ -15,7 +15,7 @@ void main_vs(
 {
   o_uv = i_uv;
   o_color = i_color;
-  o_pos = mul(float4(i_pos, 0, 1), g_Transform);
+  o_pos = mul(g_Transform, float4(i_pos, 0, 1));
 }
 
 Texture2D t_Texture : register(t0);

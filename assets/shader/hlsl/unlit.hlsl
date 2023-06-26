@@ -13,7 +13,7 @@ void main_vs(
 )
 {
   o_normal = i_normal;
-  o_pos = mul(float4(i_pos, 1), g_Transform);
+  o_pos = mul(float4(i_pos, 1), g_Transform); // TODO order?
 }
 
 void main_ps(
