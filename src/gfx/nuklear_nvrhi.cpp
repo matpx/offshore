@@ -185,9 +185,6 @@ NK_API void nk_sdl_render() {
       nk_buffer_init_default(&ebuf);
       nk_convert(&sdl.nk_context, &dev.cmds, &vbuf, &ebuf, &config);
 
-      printf("SIZE vbuf: %ld\n", nk_buffer_total(&vbuf));
-      printf("SIZE ebuf: %ld\n", nk_buffer_total(&ebuf));
-
       nvrhi::BufferDesc vertex_buffer_desc{};
       vertex_buffer_desc.byteSize = nk_buffer_total(&vbuf);
       vertex_buffer_desc.structStride = 0;
@@ -238,12 +235,6 @@ NK_API void nk_sdl_render() {
           binding_set_desc, dev.graphics_pipeline->getDesc().bindingLayouts[0]);
 
       const ivec2 window_size = gfx::window::get_width_height();
-
-      printf("element count: %d\n", cmd->elem_count);
-      printf("texture id: %d\n", cmd->texture.id);
-      printf("%f %f %f %f\n\n", cmd->clip_rect.x, cmd->clip_rect.y, cmd->clip_rect.w, cmd->clip_rect.h);
-      printf("%f %f %f %f\n\n", cmd->clip_rect.x, cmd->clip_rect.x + cmd->clip_rect.w, cmd->clip_rect.y,
-             cmd->clip_rect.y + cmd->clip_rect.h);
 
       nvrhi::ViewportState viewport =
           nvrhi::ViewportState()

@@ -35,23 +35,28 @@ void finish_input() { nk_input_end(nk_ctx); }
 void begin_pass() {
   nk_clear(nk_ctx);
 
-if (nk_begin(nk_ctx, "Show", nk_rect(50, 50, 220, 220),
-    NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_CLOSABLE)) {
+  if (nk_begin(nk_ctx, "Show", nk_rect(50, 50, 220, 220), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_CLOSABLE)) {
     /* fixed widget pixel width */
     nk_layout_row_static(nk_ctx, 30, 80, 1);
     if (nk_button_label(nk_ctx, "button")) {
-        /* event handling */
+      /* event handling */
     }
+
+    /* fixed widget window ratio width */
+    nk_layout_row_dynamic(nk_ctx, 30, 2);
+
+    static float value = 0.0f;
 
     /* custom widget pixel width */
     nk_layout_row_begin(nk_ctx, NK_STATIC, 30, 2);
     {
-        nk_layout_row_push(nk_ctx, 50);
-        nk_label(nk_ctx, "Volume:", NK_TEXT_LEFT);
-        nk_layout_row_push(nk_ctx, 110);
+      nk_layout_row_push(nk_ctx, 50);
+      nk_label(nk_ctx, "Volume:", NK_TEXT_LEFT);
+      nk_layout_row_push(nk_ctx, 110);
+      nk_slider_float(nk_ctx, 0, &value, 1.0f, 0.1f);
     }
     nk_layout_row_end(nk_ctx);
-}
+  }
   nk_end(nk_ctx);
 }
 
