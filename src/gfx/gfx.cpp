@@ -21,6 +21,8 @@ static_assert(sizeof(index_t) == 4);
 
 static mat4 current_vp = mat4(1.0);
 
+static nvrhi::CommandListHandle command_list;
+
 void init() {
   LOG_INFO("gfx::init()");
 
@@ -30,6 +32,8 @@ void init() {
   material::init();
   shapes::init();
   ui::init();
+
+  command_list = device::get_device()->createCommandList();
 }
 
 Mesh create_mesh(const std::span<const Vertex> vertex_data, const std::span<const index_t> index_data) {
@@ -92,15 +96,14 @@ void draw_world() {
   const uvec2 window_size = window::get_width_height();
 
   nvrhi::FramebufferHandle current_framebuffer = device::get_current_framebuffer();
-  nvrhi::CommandListHandle draw_command_list = device::get_device()->createCommandList();
 
-  draw_command_list->open();
+  command_list->open();
 
   for (const auto [entity, transform, renderable] :
        world::registry->view<const comp::Transform, const comp::Renderable>().each()) {
     const mat4 mvp = current_vp * transform.world;
 
-    draw_command_list->writeBuffer(renderable.material.constant_buffer, glm::value_ptr(mvp), sizeof(mvp));
+    command_list->writeBuffer(renderable.material.constant_buffer, glm::value_ptr(mvp), sizeof(mvp));
 
     auto graphicsState = nvrhi::GraphicsState()
                              .setPipeline(renderable.material.pipeline)
@@ -111,22 +114,24 @@ void draw_world() {
                              .addVertexBuffer({.buffer = renderable.mesh.vertex_buffer})
                              .setIndexBuffer({.buffer = renderable.mesh.index_buffer});
 
-    draw_command_list->setGraphicsState(graphicsState);
+    command_list->setGraphicsState(graphicsState);
 
     auto drawArguments = nvrhi::DrawArguments()
                              .setStartIndexLocation(renderable.mesh.base_element)
                              .setVertexCount(renderable.mesh.num_elements);
-    draw_command_list->drawIndexed(drawArguments);
+    command_list->drawIndexed(drawArguments);
   }
 
-  draw_command_list->close();
-  device::get_device()->executeCommandList(draw_command_list);
+  command_list->close();
+  device::get_device()->executeCommandList(command_list);
 }
 
 void end_frame() { device::finish_frame(); }
 
 void finish() {
   device::wait_idle();
+
+  command_list = nullptr;
 
   ui::finish();
   shapes::finish();

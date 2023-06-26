@@ -37,10 +37,11 @@ const static std::array<SimpleVertex, 24> cube_vertex_data = {
 
 static bool shapes_pass_active = false;
 
-static nvrhi::GraphicsPipelineHandle graphics_pipeline = nullptr;
-static nvrhi::BufferHandle cube_vertex_buffer = nullptr;
-static nvrhi::BufferHandle constant_buffer = nullptr;
-static nvrhi::BindingSetHandle cube_binding_set = nullptr;
+static nvrhi::CommandListHandle command_list;
+static nvrhi::GraphicsPipelineHandle graphics_pipeline;
+static nvrhi::BufferHandle cube_vertex_buffer;
+static nvrhi::BufferHandle constant_buffer;
+static nvrhi::BindingSetHandle cube_binding_set;
 
 static void init_pipeline() {
   LOG_DEBUG("gfx::shapes::init_pipeline()");
@@ -74,13 +75,12 @@ static void init_pipeline() {
 
   nvrhi::BindingLayoutHandle binding_layout = device::get_device()->createBindingLayout(layout_desc);
 
-  const auto pipeline_desc =
-      nvrhi::GraphicsPipelineDesc()
-          .addBindingLayout(binding_layout)
-          .setInputLayout(input_layout)
-          .setVertexShader(vertex_shader)
-          .setPixelShader(pixel_shader)
-          .setPrimType(nvrhi::PrimitiveType::LineList);
+  const auto pipeline_desc = nvrhi::GraphicsPipelineDesc()
+                                 .addBindingLayout(binding_layout)
+                                 .setInputLayout(input_layout)
+                                 .setVertexShader(vertex_shader)
+                                 .setPixelShader(pixel_shader)
+                                 .setPrimType(nvrhi::PrimitiveType::LineList);
 
   graphics_pipeline = device::get_device()->createGraphicsPipeline(pipeline_desc, device::get_current_framebuffer());
 }
@@ -111,17 +111,17 @@ static void init_buffer() {
   cube_binding_set =
       device::get_device()->createBindingSet(binding_set_desc, graphics_pipeline->getDesc().bindingLayouts[0]);
 
-  nvrhi::CommandListHandle upload_command_list = device::get_device()->createCommandList();
+  command_list->open();
+  command_list->writeBuffer(cube_vertex_buffer, cube_vertex_data.data(), sizeof(cube_vertex_data));
+  command_list->close();
 
-  upload_command_list->open();
-  upload_command_list->writeBuffer(cube_vertex_buffer, cube_vertex_data.data(), sizeof(cube_vertex_data));
-  upload_command_list->close();
-
-  device::get_device()->executeCommandList(upload_command_list);
+  device::get_device()->executeCommandList(command_list);
 }
 
 void init() {
   LOG_INFO("gfx::shapes::init()");
+
+  command_list = device::get_device()->createCommandList();
 
   init_pipeline();
   init_buffer();
@@ -141,11 +141,9 @@ static void draw_shape(const u32 base_element, const u32 num_elements, const vec
 
   const mat4 mvp = gfx::get_current_vp() * glm::scale(glm::translate(glm::identity<mat4>(), center), scale);
 
-  nvrhi::CommandListHandle draw_command_list = device::get_device()->createCommandList();
+  command_list->open();
 
-  draw_command_list->open();
-
-  draw_command_list->writeBuffer(constant_buffer, glm::value_ptr(mvp), sizeof(mvp));
+  command_list->writeBuffer(constant_buffer, glm::value_ptr(mvp), sizeof(mvp));
 
   const auto vertex_buffer_binding = nvrhi::VertexBufferBinding{
       .buffer = cube_vertex_buffer,
@@ -160,13 +158,13 @@ static void draw_shape(const u32 base_element, const u32 num_elements, const vec
                                  .addBindingSet(cube_binding_set)
                                  .addVertexBuffer(vertex_buffer_binding);
 
-  draw_command_list->setGraphicsState(graphicsState);
+  command_list->setGraphicsState(graphicsState);
 
   const auto drawArguments = nvrhi::DrawArguments().setVertexCount(num_elements);
-  draw_command_list->draw(drawArguments);
+  command_list->draw(drawArguments);
 
-  draw_command_list->close();
-  device::get_device()->executeCommandList(draw_command_list);
+  command_list->close();
+  device::get_device()->executeCommandList(command_list);
 }
 
 void draw_box(const vec3& center, const vec3& scale) { draw_shape(0, cube_vertex_data.size(), center, scale); }
@@ -192,6 +190,7 @@ void finish() {
   cube_vertex_buffer = nullptr;
   constant_buffer = nullptr;
   graphics_pipeline = nullptr;
+  command_list = nullptr;
 
   LOG_INFO("gfx::shapes::finish()");
 }
