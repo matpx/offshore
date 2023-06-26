@@ -176,6 +176,9 @@ void ensure_buffer_size(nvrhi::BufferHandle &buffer, const size_t required_size,
             .setKeepInitialState(true);
 
     buffer = gfx::device::get_device()->createBuffer(vertex_buffer_desc);
+
+    const std::string &debug_name = buffer->getDesc().debugName;
+    LOG_DEBUG("resize nuklear buffer \"%s\" to %ld byte", debug_name.c_str(), required_size);
   }
 }
 
@@ -193,8 +196,8 @@ nvrhi::IBindingSet *get_binding_set(nvrhi::ITexture *texture) {
                                     .addItem(nvrhi::BindingSetItem::Texture_SRV(0, texture))
                                     .addItem(nvrhi::BindingSetItem::Sampler(0, dev.font_sampler));
 
-  const std::string debug_name = texture->getDesc().debugName;
-  LOG_DEBUG("create nuklear binding set: %s", debug_name.c_str());
+  const std::string &debug_name = texture->getDesc().debugName;
+  LOG_DEBUG("create nuklear binding set \"%s\"", debug_name.c_str());
 
   nvrhi::BindingSetHandle binding_set =
       gfx::device::get_device()->createBindingSet(binding_set_desc, dev.graphics_pipeline->getDesc().bindingLayouts[0]);
