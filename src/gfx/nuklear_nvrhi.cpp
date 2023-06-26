@@ -2,6 +2,7 @@
 
 #include <nvrhi/nvrhi.h>
 
+#include <cassert>
 #include <glm/ext/matrix_clip_space.hpp>
 
 #include "../core/types.hpp"
@@ -12,6 +13,8 @@
 
 struct nk_nvrhi_device {
   nk_buffer cmds;
+  nk_buffer vertex_data;
+  nk_buffer index_data;
   nk_draw_null_texture tex_null;
 
   nvrhi::GraphicsPipelineHandle graphics_pipeline;
@@ -37,7 +40,12 @@ static struct nk_sdl {
 
 NK_API void nk_sdl_device_create(void) {
   nk_nvrhi_device &dev = sdl.nvrhi_device;
+
+  dev = {};
+
   nk_buffer_init_default(&dev.cmds);
+  nk_buffer_init_default(&dev.vertex_data);
+  nk_buffer_init_default(&dev.index_data);
 
   nvrhi::ShaderDesc vertex_shader_desc(nvrhi::ShaderType::Vertex);
   vertex_shader_desc.entryName = "main_vs";
@@ -151,6 +159,23 @@ NK_API void nk_sdl_device_destroy(void) {
   dev = {};
 }
 
+void ensure_buffer_size(nvrhi::BufferHandle &buffer, const size_t required_size, const bool is_index_buffer) {
+  assert(required_size > 0);
+
+  if (buffer == nullptr || buffer->getDesc().byteSize < required_size) {
+    nvrhi::BufferDesc vertex_buffer_desc =
+        nvrhi::BufferDesc()
+            .setByteSize(required_size)
+            .setDebugName(is_index_buffer ? "Nuklear Index Buffer" : "Nuklear Vertex Buffer")
+            .setIsVertexBuffer(!is_index_buffer)
+            .setIsIndexBuffer(is_index_buffer)
+            .setInitialState(is_index_buffer ? nvrhi::ResourceStates::IndexBuffer : nvrhi::ResourceStates::VertexBuffer)
+            .setKeepInitialState(true);
+
+    buffer = gfx::device::get_device()->createBuffer(vertex_buffer_desc);
+  }
+}
+
 NK_API void nk_sdl_render() {
   struct nk_nvrhi_device &dev = sdl.nvrhi_device;
   vec2 width_height = gfx::window::get_width_height();
@@ -161,7 +186,6 @@ NK_API void nk_sdl_render() {
   command_list->open();
 
   {
-    struct nk_buffer vbuf, ebuf;
     {
       struct nk_convert_config config;
       static const struct nk_draw_vertex_layout_element vertex_layout[] = {
@@ -181,40 +205,15 @@ NK_API void nk_sdl_render() {
       config.shape_AA = NK_ANTI_ALIASING_ON;
       config.line_AA = NK_ANTI_ALIASING_ON;
 
-      nk_buffer_init_default(&vbuf);
-      nk_buffer_init_default(&ebuf);
-      nk_convert(&sdl.nk_context, &dev.cmds, &vbuf, &ebuf, &config);
+      nk_convert(&sdl.nk_context, &dev.cmds, &dev.vertex_data, &dev.index_data, &config);
 
-      nvrhi::BufferDesc vertex_buffer_desc{};
-      vertex_buffer_desc.byteSize = nk_buffer_total(&vbuf);
-      vertex_buffer_desc.structStride = 0;
-      vertex_buffer_desc.debugName = "Nuklear Vertex Buffer";
-      vertex_buffer_desc.canHaveUAVs = false;
-      vertex_buffer_desc.isVertexBuffer = true;
-      vertex_buffer_desc.isIndexBuffer = false;
-      vertex_buffer_desc.isDrawIndirectArgs = false;
-      vertex_buffer_desc.isVolatile = false;
-      vertex_buffer_desc.initialState = nvrhi::ResourceStates::VertexBuffer;
-      vertex_buffer_desc.keepInitialState = true;
+      ensure_buffer_size(dev.vertex_buffer, nk_buffer_total(&dev.vertex_data), false);
+      ensure_buffer_size(dev.index_buffer, nk_buffer_total(&dev.index_data), true);
 
-      dev.vertex_buffer = gfx::device::get_device()->createBuffer(vertex_buffer_desc);
-
-      nvrhi::BufferDesc index_buffer_desc{};
-      index_buffer_desc.byteSize = nk_buffer_total(&ebuf);
-      index_buffer_desc.structStride = 0;
-      index_buffer_desc.debugName = "Nuklear Index Buffer";
-      index_buffer_desc.canHaveUAVs = false;
-      index_buffer_desc.isVertexBuffer = false;
-      index_buffer_desc.isIndexBuffer = true;
-      index_buffer_desc.isDrawIndirectArgs = false;
-      index_buffer_desc.isVolatile = false;
-      index_buffer_desc.initialState = nvrhi::ResourceStates::IndexBuffer;
-      index_buffer_desc.keepInitialState = true;
-
-      dev.index_buffer = gfx::device::get_device()->createBuffer(index_buffer_desc);
-
-      command_list->writeBuffer(dev.vertex_buffer, nk_buffer_memory_const(&vbuf), nk_buffer_total(&vbuf));
-      command_list->writeBuffer(dev.index_buffer, nk_buffer_memory_const(&ebuf), nk_buffer_total(&ebuf));
+      command_list->writeBuffer(dev.vertex_buffer, nk_buffer_memory_const(&dev.vertex_data),
+                                nk_buffer_total(&dev.vertex_data));
+      command_list->writeBuffer(dev.index_buffer, nk_buffer_memory_const(&dev.index_data),
+                                nk_buffer_total(&dev.index_data));
     }
 
     command_list->writeBuffer(dev.constant_buffer, glm::value_ptr(ortho), sizeof(ortho));
@@ -262,6 +261,8 @@ NK_API void nk_sdl_render() {
     }
     nk_clear(&sdl.nk_context);
     nk_buffer_clear(&dev.cmds);
+    nk_buffer_clear(&dev.vertex_data);
+    nk_buffer_clear(&dev.index_data);
   }
 
   command_list->close();
