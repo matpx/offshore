@@ -20,7 +20,6 @@ void init() {
   assert(nk_ctx == nullptr);
 
   nk_ctx = nk_sdl_init(window::get_sdl_window());
-
 }
 
 void begin_input() { nk_input_begin(nk_ctx); }

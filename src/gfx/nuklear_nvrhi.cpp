@@ -277,7 +277,6 @@ NK_API void nk_sdl_render() {
     offset += cmd->elem_count;
   }
 
-  nk_clear(&sdl.nk_context);
   nk_buffer_clear(&dev.cmds);
   nk_buffer_clear(&dev.vertex_data);
   nk_buffer_clear(&dev.index_data);
@@ -332,15 +331,15 @@ NK_API struct nk_context *nk_sdl_init(SDL_Window *win) {
 NK_API int nk_sdl_handle_event(SDL_Event *evt) {
   struct nk_context *ctx = &sdl.nk_context;
 
-  if (ctx->input.mouse.grab) {
-    SDL_SetRelativeMouseMode(SDL_TRUE);
-    ctx->input.mouse.grab = 0;
-  } else if (ctx->input.mouse.ungrab) {
-    int x = (int)ctx->input.mouse.prev.x, y = (int)ctx->input.mouse.prev.y;
-    SDL_SetRelativeMouseMode(SDL_FALSE);
-    SDL_WarpMouseInWindow(sdl.sdl_window, x, y);
-    ctx->input.mouse.ungrab = 0;
-  }
+  // if (ctx->input.mouse.grab) {
+  //   SDL_SetRelativeMouseMode(SDL_TRUE);
+  //   ctx->input.mouse.grab = 0;
+  // } else if (ctx->input.mouse.ungrab) {
+  //   int x = (int)ctx->input.mouse.prev.x, y = (int)ctx->input.mouse.prev.y;
+  //   SDL_SetRelativeMouseMode(SDL_FALSE);
+  //   SDL_WarpMouseInWindow(sdl.sdl_window, x, y);
+  //   ctx->input.mouse.ungrab = 0;
+  // }
 
   switch (evt->type) {
     case SDL_KEYUP:
