@@ -3,7 +3,6 @@
 #include <nvrhi/nvrhi.h>
 
 #include <cassert>
-#include <glm/ext/matrix_clip_space.hpp>
 #include <unordered_map>
 
 #include "../core/log.hpp"
@@ -42,8 +41,6 @@ static struct nk_sdl {
 
 NK_API void nk_sdl_device_create(void) {
   nk_nvrhi_device &dev = sdl.nvrhi_device;
-
-  dev = {};
 
   nk_buffer_init_default(&dev.cmds);
   nk_buffer_init_default(&dev.vertex_data);
@@ -139,11 +136,14 @@ NK_INTERN void nk_sdl_device_upload_atlas(const void *image, int width, int heig
   dev.font_texture = gfx::device::get_device()->createTexture(texture_desc);
 
   command_list->open();
+
   command_list->beginTrackingTextureState(dev.font_texture, nvrhi::AllSubresources, nvrhi::ResourceStates::Common);
   command_list->writeTexture(dev.font_texture, 0, 0, image, width * 4);
   command_list->setPermanentTextureState(dev.font_texture, nvrhi::ResourceStates::ShaderResource);
   command_list->commitBarriers();
+
   command_list->close();
+
   gfx::device::get_device()->executeCommandList(command_list);
 
   const auto sampler_desc =
@@ -165,7 +165,7 @@ NK_API void nk_sdl_device_destroy(void) {
 void ensure_buffer_size(nvrhi::BufferHandle &buffer, const size_t required_size, const bool is_index_buffer) {
   assert(required_size > 0);
 
-  if (buffer == nullptr || buffer->getDesc().byteSize < required_size) {
+  if (buffer == nullptr || buffer->getDesc().byteSize < required_size) {  // TODO extra buffer
     nvrhi::BufferDesc vertex_buffer_desc =
         nvrhi::BufferDesc()
             .setByteSize(required_size)
@@ -205,85 +205,82 @@ nvrhi::IBindingSet *get_binding_set(nvrhi::ITexture *texture) {
 }
 
 NK_API void nk_sdl_render() {
-  struct nk_nvrhi_device &dev = sdl.nvrhi_device;
-  vec2 width_height = gfx::window::get_width_height();
+  nk_nvrhi_device &dev = sdl.nvrhi_device;
 
-  mat4 ortho = glm::ortho(0.0f, width_height.x, width_height.y, 0.0f);
+  const vec2 width_height = gfx::window::get_width_height();
+  const mat4 ortho = glm::ortho(0.0f, width_height.x, width_height.y, 0.0f);
 
   const nvrhi::CommandListHandle command_list = gfx::device::get_device()->createCommandList();
   command_list->open();
 
-  {
-    {
-      struct nk_convert_config config;
-      static const struct nk_draw_vertex_layout_element vertex_layout[] = {
-          {NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, position)},
-          {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(struct nk_sdl_vertex, uv)},
-          {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(struct nk_sdl_vertex, col)},
-          {NK_VERTEX_LAYOUT_END}};
-      memset(&config, 0, sizeof(config));
-      config.vertex_layout = vertex_layout;
-      config.vertex_size = sizeof(nk_sdl_vertex);
-      config.vertex_alignment = NK_ALIGNOF(nk_sdl_vertex);
-      config.circle_segment_count = 22;
-      config.curve_segment_count = 22;
-      config.arc_segment_count = 22;
-      config.global_alpha = 1.0f;
-      config.shape_AA = NK_ANTI_ALIASING_ON;
-      config.line_AA = NK_ANTI_ALIASING_ON;
+  static const nk_draw_vertex_layout_element vertex_layout[] = {
+      {NK_VERTEX_POSITION, NK_FORMAT_FLOAT, NK_OFFSETOF(nk_sdl_vertex, position)},
+      {NK_VERTEX_TEXCOORD, NK_FORMAT_FLOAT, NK_OFFSETOF(nk_sdl_vertex, uv)},
+      {NK_VERTEX_COLOR, NK_FORMAT_R8G8B8A8, NK_OFFSETOF(nk_sdl_vertex, col)},
+      {NK_VERTEX_LAYOUT_END}};
 
-      nk_convert(&sdl.nk_context, &dev.cmds, &dev.vertex_data, &dev.index_data, &config);
+  nk_convert_config config = {};
+  config.vertex_layout = vertex_layout;
+  config.vertex_size = sizeof(nk_sdl_vertex);
+  config.vertex_alignment = NK_ALIGNOF(nk_sdl_vertex);
+  config.circle_segment_count = 22;
+  config.curve_segment_count = 22;
+  config.arc_segment_count = 22;
+  config.global_alpha = 1.0f;
+  config.shape_AA = NK_ANTI_ALIASING_ON;
+  config.line_AA = NK_ANTI_ALIASING_ON;
 
-      ensure_buffer_size(dev.vertex_buffer, nk_buffer_total(&dev.vertex_data), false);
-      ensure_buffer_size(dev.index_buffer, nk_buffer_total(&dev.index_data), true);
+  nk_convert(&sdl.nk_context, &dev.cmds, &dev.vertex_data, &dev.index_data, &config);
 
-      command_list->writeBuffer(dev.vertex_buffer, nk_buffer_memory_const(&dev.vertex_data),
-                                nk_buffer_total(&dev.vertex_data));
-      command_list->writeBuffer(dev.index_buffer, nk_buffer_memory_const(&dev.index_data),
-                                nk_buffer_total(&dev.index_data));
-    }
+  ensure_buffer_size(dev.vertex_buffer, nk_buffer_total(&dev.vertex_data), false);
+  ensure_buffer_size(dev.index_buffer, nk_buffer_total(&dev.index_data), true);
 
-    command_list->writeBuffer(dev.constant_buffer, glm::value_ptr(ortho), sizeof(ortho));
+  command_list->writeBuffer(dev.vertex_buffer, nk_buffer_memory_const(&dev.vertex_data),
+                            nk_buffer_total(&dev.vertex_data));
+  command_list->writeBuffer(dev.index_buffer, nk_buffer_memory_const(&dev.index_data),
+                            nk_buffer_total(&dev.index_data));
 
-    const struct nk_draw_command *cmd = nullptr;
-    nk_draw_index offset = 0;
-    nk_draw_foreach(cmd, &sdl.nk_context, &dev.cmds) {
-      if (!cmd->elem_count) continue;
+  command_list->writeBuffer(dev.constant_buffer, glm::value_ptr(ortho), sizeof(ortho));
 
-      const ivec2 window_size = gfx::window::get_width_height();
+  const nk_draw_command *cmd = nullptr;
+  nk_draw_index offset = 0;
+  nk_draw_foreach(cmd, &sdl.nk_context, &dev.cmds) {
+    if (!cmd->elem_count) continue;
 
-      nvrhi::ViewportState viewport =
-          nvrhi::ViewportState()
-              .addViewport(nvrhi::Viewport(window_size.x, window_size.y))
-              .addScissorRect(nvrhi::Rect(std::max(0.0f, cmd->clip_rect.x), cmd->clip_rect.x + cmd->clip_rect.w,
-                                          std::max(0.0f, cmd->clip_rect.y), cmd->clip_rect.y + cmd->clip_rect.h));
+    const ivec2 window_size = gfx::window::get_width_height();
 
-      nvrhi::ITexture *texture =
-          cmd->texture.ptr == nullptr ? dev.font_texture.Get() : (nvrhi::ITexture *)cmd->texture.ptr;
+    nvrhi::ViewportState viewport =
+        nvrhi::ViewportState()
+            .addViewport(nvrhi::Viewport(window_size.x, window_size.y))
+            .addScissorRect(nvrhi::Rect(std::max(0.0f, cmd->clip_rect.x), cmd->clip_rect.x + cmd->clip_rect.w,
+                                        std::max(0.0f, cmd->clip_rect.y), cmd->clip_rect.y + cmd->clip_rect.h));
 
-      nvrhi::GraphicsState graphics_state =
-          nvrhi::GraphicsState()
-              .setFramebuffer(gfx::device::get_current_framebuffer())
-              .setPipeline(dev.graphics_pipeline)
-              .addVertexBuffer({.buffer = dev.vertex_buffer})
-              .setIndexBuffer({.buffer = dev.index_buffer, .format = nvrhi::Format::R16_UINT})
-              .addBindingSet(get_binding_set(texture))
-              .setViewport(viewport);
+    nvrhi::ITexture *texture =
+        cmd->texture.ptr == nullptr ? dev.font_texture.Get() : (nvrhi::ITexture *)cmd->texture.ptr;
 
-      nvrhi::DrawArguments draw_arguments;
-      draw_arguments.vertexCount = cmd->elem_count;
-      draw_arguments.startIndexLocation = offset;
+    nvrhi::GraphicsState graphics_state =
+        nvrhi::GraphicsState()
+            .setFramebuffer(gfx::device::get_current_framebuffer())
+            .setPipeline(dev.graphics_pipeline)
+            .addVertexBuffer({.buffer = dev.vertex_buffer})
+            .setIndexBuffer({.buffer = dev.index_buffer, .format = nvrhi::Format::R16_UINT})
+            .addBindingSet(get_binding_set(texture))
+            .setViewport(viewport);
 
-      command_list->setGraphicsState(graphics_state);
-      command_list->drawIndexed(draw_arguments);
+    nvrhi::DrawArguments draw_arguments;
+    draw_arguments.vertexCount = cmd->elem_count;
+    draw_arguments.startIndexLocation = offset;
 
-      offset += cmd->elem_count;
-    }
-    nk_clear(&sdl.nk_context);
-    nk_buffer_clear(&dev.cmds);
-    nk_buffer_clear(&dev.vertex_data);
-    nk_buffer_clear(&dev.index_data);
+    command_list->setGraphicsState(graphics_state);
+    command_list->drawIndexed(draw_arguments);
+
+    offset += cmd->elem_count;
   }
+
+  nk_clear(&sdl.nk_context);
+  nk_buffer_clear(&dev.cmds);
+  nk_buffer_clear(&dev.vertex_data);
+  nk_buffer_clear(&dev.index_data);
 
   command_list->close();
   gfx::device::get_device()->executeCommandList(command_list);
@@ -307,6 +304,18 @@ static void nk_sdl_clipboard_copy(nk_handle usr, const char *text, int len) {
   free(str);
 }
 
+NK_API void nk_sdl_init_font_stash() {
+  nk_font_atlas_init_default(&sdl.nk_font_atlas);
+  nk_font_atlas_begin(&sdl.nk_font_atlas);
+
+  const void *image;
+  int w, h;
+  image = nk_font_atlas_bake(&sdl.nk_font_atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
+  nk_sdl_device_upload_atlas(image, w, h);
+  nk_font_atlas_end(&sdl.nk_font_atlas, nk_handle_ptr(sdl.nvrhi_device.font_texture), 0);
+  if (sdl.nk_font_atlas.default_font) nk_style_set_font(&sdl.nk_context, &sdl.nk_font_atlas.default_font->handle);
+}
+
 NK_API struct nk_context *nk_sdl_init(SDL_Window *win) {
   sdl.sdl_window = win;
   nk_init_default(&sdl.nk_context, 0);
@@ -314,22 +323,10 @@ NK_API struct nk_context *nk_sdl_init(SDL_Window *win) {
   sdl.nk_context.clip.paste = nk_sdl_clipboard_paste;
   sdl.nk_context.clip.userdata = nk_handle_ptr(0);
   nk_sdl_device_create();
+
+  nk_sdl_init_font_stash();
+
   return &sdl.nk_context;
-}
-
-NK_API void nk_sdl_font_stash_begin(struct nk_font_atlas **atlas) {
-  nk_font_atlas_init_default(&sdl.nk_font_atlas);
-  nk_font_atlas_begin(&sdl.nk_font_atlas);
-  *atlas = &sdl.nk_font_atlas;
-}
-
-NK_API void nk_sdl_font_stash_end(void) {
-  const void *image;
-  int w, h;
-  image = nk_font_atlas_bake(&sdl.nk_font_atlas, &w, &h, NK_FONT_ATLAS_RGBA32);
-  nk_sdl_device_upload_atlas(image, w, h);
-  nk_font_atlas_end(&sdl.nk_font_atlas, nk_handle_ptr(sdl.nvrhi_device.font_texture), 0);
-  if (sdl.nk_font_atlas.default_font) nk_style_set_font(&sdl.nk_context, &sdl.nk_font_atlas.default_font->handle);
 }
 
 NK_API int nk_sdl_handle_event(SDL_Event *evt) {
@@ -470,5 +467,5 @@ void nk_sdl_shutdown(void) {
   nk_font_atlas_clear(&sdl.nk_font_atlas);
   nk_free(&sdl.nk_context);
   nk_sdl_device_destroy();
-  memset(&sdl, 0, sizeof(sdl));
+  sdl = {};
 }

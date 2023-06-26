@@ -21,9 +21,6 @@ void init() {
 
   nk_ctx = nk_sdl_init(window::get_sdl_window());
 
-  nk_font_atlas* atlas;
-  nk_sdl_font_stash_begin(&atlas);
-  nk_sdl_font_stash_end();
 }
 
 void begin_input() { nk_input_begin(nk_ctx); }
