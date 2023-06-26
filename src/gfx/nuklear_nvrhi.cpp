@@ -156,6 +156,9 @@ NK_API void nk_sdl_device_destroy(void) {
   nk_nvrhi_device &dev = sdl.nvrhi_device;
 
   nk_buffer_free(&dev.cmds);
+  nk_buffer_free(&dev.vertex_data);
+  nk_buffer_free(&dev.index_data);
+
   dev = {};
 }
 
