@@ -83,6 +83,7 @@
 #ifndef MC_REALLOC
 #include <stdlib.h>
 #define MC_REALLOC	realloc
+#define MC_FREE		free
 #endif
 
 typedef struct {
@@ -672,8 +673,8 @@ end:
 
 void mcFree(McMesh *mesh)
 {
-	MC_REALLOC(mesh->verts, 0);
-	MC_REALLOC(mesh->indices, 0);
+	MC_FREE(mesh->verts);
+	MC_FREE(mesh->indices);
 	mesh->nverts = 0;
 	mesh->ntris = 0;
 }
