@@ -84,9 +84,9 @@ NK_API void nk_sdl_device_create(void) {
   blend_state.targets[0]
       .setBlendEnable(true)
       .setSrcBlend(nvrhi::BlendFactor::SrcAlpha)
-      .setDestBlend(nvrhi::BlendFactor::InvSrcAlpha)
-      .setSrcBlendAlpha(nvrhi::BlendFactor::InvSrcAlpha)
-      .setDestBlendAlpha(nvrhi::BlendFactor::Zero);
+      .setDestBlend(nvrhi::BlendFactor::OneMinusSrcAlpha)
+      .setSrcBlendAlpha(nvrhi::BlendFactor::SrcAlpha)
+      .setDestBlendAlpha(nvrhi::BlendFactor::OneMinusSrcAlpha);
 
   const auto raster_state =
       nvrhi::RasterState().setFillSolid().setCullNone().setScissorEnable(true).setDepthClipEnable(true);
@@ -178,8 +178,8 @@ NK_API void nk_sdl_render() {
       config.curve_segment_count = 22;
       config.arc_segment_count = 22;
       config.global_alpha = 1.0f;
-      config.shape_AA = NK_ANTI_ALIASING_OFF;
-      config.line_AA = NK_ANTI_ALIASING_OFF;
+      config.shape_AA = NK_ANTI_ALIASING_ON;
+      config.line_AA = NK_ANTI_ALIASING_ON;
 
       nk_buffer_init_default(&vbuf);
       nk_buffer_init_default(&ebuf);
