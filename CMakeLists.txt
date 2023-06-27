@@ -57,7 +57,7 @@ else()
 
   target_link_libraries(offshore PRIVATE SDL2)
 
-  # target_link_options(offshore PRIVATE -fsanitize=address -fno-omit-frame-pointer)
+  target_link_options(offshore PRIVATE -fsanitize=address -fno-omit-frame-pointer)
   # target_link_libraries(offshore PRIVATE efence)
 endif()
 
