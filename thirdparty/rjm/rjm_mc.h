@@ -666,8 +666,8 @@ McMesh mcGenerate(const float *bmin, const float *bmax, float cellsize, McIsoFn 
 	}
 
 end:
-	MC_REALLOC(grid0, 0);
-	MC_REALLOC(grid1, 0);
+	MC_FREE(grid0);
+	MC_FREE(grid1);
 	return help.mesh;
 }
 

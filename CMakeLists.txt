@@ -18,7 +18,6 @@ target_compile_definitions(offshore PRIVATE GLM_FORCE_ALIGNED GLM_FORCE_SSE2)
 
 target_include_directories(offshore SYSTEM PRIVATE thirdparty)
 target_include_directories(offshore SYSTEM PRIVATE assets/shader/include)
-# target_link_options(offshore PRIVATE -fsanitize=address -fno-omit-frame-pointer)
 
 target_compile_definitions(
   offshore
@@ -57,5 +56,8 @@ else()
   target_compile_options(offshore PRIVATE -O0 -g)
 
   target_link_libraries(offshore PRIVATE SDL2)
+
+  # target_link_options(offshore PRIVATE -fsanitize=address -fno-omit-frame-pointer)
+  # target_link_libraries(offshore PRIVATE efence)
 endif()
 
