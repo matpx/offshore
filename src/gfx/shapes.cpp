@@ -121,6 +121,8 @@ static void init_buffer() {
 void init() {
   LOG_INFO("gfx::shapes::init()");
 
+  assert(!shapes_pass_active);
+
   command_list = device::get_device()->createCommandList();
 
   init_pipeline();
