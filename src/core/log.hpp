@@ -40,6 +40,6 @@
     printf(__VA_ARGS__);                                           \
     printf("\033[0m\n");                                           \
   }
-#elif
+#else
 #define LOG_DEBUG(...)
 #endif

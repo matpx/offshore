@@ -64,10 +64,10 @@ void init() {
   vkb::InstanceBuilder instance_builder;
   instance_builder.set_app_name("offshore")
       .require_api_version(VKB_VK_API_VERSION_1_3)
-      .use_default_debug_messenger()
 #ifndef NDEBUG
-      .enable_validation_layers();
+      .enable_validation_layers()
 #endif
+      .use_default_debug_messenger();
 
   for (const char* extension : instance_extensions) {
     instance_builder.enable_extension(extension);
@@ -275,8 +275,8 @@ void init() {
 }
 
 void begin_frame() {
-  const vk::Result res = vk_device.acquireNextImageKHR(vk_swapchain, std::numeric_limits<uint64_t>::max(),
-                                                       vk_present_semaphore, vk::Fence(), &current_swapchain_index);
+  [[maybe_unused]] const vk::Result res = vk_device.acquireNextImageKHR(
+      vk_swapchain, std::numeric_limits<uint64_t>::max(), vk_present_semaphore, vk::Fence(), &current_swapchain_index);
 
   assert(res == vk::Result::eSuccess);
 
@@ -311,7 +311,7 @@ void finish_frame() {
                                 .setPSwapchains(&vk_swapchain)
                                 .setPImageIndices(&current_swapchain_index);
 
-  const vk::Result res = vk_present_queue.presentKHR(&info);
+  [[maybe_unused]] const vk::Result res = vk_present_queue.presentKHR(&info);
   assert(res == vk::Result::eSuccess || res == vk::Result::eErrorOutOfDateKHR);
 
   // vk_present_queue.waitIdle();

@@ -11,7 +11,7 @@
 #include "log.hpp"
 
 int main() {
-  LOG_DEBUG("debug mode!");
+  LOG_DEBUG("DEBUG MODE!");
 
   gfx::init();
   world::init();
