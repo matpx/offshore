@@ -54,7 +54,7 @@ if(MSVC)
   target_link_directories(offshore PRIVATE platform/win32/lib)
   target_link_libraries(offshore PRIVATE SDL2)
 
-  target_compile_options(offshore PRIVATE /W4 /Od)
+  target_compile_options(offshore PRIVATE /W4)
 else()
   target_compile_definitions(offshore PRIVATE $<$<CONFIG:Debug>:_GLIBCXX_DEBUG _LIBCPP_DEBUG>)
   target_compile_options(offshore PRIVATE -Wall -Wextra -Wpedantic)
