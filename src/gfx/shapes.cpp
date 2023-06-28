@@ -141,6 +141,7 @@ static void draw_shape(const u32 base_element, const u32 num_elements, const vec
   assert(shapes_pass_active);
 
   const mat4 mvp = gfx::get_current_vp() * glm::scale(glm::translate(glm::identity<mat4>(), center), scale);
+  const uvec2 current_viewport = device::get_current_viewport();
 
   command_list->writeBuffer(constant_buffer, glm::value_ptr(mvp), sizeof(mvp));
 
@@ -153,7 +154,7 @@ static void draw_shape(const u32 base_element, const u32 num_elements, const vec
                                  .setPipeline(graphics_pipeline)
                                  .setFramebuffer(device::get_current_framebuffer())
                                  .setViewport(nvrhi::ViewportState().addViewportAndScissorRect(
-                                     nvrhi::Viewport(window::get_width_height().x, window::get_width_height().y)))
+                                     nvrhi::Viewport(current_viewport.x, current_viewport.y)))
                                  .addBindingSet(cube_binding_set)
                                  .addVertexBuffer(vertex_buffer_binding);
 

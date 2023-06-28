@@ -9,6 +9,7 @@
 #include "../core/log.hpp"
 #include "device.hpp"
 #include "material.hpp"
+#include "passes.hpp"
 #include "renderable.hpp"
 #include "shapes.hpp"
 #include "ui.hpp"
@@ -21,8 +22,6 @@ static_assert(sizeof(index_t) == 4);
 
 static mat4 current_vp = mat4(1.0);
 
-static nvrhi::CommandListHandle command_list;
-
 void init() {
   LOG_INFO("gfx::init()");
 
@@ -30,10 +29,9 @@ void init() {
 
   device::init();
   material::init();
+  passes::init();
   shapes::init();
   ui::init();
-
-  command_list = device::get_device()->createCommandList();
 }
 
 Mesh create_mesh(const std::span<const Vertex> vertex_data, const std::span<const index_t> index_data) {
@@ -92,49 +90,16 @@ void begin_frame(entt::entity camera) {
   device::begin_frame();
 }
 
-void draw_world() {
-  const uvec2 window_size = window::get_width_height();
-
-  nvrhi::FramebufferHandle current_framebuffer = device::get_current_framebuffer();
-
-  command_list->open();
-
-  for (const auto [entity, transform, renderable] :
-       world::registry->view<const comp::Transform, const comp::Renderable>().each()) {
-    const mat4 mvp = current_vp * transform.world;
-
-    command_list->writeBuffer(renderable.material.constant_buffer, glm::value_ptr(mvp), sizeof(mvp));
-
-    auto graphicsState = nvrhi::GraphicsState()
-                             .setPipeline(renderable.material.pipeline)
-                             .setFramebuffer(current_framebuffer)
-                             .setViewport(nvrhi::ViewportState().addViewportAndScissorRect(
-                                 nvrhi::Viewport(window_size.x, window_size.y)))
-                             .addBindingSet(renderable.material.binding_set)
-                             .addVertexBuffer({.buffer = renderable.mesh.vertex_buffer})
-                             .setIndexBuffer({.buffer = renderable.mesh.index_buffer});
-
-    command_list->setGraphicsState(graphicsState);
-
-    auto drawArguments = nvrhi::DrawArguments()
-                             .setStartIndexLocation(renderable.mesh.base_element)
-                             .setVertexCount(renderable.mesh.num_elements);
-    command_list->drawIndexed(drawArguments);
-  }
-
-  command_list->close();
-  device::get_device()->executeCommandList(command_list);
-}
+void draw_all() { passes::draw_world(); }
 
 void end_frame() { device::finish_frame(); }
 
 void finish() {
   device::wait_idle();
 
-  command_list = nullptr;
-
   ui::finish();
   shapes::finish();
+  passes::finish();
   material::finish();
   device::finish();
 

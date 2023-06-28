@@ -12,9 +12,7 @@ Mesh create_mesh(const std::span<const Vertex> vertex_data, const std::span<cons
 
 void begin_frame(entt::entity camera);
 
-void draw_world();
-
-void draw_sphere();
+void draw_all();
 
 void end_frame();
 

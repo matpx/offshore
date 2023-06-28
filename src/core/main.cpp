@@ -49,7 +49,7 @@ int main() {
     world::update();
 
     gfx::begin_frame(world::main_camera);
-    gfx::draw_world();
+    gfx::draw_all();
 
     gfx::shapes::begin_pass();
     gfx::shapes::draw_all_aabb();

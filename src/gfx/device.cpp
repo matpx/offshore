@@ -54,6 +54,12 @@ nvrhi::DeviceHandle get_device() { return nvrhi_device; }
 
 nvrhi::FramebufferHandle get_current_framebuffer() { return nvrhi_framebuffers[current_swapchain_index]; }
 
+uvec2 get_current_viewport() {
+  const auto framebuffer_info = get_current_framebuffer()->getFramebufferInfo();
+
+  return {framebuffer_info.width, framebuffer_info.height};
+}
+
 void init() {
   u32 extension_count = 0;
   SDL_Vulkan_GetInstanceExtensions(window::get_sdl_window(), &extension_count, nullptr);
