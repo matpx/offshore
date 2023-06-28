@@ -130,18 +130,15 @@ void init() {
 void begin_pass() {
   assert(!shapes_pass_active);
 
-  // sg_apply_pipeline(unlit_pipeline);
-  // sg_apply_bindings(cube_bindings);
-
   shapes_pass_active = true;
+
+  command_list->open();
 }
 
 static void draw_shape(const u32 base_element, const u32 num_elements, const vec3& center, const vec3& scale) {
   assert(shapes_pass_active);
 
   const mat4 mvp = gfx::get_current_vp() * glm::scale(glm::translate(glm::identity<mat4>(), center), scale);
-
-  command_list->open();
 
   command_list->writeBuffer(constant_buffer, glm::value_ptr(mvp), sizeof(mvp));
 
@@ -162,9 +159,6 @@ static void draw_shape(const u32 base_element, const u32 num_elements, const vec
 
   const auto drawArguments = nvrhi::DrawArguments().setVertexCount(num_elements);
   command_list->draw(drawArguments);
-
-  command_list->close();
-  device::get_device()->executeCommandList(command_list);
 }
 
 void draw_box(const vec3& center, const vec3& scale) { draw_shape(0, cube_vertex_data.size(), center, scale); }
@@ -179,6 +173,9 @@ void draw_all_aabb() {
 
 void finish_pass() {
   assert(shapes_pass_active);
+
+  command_list->close();
+  device::get_device()->executeCommandList(command_list);
 
   shapes_pass_active = false;
 }
