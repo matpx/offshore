@@ -337,7 +337,9 @@ void finish_frame() {
   [[maybe_unused]] const vk::Result res = vk_present_queue.presentKHR(&info);
   assert(res == vk::Result::eSuccess || res == vk::Result::eErrorOutOfDateKHR);
 
-  // vk_present_queue.waitIdle();
+#ifndef NDEBUG
+  vk_present_queue.waitIdle();
+#endif
 
   nvrhi_device->waitEventQuery(query_pool[current_frame_index]);
   nvrhi_device->resetEventQuery(query_pool[current_frame_index]);
