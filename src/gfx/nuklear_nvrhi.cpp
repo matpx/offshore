@@ -177,7 +177,8 @@ void ensure_buffer_size(nvrhi::BufferHandle &buffer, const size_t required_size,
 
     buffer = gfx::device::get_device()->createBuffer(vertex_buffer_desc);
 
-    LOG_DEBUG("resize nuklear buffer \"%s\" to %ld byte", buffer->getDesc().debugName.c_str(), required_size);
+    LOG_DEBUG("resize nuklear %s buffer: %ld bytes", is_index_buffer ? "index buffer" : "vertex buffer",
+              required_size);
   }
 }
 

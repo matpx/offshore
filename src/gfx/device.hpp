@@ -8,6 +8,8 @@
 
 namespace gfx::device {
 
+constexpr u32 max_frames_in_flight = 2;
+
 void init();
 
 void begin_frame();
