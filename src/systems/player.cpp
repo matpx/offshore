@@ -24,7 +24,7 @@ void Player::setup() {
 
 void Player::update(double delta_time) {
   constexpr float look_multiplier = 0.005f;
-  constexpr float velocity_multiplier = 0.2f;
+  constexpr float velocity_multiplier = 0.1f;
 
   comp::Transform& player_transform = world::registry->get<comp::Transform>(player_entity);
   comp::Transform& camera_transform = world::registry->get<comp::Transform>(world::main_camera);

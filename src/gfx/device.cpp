@@ -312,7 +312,7 @@ void begin_frame() {
   const auto framebuffer_desc = get_current_framebuffer()->getDesc();
   clear_command_list->clearTextureFloat(framebuffer_desc.colorAttachments[0].texture,
                                         framebuffer_desc.colorAttachments[0].subresources,
-                                        nvrhi::Color(0.0f, 0.0f, 0.0f, 1.0f));
+                                        nvrhi::Color(0.2f, 0.0f, 0.2f, 1.0f));
   clear_command_list->clearDepthStencilTexture(framebuffer_desc.depthAttachment.texture,
                                                framebuffer_desc.depthAttachment.subresources, true, 1.0f, true, 0.0f);
 

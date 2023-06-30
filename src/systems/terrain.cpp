@@ -21,9 +21,10 @@ enum class TerrainLOD {
   LOW = 2,
 };
 
-constexpr float min_chunk_radius = 32.0f;
+constexpr float min_chunk_radius = 64.0f;
+constexpr float lod_switch_radius = 1.3f;
 
-static ivec3 terrain_center = {0, 0, 0};
+static vec3 terrain_center = {0, 0, 0};
 
 struct UserParams {
   vec3 global_offset;
@@ -44,14 +45,14 @@ static float testIsoFn(const float *position, [[maybe_unused]] float *extra, [[m
 }
 
 ivec2 build_chunk(const vec3 &chunk_position, const TerrainLOD level) {
-  const float radius = min_chunk_radius * std::pow(3.0f, (float)level);
+  const float radius = min_chunk_radius * std::pow(3.0f, (float)level + (level == TerrainLOD::HIGH ? 1 : 0));
 
   const vec3 chunk_offset = chunk_position * (radius * 2.0f);
-  const vec3 global_offset = chunk_offset + min_chunk_radius * (vec3)terrain_center;
+  const vec3 global_offset = chunk_offset + min_chunk_radius * terrain_center;
 
   const float bmin[3] = {-(radius), -(radius), -(radius)};
   const float bmax[3] = {+(radius), +(radius), +(radius)};
-  const float res = 8.0f * ((float)level + 1.0f);
+  const float res = 16.0f * ((float)level + 1.0f);
 
   UserParams up = {
       global_offset,
@@ -100,15 +101,15 @@ void rebuild() {
 
   vertex_index_count += build_chunk(vec3{0, 0, 0}, TerrainLOD::HIGH);
 
-  for (i32 x = -1; x <= 1; x++) {
-    for (i32 y = -1; y <= 1; y++) {
-      for (i32 z = -1; z <= 1; z++) {
-        if (x == 0 && y == 0 && z == 0) continue;
+  // for (i32 x = -1; x <= 1; x++) {
+  //   for (i32 y = -1; y <= 1; y++) {
+  //     for (i32 z = -1; z <= 1; z++) {
+  //       if (x == 0 && y == 0 && z == 0) continue;
 
-        vertex_index_count += build_chunk(vec3{x, y, z}, TerrainLOD::HIGH);
-      }
-    }
-  }
+  //       vertex_index_count += build_chunk(vec3{x, y, z}, TerrainLOD::HIGH);
+  //     }
+  //   }
+  // }
 
   for (i32 x = -1; x <= 1; x++) {
     for (i32 y = -1; y <= 1; y++) {
@@ -136,16 +137,15 @@ void rebuild() {
 void Terrain::setup() { rebuild(); }
 
 void Terrain::update([[maybe_unused]] double delta_time) {
-  const ivec3 camera_translation =
-      world::registry->get<comp::Transform>(world::main_camera).world[3] / min_chunk_radius;
-  const ivec3 camera_to_root = camera_translation - terrain_center;
+  const vec3 camera_translation = world::registry->get<comp::Transform>(world::main_camera).world[3] / min_chunk_radius;
+  const vec3 camera_to_root = camera_translation - terrain_center;
 
-  if (camera_to_root.x != 0 || camera_to_root.y != 0 || camera_to_root.z != 0) {
+  if (glm::compMax(camera_to_root) > lod_switch_radius || glm::compMin(camera_to_root) < -lod_switch_radius) {
     for (const auto &[entity, renderable] : world::registry->view<comp::Renderable, comp::TerrainChunk>().each()) {
       world::registry->destroy(entity);
     }
 
-    terrain_center = camera_translation;
+    terrain_center = (ivec3)camera_translation;
 
     rebuild();
   }
