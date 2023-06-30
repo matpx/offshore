@@ -22,7 +22,7 @@ enum class TerrainLOD {
 };
 
 constexpr float min_chunk_radius = 64.0f;
-constexpr float lod_switch_radius = 1.3f;
+constexpr float lod_switch_radius = 1.2f;
 
 static vec3 terrain_center = {0, 0, 0};
 
@@ -45,7 +45,7 @@ static float testIsoFn(const float *position, [[maybe_unused]] float *extra, [[m
 }
 
 ivec2 build_chunk(const vec3 &chunk_position, const TerrainLOD level) {
-  const float radius = min_chunk_radius * std::pow(3.0f, (float)level + (level == TerrainLOD::HIGH ? 1 : 0));
+  const float radius = min_chunk_radius * std::pow(3.0f, (float)level);
 
   const vec3 chunk_offset = chunk_position * (radius * 2.0f);
   const vec3 global_offset = chunk_offset + min_chunk_radius * terrain_center;
@@ -101,15 +101,15 @@ void rebuild() {
 
   vertex_index_count += build_chunk(vec3{0, 0, 0}, TerrainLOD::HIGH);
 
-  // for (i32 x = -1; x <= 1; x++) {
-  //   for (i32 y = -1; y <= 1; y++) {
-  //     for (i32 z = -1; z <= 1; z++) {
-  //       if (x == 0 && y == 0 && z == 0) continue;
+  for (i32 x = -1; x <= 1; x++) {
+    for (i32 y = -1; y <= 1; y++) {
+      for (i32 z = -1; z <= 1; z++) {
+        if (x == 0 && y == 0 && z == 0) continue;
 
-  //       vertex_index_count += build_chunk(vec3{x, y, z}, TerrainLOD::HIGH);
-  //     }
-  //   }
-  // }
+        vertex_index_count += build_chunk(vec3{x, y, z}, TerrainLOD::HIGH);
+      }
+    }
+  }
 
   for (i32 x = -1; x <= 1; x++) {
     for (i32 y = -1; y <= 1; y++) {
