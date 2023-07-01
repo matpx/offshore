@@ -22,6 +22,7 @@ enum class TerrainLOD {
 };
 
 constexpr float min_chunk_radius = 64.0f;
+constexpr float resolution_multiplyer = 4.0f;
 constexpr float lod_switch_radius = 1.2f;
 
 static vec3 terrain_center = {0, 0, 0};
@@ -52,7 +53,7 @@ ivec2 build_chunk(const vec3 &chunk_position, const TerrainLOD level) {
 
   const float bmin[3] = {-(radius), -(radius), -(radius)};
   const float bmax[3] = {+(radius), +(radius), +(radius)};
-  const float res = 16.0f * ((float)level + 1.0f);
+  const float res = min_chunk_radius / resolution_multiplyer * ((float)level + 1.0f);
 
   UserParams up = {
       global_offset,
