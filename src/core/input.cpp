@@ -8,10 +8,11 @@
 namespace input {
 
 static std::array<bool, (size_t)Actions::_LEN> pressed;
+static std::array<bool, (size_t)Toggle::_LEN> toggles;
 
 static vec2 mouse_motion = {};
 
-void set_key_state(SDL_Keycode key, bool state) {
+void set_key_state(const SDL_Keycode key, const bool state) {
   switch (key) {
     case SDLK_w:
       pressed[(size_t)Actions::UP] = state;
@@ -24,6 +25,12 @@ void set_key_state(SDL_Keycode key, bool state) {
       return;
     case SDLK_d:
       pressed[(size_t)Actions::RIGHT] = state;
+      return;
+    case SDLK_F5:
+      if (state == true) {
+        toggles[(size_t)Toggle::NOCLIP] = !toggles[(size_t)Toggle::NOCLIP];
+        LOG_DEBUG("toggle NOCLIP");
+      }
       return;
   }
 }
@@ -46,11 +53,11 @@ void begin() {
   gfx::ui::begin_input();
 }
 
-void end() { 
-  gfx::ui::finish_input();
-}
+void end() { gfx::ui::finish_input(); }
 
-bool is_pressed(Actions actions) { return pressed[(size_t)actions]; }
+bool is_pressed(Actions action) { return pressed[(size_t)action]; }
+
+bool is_toggled(Toggle toggle) { return toggles[(size_t)toggle]; }
 
 vec2 last_mouse_motion() { return mouse_motion; }
 

@@ -13,7 +13,7 @@ static entt::entity player_entity = entt::null;
 void Player::setup() {
   player_entity = world::registry->create();
 
-  world::registry->emplace<comp::Transform>(player_entity, comp::Transform{.translation = {0, 0, 10}});
+  world::registry->emplace<comp::Transform>(player_entity, comp::Transform{.translation = {0, 0, 610}});
   world::registry->emplace<comp::Player>(player_entity, comp::Player{});
 
   world::main_camera = world::registry->create();
@@ -36,11 +36,11 @@ void Player::update(double delta_time) {
   head_rotation.x += input::last_mouse_motion().x * look_multiplier;
   head_rotation.y += input::last_mouse_motion().y * look_multiplier;
 
-  // player_transform.rotation = glm::slerp(player_transform.rotation,
-  //                                        glm::rotation(glm::normalize(player_transform.rotation * vec3(0, 1, 0)),
-  //                                                      glm::normalize(player_transform.translation)) *
-  //                                            player_transform.rotation,
-  //                                        0.2f);
+  player_transform.rotation = glm::slerp(player_transform.rotation,
+                                         glm::rotation(glm::normalize(player_transform.rotation * vec3(0, 1, 0)),
+                                                       glm::normalize(player_transform.translation)) *
+                                             player_transform.rotation,
+                                         0.2f);
 
   camera_transform.rotation =
       glm::angleAxis(head_rotation.x, vec3{0, -1, 0}) * glm::angleAxis(head_rotation.y, vec3{-1, 0, 0});
@@ -61,10 +61,14 @@ void Player::update(double delta_time) {
     velocity.x += velocity_multiplier * delta_time;
   }
 
-  // player_transform.translation +=
-  //    player_transform.rotation * glm::angleAxis(head_rotation.x, vec3{0, -1, 0}) * velocity;
+  if (input::is_toggled(input::Toggle::NOCLIP)) {
+    camera_transform.translation += camera_transform.rotation * velocity;
+  } else {
+    camera_transform.translation = {0.0f, 0.0f, 0.0f};
 
-  player_transform.translation += camera_transform.rotation * velocity;
+    player_transform.translation +=
+        player_transform.rotation * glm::angleAxis(head_rotation.x, vec3{0, -1, 0}) * velocity;
+  }
 }
 
 }  // namespace systems
