@@ -24,7 +24,7 @@ void draw_world() {
 
     command_list->writeBuffer(renderable.material.constant_buffer, glm::value_ptr(mvp), sizeof(mvp));
 
-    auto graphicsState = nvrhi::GraphicsState()
+    const auto graphicsState = nvrhi::GraphicsState()
                              .setPipeline(renderable.material.pipeline)
                              .setFramebuffer(current_framebuffer)
                              .setViewport(nvrhi::ViewportState().addViewportAndScissorRect(
@@ -35,7 +35,7 @@ void draw_world() {
 
     command_list->setGraphicsState(graphicsState);
 
-    auto drawArguments = nvrhi::DrawArguments()
+    const auto drawArguments = nvrhi::DrawArguments()
                              .setStartIndexLocation(renderable.mesh.base_element)
                              .setVertexCount(renderable.mesh.num_elements);
     command_list->drawIndexed(drawArguments);
