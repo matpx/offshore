@@ -6,16 +6,11 @@
 
 namespace input {
 
-enum class Actions {
+enum class Action {
   LEFT,
   RIGHT,
   UP,
   DOWN,
-  _LEN,
-};
-
-enum class Toggle {
-  NOCLIP,
   _LEN,
 };
 
@@ -25,8 +20,11 @@ void begin();
 
 void end();
 
-bool is_pressed(Actions action);
-bool is_toggled(Toggle toggle);
+bool key_is_pressed(SDL_Keycode key);
+bool action_is_pressed(Action action);
+
+bool key_just_pressed(SDL_Keycode key);
+bool action_just_pressed(Action action);
 
 vec2 last_mouse_motion();
 

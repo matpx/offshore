@@ -1,14 +1,19 @@
 #include "player.hpp"
 
+#include <SDL2/SDL_keycode.h>
+
 #include <entt/entity/registry.hpp>
 
 #include "../core/input.hpp"
 #include "../gfx/material.hpp"
 #include "../world/world.hpp"
+#include "../core/log.hpp"
 
 namespace systems {
 
 static entt::entity player_entity = entt::null;
+
+static bool freefly = false;
 
 void Player::setup() {
   player_entity = world::registry->create();
@@ -49,19 +54,24 @@ void Player::update(double delta_time) {
 
   vec3 velocity = {};
 
-  if (input::is_pressed(input::Actions::UP)) {
+  if (input::action_is_pressed(input::Action::UP)) {
     velocity.z -= velocity_multiplier * delta_time;
-  } else if (input::is_pressed(input::Actions::DOWN)) {
+  } else if (input::action_is_pressed(input::Action::DOWN)) {
     velocity.z += velocity_multiplier * delta_time;
   }
 
-  if (input::is_pressed(input::Actions::LEFT)) {
+  if (input::action_is_pressed(input::Action::LEFT)) {
     velocity.x -= velocity_multiplier * delta_time;
-  } else if (input::is_pressed(input::Actions::RIGHT)) {
+  } else if (input::action_is_pressed(input::Action::RIGHT)) {
     velocity.x += velocity_multiplier * delta_time;
   }
 
-  if (input::is_toggled(input::Toggle::NOCLIP)) {
+  if (input::key_just_pressed(SDLK_F5)) {
+    freefly = !freefly;
+    LOG_DEBUG("toggle player freefly");
+  }
+
+  if (freefly) {
     camera_transform.translation += camera_transform.rotation * velocity;
   } else {
     camera_transform.translation = {0.0f, 0.0f, 0.0f};
