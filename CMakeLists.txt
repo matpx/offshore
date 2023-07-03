@@ -8,7 +8,7 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT WIN32)
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
   set(USE_SHARED_THIRDPARTY_LIBS ON)
 endif()
 
@@ -22,6 +22,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DISTRIBUTION TRUE)
+
+set(BIN_TARGET_DIR ${CMAKE_SOURCE_DIR}/bin)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${BIN_TARGET_DIR})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${BIN_TARGET_DIR})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${BIN_TARGET_DIR})
 
 # JoltPhysics
 
@@ -76,7 +82,7 @@ add_compile_definitions(
 # PLATFORM
 
 if(MSVC)
-  configure_file(platform/win32/lib/SDL2.dll ${CMAKE_BINARY_DIR} COPYONLY)
+  configure_file(platform/win32/lib/SDL2.dll ${BIN_TARGET_DIR} COPYONLY)
 
   target_include_directories(offshore PRIVATE platform/win32/include)
   target_link_directories(offshore PRIVATE platform/win32/lib)
