@@ -8,11 +8,14 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
+set(CMAKE_CXX_FLAGS_DISTRIBUTION "${CMAKE_CXX_FLAGS_RELEASE}")
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DISTRIBUTION TRUE)
 
 # JoltPhysics
 
@@ -66,7 +69,7 @@ else()
 
   target_link_libraries(offshore PRIVATE SDL2)
 
-  target_link_options(offshore PRIVATE $<$<CONFIG:Debug>:-fsanitize=address -fno-omit-frame-pointer>)
+  target_link_options(offshore PRIVATE $<$<CONFIG:Debug>:-fsanitize=address,undefined,implicit-conversion,float-divide-by-zero,local-bounds -fno-omit-frame-pointer>)
   # target_link_libraries(offshore PRIVATE efence)
 endif()
 
@@ -75,3 +78,4 @@ endif()
 message("-- CMAKE_BUILD_TYPE: " ${CMAKE_BUILD_TYPE})
 message("-- CMAKE_CXX_FLAGS_DEBUG: " ${CMAKE_CXX_FLAGS_DEBUG})
 message("-- CMAKE_CXX_FLAGS_RELEASE: " ${CMAKE_CXX_FLAGS_RELEASE})
+message("-- CMAKE_CXX_FLAGS_DISTRIBUTION: " ${CMAKE_CXX_FLAGS_DISTRIBUTION})
