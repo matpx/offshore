@@ -29,6 +29,7 @@ if(USE_SHARED_THIRDPARTY_LIBS)
   set(BUILD_SHARED_LIBS ON CACHE BOOL "Compile Jolt as a shared library")
 endif()
 
+set(DOUBLE_PRECISION ON CACHE BOOL "Use double precision math")
 add_subdirectory(thirdparty/JoltPhysics/Build)
 
 # NVRHI
@@ -70,7 +71,6 @@ add_compile_definitions(
   NK_INCLUDE_FONT_BAKING
   NK_INCLUDE_DEFAULT_FONT
   NK_INCLUDE_STANDARD_VARARGS
-  JPH_DOUBLE_PRECISION
 )
 
 # PLATFORM
