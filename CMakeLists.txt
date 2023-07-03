@@ -12,6 +12,10 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# JoltPhysics
+
+add_subdirectory(thirdparty/JoltPhysics/Build)
+
 # NVRHI
 
 set(NVRHI_WITH_SHADER_COMPILER OFF CACHE BOOL "Build the NVRHI shader compiler executable")
@@ -26,7 +30,7 @@ file(GLOB OffshoreSources CONFIGURE_DEPENDS src/**/*.cpp src/**/*.hpp src/**/*.c
 file(GLOB ThirdpartySources CONFIGURE_DEPENDS thirdparty/vk-bootstrap/*.cpp thirdparty/vk-bootstrap/*.h)
 
 add_executable(offshore ${OffshoreSources} ${ThirdpartySources})
-target_link_libraries(offshore PRIVATE nvrhi_vk nvrhi)
+target_link_libraries(offshore PRIVATE nvrhi_vk nvrhi Jolt)
 
 target_include_directories(offshore SYSTEM PRIVATE thirdparty)
 target_include_directories(offshore SYSTEM PRIVATE assets/shader/include)
