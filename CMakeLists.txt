@@ -8,9 +8,11 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND NOT WIN32)
   set(USE_SHARED_THIRDPARTY_LIBS ON)
 endif()
+
+set(CMAKE_MSVC_RUNTIME_LIBRARY MultiThreadedDebug)
 
 set(CMAKE_CXX_FLAGS_DISTRIBUTION "${CMAKE_CXX_FLAGS_RELEASE}")
 
@@ -75,6 +77,7 @@ add_compile_definitions(
 
 if(MSVC)
   configure_file(platform/win32/lib/SDL2.dll ${CMAKE_BINARY_DIR} COPYONLY)
+
   target_include_directories(offshore PRIVATE platform/win32/include)
   target_link_directories(offshore PRIVATE platform/win32/lib)
   target_link_libraries(offshore PRIVATE SDL2)
