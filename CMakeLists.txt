@@ -8,6 +8,10 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug)
 endif()
 
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+  set(USE_SHARED_THIRDPARTY_LIBS ON)
+endif()
+
 set(CMAKE_CXX_FLAGS_DISTRIBUTION "${CMAKE_CXX_FLAGS_RELEASE}")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
@@ -19,9 +23,17 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_DISTRIBUTION TRUE)
 
 # JoltPhysics
 
+if(USE_SHARED_THIRDPARTY_LIBS)
+  set(BUILD_SHARED_LIBS ON CACHE BOOL "Compile Jolt as a shared library")
+endif()
+
 add_subdirectory(thirdparty/JoltPhysics/Build)
 
 # NVRHI
+
+if(USE_SHARED_THIRDPARTY_LIBS)
+  set(NVRHI_BUILD_SHARED ON CACHE BOOL "Build NVRHI as a shared library (DLL or .so)")
+endif()
 
 set(NVRHI_WITH_SHADER_COMPILER OFF CACHE BOOL "Build the NVRHI shader compiler executable")
 add_subdirectory(thirdparty/nvrhi)
@@ -35,7 +47,12 @@ file(GLOB OffshoreSources CONFIGURE_DEPENDS src/**/*.cpp src/**/*.hpp src/**/*.c
 file(GLOB ThirdpartySources CONFIGURE_DEPENDS thirdparty/vk-bootstrap/*.cpp thirdparty/vk-bootstrap/*.h)
 
 add_executable(offshore ${OffshoreSources} ${ThirdpartySources})
-target_link_libraries(offshore PRIVATE nvrhi_vk nvrhi Jolt)
+
+if(NOT USE_SHARED_THIRDPARTY_LIBS)
+  target_link_libraries(offshore PRIVATE nvrhi_vk)
+endif()
+
+target_link_libraries(offshore PRIVATE nvrhi Jolt)
 
 target_include_directories(offshore SYSTEM PRIVATE thirdparty)
 target_include_directories(offshore SYSTEM PRIVATE assets/shader/include)
