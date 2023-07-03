@@ -36,9 +36,7 @@ target_include_directories(offshore SYSTEM PRIVATE thirdparty)
 target_include_directories(offshore SYSTEM PRIVATE assets/shader/include)
 target_include_directories(offshore SYSTEM PRIVATE thirdparty/nvrhi/include)
 
-target_compile_definitions(
-  offshore
-  PRIVATE
+add_compile_definitions(
   GLM_FORCE_ALIGNED
   GLM_FORCE_SSE2
   NK_INCLUDE_FIXED_TYPES
@@ -48,6 +46,7 @@ target_compile_definitions(
   NK_INCLUDE_FONT_BAKING
   NK_INCLUDE_DEFAULT_FONT
   NK_INCLUDE_STANDARD_VARARGS
+  JPH_DOUBLE_PRECISION
 )
 
 # PLATFORM
