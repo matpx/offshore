@@ -69,7 +69,8 @@ else()
 
   target_link_libraries(offshore PRIVATE SDL2)
 
-  target_link_options(offshore PRIVATE $<$<CONFIG:Debug>:-fsanitize=address,undefined,implicit-conversion,float-divide-by-zero,local-bounds -fno-omit-frame-pointer>)
+  target_link_options(offshore PRIVATE $<$<CONFIG:Debug>:-fsanitize=address -fno-omit-frame-pointer>)
+  # target_link_options(offshore PRIVATE $<$<CONFIG:Debug>:-fsanitize=undefined,implicit-conversion,float-divide-by-zero,local-bounds -fno-omit-frame-pointer>)
   # target_link_libraries(offshore PRIVATE efence)
 endif()
 
